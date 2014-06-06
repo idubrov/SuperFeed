@@ -41,17 +41,9 @@ _sbrk(int incr)
     {
       // Some of the libstdc++-v3 tests rely upon detecting
       // out of memory errors, so do not abort here.
-#if 0
-      extern void abort (void);
-
-      _write (1, "_sbrk: Heap and stack collision\n", 32);
-
-      abort ();
-#else
       // Heap has overflowed
       errno = ENOMEM;
       return (caddr_t) -1;
-#endif
     }
 
   current_heap_end += incr;
