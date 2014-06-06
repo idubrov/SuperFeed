@@ -16,10 +16,7 @@ public:
 	{
 		using namespace ::cfg::driver;
 		Port->BSRR = StepPin;
-		// Wait at least 75ns. Each NOP should be ~20ns (1/48000000 sec)
-		__NOP();
-		__NOP();
-		__NOP();
+		// Wait at least 75ns. Each NOP should be ~40ns (1/24000000 sec)
 		__NOP();
 		__NOP();
 		Port->BRR = StepPin;

@@ -25,7 +25,7 @@ void digit(int dig) {
  * @param  None
  * @retval None
  */
-int main(void)
+int main()
 {
 	encoder::limit(10);
 

@@ -119,12 +119,8 @@ private:
 
 	static inline void wait_address() {
 		// Address set up time is 40ns minimum (tAS)
-		// Each our tick is 20ns (48 Mhz)
-		// So, let's wait for 5 cycles
-		__NOP();
-		__NOP();
-		__NOP();
-		__NOP();
+		// Each our tick is 40ns (24 Mhz)
+		// So, let's wait for 1 cycle
 		__NOP();
 	}
 
