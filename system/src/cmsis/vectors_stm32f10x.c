@@ -56,28 +56,43 @@ DMA1_Channel7_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 ADC1_2_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
+EXTI9_5_IRQHandler(void);
+
+#if defined(STM32F10X_LD) || defined(STM32F10X_MD) || \
+	defined(STM32F10X_HD) || defined(STM32F10X_XL)
+void __attribute__ ((weak, alias ("Default_Handler")))
 USB_HP_CAN1_TX_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 USB_LP_CAN1_RX0_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_LD) || defined(STM32F10X_MD) || \
+	defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_CL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 CAN1_RX1_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 CAN1_SCE_IRQHandler(void);
-void __attribute__ ((weak, alias ("Default_Handler")))
-EXTI9_5_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_XL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_BRK_TIM9_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_UP_TIM10_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_TRG_COM_TIM11_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_LD) || defined(STM32F10X_MD) || \
+	defined(STM32F10X_HD) || defined(STM32F10X_CL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_BRK_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_UP_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_TRG_COM_IRQHandler(void);
+#endif
 
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_CC_IRQHandler(void);
@@ -85,47 +100,78 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 TIM2_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM3_IRQHandler(void);
+
+#if defined(STM32F10X_MD) || defined(STM32F10X_HD) \
+	|| defined(STM32F10X_XL) || defined(STM32F10X_CL) \
+	|| defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM4_IRQHandler(void);
+#endif
+
 void __attribute__ ((weak, alias ("Default_Handler")))
 I2C1_EV_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 I2C1_ER_IRQHandler(void);
+
+#if defined(STM32F10X_MD) || defined(STM32F10X_HD) \
+	|| defined(STM32F10X_XL) || defined(STM32F10X_CL) \
+	|| defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 I2C2_EV_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 I2C2_ER_IRQHandler(void);
+#endif
+
 void __attribute__ ((weak, alias ("Default_Handler")))
 SPI1_IRQHandler(void);
+
+#if defined(STM32F10X_MD) || defined(STM32F10X_HD) \
+	|| defined(STM32F10X_XL) || defined(STM32F10X_CL) \
+	|| defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 SPI2_IRQHandler(void);
+#endif
+
 void __attribute__ ((weak, alias ("Default_Handler")))
 USART1_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 USART2_IRQHandler(void);
+
+#if !defined(STM32F10X_LD) && !defined(STM32F10X_LD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 USART3_IRQHandler(void);
+#endif
+
 void __attribute__ ((weak, alias ("Default_Handler")))
 EXTI15_10_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 RTCAlarm_IRQHandler(void);
+
+#if defined(STM32F10X_LD) || defined(STM32F10X_MD) \
+	|| defined(STM32F10X_HD) || defined(STM32F10X_XL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 USBWakeUp_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_HD)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_BRK_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_UP_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_TRG_COM_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_XL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_BRK_TIM12_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_UP_TIM13_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_TRG_COM_TIM14_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM8_CC_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
@@ -134,6 +180,10 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 FSMC_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 SDIO_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_CL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM5_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
@@ -142,19 +192,38 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 UART4_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 UART5_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_CL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM6_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_CL) || defined(STM32F10X_LD_VL) || \
+	defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM7_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_CL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel1_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel2_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel3_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_HD) || defined(STM32F10X_XL) || \
+	defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel4_5_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_CL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 CAN1_TX_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
@@ -163,8 +232,14 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 OTG_FS_WKUP_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel4_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_CL) || defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 DMA2_Channel5_IRQHandler(void);
+#endif
+
+#if defined(STM32F10X_CL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 ETH_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
@@ -179,7 +254,10 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 CAN2_SCE_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 OTG_FS_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_LD_VL) || defined(STM32F10X_MD_VL) || \
+	defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM1_BRK_TIM15_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
@@ -190,13 +268,16 @@ void __attribute__ ((weak, alias ("Default_Handler")))
 CEC_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM6_DAC_IRQHandler(void);
+#endif
 
+#if defined(STM32F10X_HD_VL)
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM12_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM13_IRQHandler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
 TIM14_IRQHandler(void);
+#endif
 
 // ----------------------------------------------------------------------------
 
