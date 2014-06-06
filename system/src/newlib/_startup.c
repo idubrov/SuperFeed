@@ -50,9 +50,6 @@ extern unsigned int __bss_start__;
 // End address for the .bss section; defined in linker script
 extern unsigned int __bss_end__;
 
-extern void
-__initialize_args(int*, char***);
-
 // main() is the entry point for newlib based applications.
 // By default, there are no arguments, but this can be customised
 // by redefining __initialize_args(), which is done when the

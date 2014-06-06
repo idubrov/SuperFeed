@@ -24,7 +24,7 @@ _exit(int code);
 // is required.
 
 void
-__attribute__((weak))
+__attribute__((weak,noreturn))
 _exit(int code __attribute__((unused)))
 {
 #if !defined(DEBUG)

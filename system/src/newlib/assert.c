@@ -11,8 +11,10 @@
 
 void
 __attribute__((noreturn))
-__assert_func (const char *file, int line, const char *func,
-               const char *failedexpr)
+__assert_func (const char __attribute__((unused)) *file,
+		int __attribute__((unused)) line,
+		const __attribute__((unused)) char *func,
+		const char __attribute__((unused)) *failedexpr)
 {
   abort ();
   /* NOTREACHED */
@@ -38,7 +40,7 @@ assert_failed (uint8_t* file, uint32_t line);
 // Called from the assert_param() macro, usually defined in the stm32f*_conf.h
 void
 __attribute__((noreturn))
-assert_failed (uint8_t* file, uint32_t line)
+assert_failed (uint8_t __attribute__((unused)) *file, uint32_t __attribute__((unused)) line)
 {
   abort ();
   /* NOTREACHED */
