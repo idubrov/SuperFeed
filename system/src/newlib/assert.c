@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "diag/Trace.h"
-
 // ----------------------------------------------------------------------------
 
 void
@@ -16,9 +14,6 @@ __attribute__((noreturn))
 __assert_func (const char *file, int line, const char *func,
                const char *failedexpr)
 {
-  trace_printf ("assertion \"%s\" failed: file \"%s\", line %d%s%s\n",
-                failedexpr, file, line, func ? ", function: " : "",
-                func ? func : "");
   abort ();
   /* NOTREACHED */
 }
@@ -45,7 +40,6 @@ void
 __attribute__((noreturn))
 assert_failed (uint8_t* file, uint32_t line)
 {
-  trace_printf ("assert_param() failed: file \"%s\", line %d\n", file, line);
   abort ();
   /* NOTREACHED */
 }
