@@ -14,11 +14,18 @@ public:
 
 	static inline void step()
 	{
+		// FIXME: For CN0162 setup time is 10usec at least, need to check...
+
 		using namespace ::cfg::driver;
 		Port->BSRR = StepPin;
-		// Wait at least 75ns. Each NOP should be ~40ns (1/24000000 sec)
+		// Wait at least 75ns (for IMS483). Each NOP should be ~40ns (1/24000000 sec)
 		__NOP();
 		__NOP();
+
+		// for CN0162, wait time should be 300ns at least
+		//__NOP(); __NOP(); __NOP(); __NOP();
+		//__NOP(); __NOP(); __NOP(); __NOP();
+
 		Port->BRR = StepPin;
 	}
 

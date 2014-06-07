@@ -7,7 +7,8 @@ util::util()
 {
 	// Enable clocks for LED port and timer
 	RCC_APB2PeriphClockCmd(LedPortClock, ENABLE);
-	RCC_APB1PeriphClockCmd(TimerClock, ENABLE);
+	RCC_APB1PeriphClockCmd(DelayTimerClock, ENABLE);
+	RCC_APB1PeriphClockCmd(TickTimerClock, ENABLE);
 
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -15,16 +16,23 @@ util::util()
 
 	// Setup timer for delays
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	TIM_DeInit(Timer);
+	TIM_DeInit(DelayTimer);
+	TIM_DeInit(TickTimer);
 
-	// Tick every 1us
+	// Both timers tick every 1us
 	TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.HCLK_Frequency / 1000000)
 			- 1;
 	TIM_TimeBaseStructure.TIM_Period = 0;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(Timer, &TIM_TimeBaseStructure);
-	TIM_SelectOnePulseMode(Timer, TIM_OPMode_Single); // Stop after single pulse
+	TIM_TimeBaseInit(DelayTimer, &TIM_TimeBaseStructure);
+	TIM_TimeBaseInit(TickTimer, &TIM_TimeBaseStructure);
+
+	// Delay timer runs in single pulse mode
+	TIM_SelectOnePulseMode(DelayTimer, TIM_OPMode_Single);
+	// Tick timer runs from 0 to 0xffff
+	TIM_SetAutoreload(TickTimer, UINT16_MAX);
+	TIM_Cmd(TickTimer, ENABLE);
 
 	// Output pins
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -41,10 +49,10 @@ util::util()
 
 void util::delay_us(uint16_t usec)
 {
-	Timer->ARR = usec;
-	Timer->SR = ~TIM_FLAG_Update;
-	Timer->CR1 |= TIM_CR1_CEN;
-	while (!(Timer->SR & TIM_FLAG_Update))
+	DelayTimer->ARR = usec;
+	DelayTimer->SR = ~TIM_FLAG_Update;
+	DelayTimer->CR1 |= TIM_CR1_CEN;
+	while (!(DelayTimer->SR & TIM_FLAG_Update))
 		;
 }
 

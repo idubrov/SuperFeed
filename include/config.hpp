@@ -28,13 +28,17 @@ namespace cfg
 // Utility module timer and LEDs
 namespace util
 {
-constexpr TIM_TypeDef* Timer = TIM6;
+// Timer used for delays
+constexpr uint32_t DelayTimerClock = RCC_APB1Periph_TIM6;
+constexpr TIM_TypeDef* DelayTimer = TIM6;
+// Timer used for counting ticks (with 1usec per tick)
+constexpr uint32_t TickTimerClock = RCC_APB1Periph_TIM7;
+constexpr TIM_TypeDef* TickTimer = TIM7;
+
+constexpr uint32_t LedPortClock = RCC_APB2Periph_GPIOC;
 constexpr GPIO_TypeDef* LedPort = GPIOC;
 constexpr uint16_t Led3Pin = GPIO_Pin_9;
 constexpr uint16_t Led4Pin = GPIO_Pin_8;
-
-constexpr uint32_t LedPortClock = RCC_APB2Periph_GPIOC;
-constexpr uint32_t TimerClock = RCC_APB1Periph_TIM6;
 }
 
 // PC10-PC12 should be connected to first three output of the switch.

@@ -9,6 +9,10 @@ public:
 	static void delay_us(uint16_t usec);
 	static void delay_ms(uint16_t msec);
 
+	static inline uint16_t ticks() {
+		return ::cfg::util::TickTimer->CNT;
+	}
+
 	static inline void led3_on()
 	{
 		::cfg::util::LedPort->BSRR = ::cfg::util::Led3Pin;
