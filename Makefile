@@ -95,8 +95,11 @@ build/%.o: %.c build/%.d
 	
 all: build/$(PROJ_NAME).elf build/$(PROJ_NAME).hex build/$(PROJ_NAME).bin build/$(PROJ_NAME).lst
 
-#program: build/$(PROJ_NAME).elf
-#	openocd -f $(OPENOCD_BOARD_DIR)/stm32vldiscovery.cfg -f $(OPENOCD_PROC_FILE) -c "stm_flash `pwd`/build/$(PROJ_NAME).bin" -c shutdown
+openocd:
+	openocd -f $(OPENOCD_BOARD_DIR)/stm32vldiscovery.cfg
+
+program: build/$(PROJ_NAME).elf
+	openocd -f $(OPENOCD_BOARD_DIR)/stm32vldiscovery.cfg -f $(OPENOCD_PROC_FILE) -c "stm_flash `pwd`/build/$(PROJ_NAME).bin" -c shutdown
 
 clean:
 	rm -rf build/
