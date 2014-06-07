@@ -10,15 +10,15 @@
 // Initialize subsystems
 util util::g_instance;
 //switch5 switch5::g_instance;
-encoder encoder::g_instance;
+//encoder encoder::g_instance;
 //keypad keypad::g_instance;
-//driver driver::g_instance;
+driver driver::g_instance;
 //lcd lcd::g_instance;
 //stepper g_stepper;
 
-void digit(int dig) {
-	lcd::print('0' + dig);
-}
+//void digit(int dig) {
+//	lcd::print('0' + dig);
+//}
 
 /**
  * @brief  Main program.
@@ -27,23 +27,19 @@ void digit(int dig) {
  */
 int main()
 {
-	encoder::limit(10);
-
+	bool dir = false;
 	while(1) {
-		//int pos = encoder::position();
-		int pos = 10;
-//		if (encoder::pressed()) {
-//			util::led4_on();
-//		} else {
-//			util::led4_off();
-//		}
-		for (int i = 0; i < pos; i++) {
-			util::led3_on();
-			util::delay_ms(500);
-			util::led3_off();
-			util::delay_ms(500);
+		for (int i = 0; i < 10000; i++) {
+			driver::step();
+			util::led4_on();
+			util::delay_us(50);
+			util::led4_off();
+			util::delay_us(50);
 		}
-		util::delay_ms(1000);
+
+		util::delay_ms(1);
+		driver::direction(dir ? driver::UP : driver::DOWN);
+		dir = !dir;
 	}
 //	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 //	while (1) {
