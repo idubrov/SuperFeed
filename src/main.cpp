@@ -20,6 +20,20 @@ driver driver::g_instance;
 //	lcd::print('0' + dig);
 //}
 
+//		// FIXME: For CN0162 setup time is 10usec at least, need to check...
+//
+//
+//		Port->BSRR = StepPin;
+//		// Wait at least 75ns (for IMS483). Each NOP should be ~40ns (1/24000000 sec)
+//		__NOP();
+//		__NOP();
+//
+//		// for CN0162, wait time should be 300ns at least
+//		//__NOP(); __NOP(); __NOP(); __NOP();
+//		//__NOP(); __NOP(); __NOP(); __NOP();
+//
+//		Port->BRR = StepPin;
+
 /**
  * @brief  Main program.
  * @param  None
@@ -27,18 +41,19 @@ driver driver::g_instance;
  */
 int main()
 {
-	bool dir = false;
+	bool dir = true;
 	while(1) {
 		for (int i = 0; i < 10000; i++) {
-			driver::step();
+			driver::step(Bit_SET);
 			util::led4_on();
 			util::delay_us(50);
+			driver::step(Bit_RESET);
 			util::led4_off();
 			util::delay_us(50);
 		}
 
 		util::delay_ms(1);
-		driver::direction(dir ? driver::UP : driver::DOWN);
+		driver::direction(dir ? Bit_SET : Bit_RESET);
 		dir = !dir;
 	}
 //	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);

@@ -114,6 +114,20 @@ namespace stepper {
 constexpr uint32_t Microsteps = 16;
 constexpr uint32_t LeadscrewTPI = 16;
 constexpr uint32_t StepsPerRev = 200;
+
+
+// All delays are in nanoseconds
+// IM483
+constexpr uint32_t StepLen = 1000;
+constexpr uint32_t StepSpace = 1000;
+constexpr uint32_t DirectionSetup = 1000;
+constexpr uint32_t DirectionHold = 1000;
+
+// CN0162
+//constexpr uint32_t StepLen = 300;
+//constexpr uint32_t StepSpace = 300;
+//constexpr uint32_t DirectionSetup = 10000;
+//constexpr uint32_t DirectionHold = 0;
 }
 }
 
