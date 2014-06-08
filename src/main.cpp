@@ -10,8 +10,8 @@
 // Initialize subsystems
 util util::g_instance;
 static switch5 g_switch5(::cfg::sw5::Port, ::cfg::sw5::PinShift);
-//encoder encoder::g_instance;
-//keypad keypad::g_instance;
+encoder encoder::g_instance;
+keypad keypad::g_instance;
 //driver driver::g_instance;
 lcd lcd::g_instance;
 //stepper g_stepper;
@@ -43,6 +43,8 @@ int main()
 {
 	RCC_APB2PeriphClockCmd(::cfg::sw5::PortClock, ENABLE);
 
+	g_switch5.setup();
+
 //	bool dir = true;
 //	while(1) {
 //		for (int i = 0; i < 10000; i++) {
@@ -58,6 +60,7 @@ int main()
 //		driver::direction(dir ? Bit_SET : Bit_RESET);
 //		dir = !dir;
 //	}
+	encoder::limit(20);
 	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 	while (1) {
 		lcd::position(0, 0);
@@ -73,6 +76,19 @@ int main()
 		digit(GPIOC->IDR & GPIO_Pin_10 ? 1 : 0);
 		digit(GPIOC->IDR & GPIO_Pin_11 ? 1 : 0);
 		digit(GPIOC->IDR & GPIO_Pin_12 ? 1 : 0);
+		
+		lcd::position(0, 1);
+		lcd::print(encoder::pressed() ? 'P' : 'N');
+		int pos = encoder::position();
+		digit((pos / 100) % 10);
+		digit((pos / 10) % 10);
+		digit((pos / 1) % 10);
+
+		lcd::position(0, 2);
+		int key = keypad::key();
+		digit(key / 10);
+		digit(key % 10);
+
 		util::delay_ms(100);
 	}
 	return 0;

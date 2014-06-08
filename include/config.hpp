@@ -66,10 +66,10 @@ constexpr uint16_t EncoderPins = GPIO_Pin_6 | GPIO_Pin_7;
 namespace keypad {
 constexpr uint32_t PortClock = RCC_APB2Periph_GPIOC;
 constexpr GPIO_TypeDef* Port = GPIOC;
-constexpr uint16_t RowsPins = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
-constexpr uint16_t RowsShift = 0; // Rows start with pin 0
-constexpr uint16_t ColumnsPins = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
-constexpr uint16_t ColumnsShift = 4; // Columns start with pin 4
+constexpr uint16_t ColumnsPins = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+constexpr uint16_t ColumnsShift = 0; // Rows start with pin 0
+constexpr uint16_t RowsPins = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+constexpr uint16_t RowsShift = 4; // Columns start with pin 4
 }
 
 /// PB8-PB15 should be connected to D0-D7
