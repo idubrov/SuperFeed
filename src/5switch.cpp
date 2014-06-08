@@ -7,6 +7,7 @@ void switch5::setup()
 	GPIO_InitStructure.GPIO_Pin = 7 << _first_pin; // We use 3 consecutive pins.
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(_port, &GPIO_InitStructure);
+	_position = NONE;
 }
 
 // Should be called from SysTick interrupt handler.
