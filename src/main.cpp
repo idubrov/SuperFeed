@@ -9,7 +9,7 @@
 
 // Initialize subsystems
 util util::g_instance;
-switch5 switch5::g_instance;
+static switch5 g_switch5(::cfg::sw5::Port, ::cfg::sw5::PinShift);
 //encoder encoder::g_instance;
 //keypad keypad::g_instance;
 //driver driver::g_instance;
@@ -41,6 +41,8 @@ void digit(int dig) {
  */
 int main()
 {
+	RCC_APB2PeriphClockCmd(::cfg::sw5::PortClock, ENABLE);
+
 //	bool dir = true;
 //	while(1) {
 //		for (int i = 0; i < 10000; i++) {
@@ -66,7 +68,7 @@ int main()
 //			lcd::print("N ");
 //		}
 //
-		digit(switch5::position());
+		digit(g_switch5.position());
 		lcd::print(" ");
 		digit(GPIOC->IDR & GPIO_Pin_10 ? 1 : 0);
 		digit(GPIOC->IDR & GPIO_Pin_11 ? 1 : 0);
@@ -81,5 +83,6 @@ void __attribute__ ((section(".after_vectors")))
 SysTick_Handler(void)
 {
 	encoder::scan();
+	g_switch5.scan();
 }
 

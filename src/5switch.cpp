@@ -1,25 +1,28 @@
 #include "5switch.hpp"
 
-using namespace ::cfg::sw5;
-
-switch5::switch5()
+void switch5::setup()
 {
-	RCC_APB2PeriphClockCmd(PortClock, ENABLE);
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = Pins;
+	GPIO_InitStructure.GPIO_Pin = 7 << _first_pin; // We use 3 consecutive pins.
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(Port, &GPIO_InitStructure);
+	GPIO_Init(_port, &GPIO_InitStructure);
 }
 
-switch5::Position switch5::position() {
-	uint16_t state = (Port->IDR & Pins) >> PinShift;
-	switch (state) {
-	case 3: return LL;
-	case 1: return L;
-	case 5: return M;
-	case 4: return R;
-	case 6: return RR;
-	default: return NONE;
+// Should be called from SysTick interrupt handler.
+void switch5::scan()
+{
+	// Software debouncing for 5 position switch. Shift state 3 bits and merge new
+	// bits. Only if bits are the same for 10 last scans, change current position.
+	_state <<= 3;
+	_state |= (_port->IDR >> _first_pin) & 7;
+	_state &= 0x3FFFFFFF;
+	switch (_state) {
+	case 0x1B6DB6DB: _position = LL; break; // 0b00011011011011011011011011011011
+	case 0x9249249: _position = L; break;   // 0b00001001001001001001001001001001
+	case 0x2DB6DB6D: _position = M; break;  // 0b00101101101101101101101101101101
+	case 0x24924924: _position = R; break;  // 0b00100100100100100100100100100100
+	case 0x36DB6DB6: _position = RR; break; // 0b00110110110110110110110110110110
+	// Otherwise, transition or noise, ignore
 	}
 }
