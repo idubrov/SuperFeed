@@ -31,7 +31,7 @@ public:
 		return _position;
 	}
 
-	bool move_to(int32_t position, uint32_t speed = 0);
+	bool move_to(int32_t position, uint32_t max_speed = 0);
 	bool move(int32_t speed);
 	bool stop();
 
@@ -39,13 +39,13 @@ public:
 	// define by given TPI.
 	bool move_sync_tpi(uint32_t tpi);
 private:
-	inline void tick()
+	inline void update()
 	{
 
 	}
 private:
 	// Configuration
-	static constexpr uint32_t StepsPerInch = ::cfg::stepper::StepsPerRev
+	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
 			* ::cfg::stepper::Microsteps * ::cfg::stepper::LeadscrewTPI;
 
 	// Speed settings

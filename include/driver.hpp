@@ -12,30 +12,24 @@ public:
 		UP = 0, DOWN = 1
 	};
 
-	static inline void step(BitAction bit)
-	{
+	static inline void step_on() {
 		using namespace ::cfg::driver;
-		if (bit == Bit_RESET)
-		{
-			Port->BRR = StepPin;
-		}
-		else
-		{
-			Port->BSRR = StepPin;
-		}
+		Port->BSRR = StepPin;
 	}
 
-	static inline void direction(BitAction bit)
-	{
+	static inline void step_off() {
 		using namespace ::cfg::driver;
-		if (bit == Bit_RESET)
-		{
-			Port->BRR = DirPin;
-		}
-		else
-		{
-			Port->BSRR = DirPin;
-		}
+		Port->BRR = StepPin;
+	}
+
+	static inline void dir_on() {
+		using namespace ::cfg::driver;
+		Port->BSRR = DirPin;
+	}
+
+	static inline void dir_off() {
+		using namespace ::cfg::driver;
+		Port->BRR = DirPin;
 	}
 
 	static inline void reset()
