@@ -12,7 +12,7 @@
 //   0123456789ABCDEF
 // A +++++EEE++DDDXXD
 // B +++XXLLLLLLLLLLL
-// C KKKKKKKK##+++SSS
+// C KKKKKKKK##SSS+++
 // D +++
 //
 // XX STLINK connection
@@ -72,19 +72,19 @@ constexpr uint16_t ColumnsPins = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin
 constexpr uint16_t ColumnsShift = 4; // Columns start with pin 4
 }
 
-/// PA8-PA15 should be connected to D0-D7
-/// PA5 to RS, PA6 to R/W, PA7 to E
+/// PB8-PB15 should be connected to D0-D7
+/// PB5 to RS, PB6 to R/W, PB7 to E
 namespace lcd {
 // Control port
-constexpr uint32_t ControlPortClock = RCC_APB2Periph_GPIOA;
-constexpr GPIO_TypeDef* ControlPort = GPIOA;
+constexpr uint32_t ControlPortClock = RCC_APB2Periph_GPIOB;
+constexpr GPIO_TypeDef* ControlPort = GPIOB;
 constexpr uint16_t RSPin = GPIO_Pin_5;
 constexpr uint16_t RWPin = GPIO_Pin_6;
 constexpr uint16_t EPin = GPIO_Pin_7;
 
 // Data port
-constexpr uint32_t DataPortClock = RCC_APB2Periph_GPIOA;
-constexpr GPIO_TypeDef* DataPort = GPIOA;
+constexpr uint32_t DataPortClock = RCC_APB2Periph_GPIOB;
+constexpr GPIO_TypeDef* DataPort = GPIOB;
 constexpr uint16_t DataPins = GPIO_Pin_8  | GPIO_Pin_9  | GPIO_Pin_10 | GPIO_Pin_11 |
 		                       GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 constexpr uint16_t DataShift = 8; // Data pins start with pin 8
