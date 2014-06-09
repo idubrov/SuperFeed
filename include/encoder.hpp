@@ -5,42 +5,37 @@
 
 class encoder {
 public:
-	static inline bool pressed() {
+	encoder(GPIO_TypeDef* port, TIM_TypeDef* timer, uint16_t button_pin, uint16_t encoder_pins);
+
+	inline bool pressed() {
 		return _pressed;
 	}
 
+	inline uint16_t position() const
+	{
+		return _timer->CNT >> 1;
+	}
+
+	inline void position(uint16_t pos) const {
+		_timer->CNT = (pos << 1);
+	}
+
+	inline void limit(uint16_t limit) {
+		_timer->ARR = limit << 1;
+		_timer->CNT = 0;
+	}
+private:
 	// Should be called from SysTick interrupt handler.
-	static inline void scan()
-	{
-		bool unpressed = ::cfg::encoder::Port->IDR & ::cfg::encoder::ButtonPin;
-		_state = (_state << 1) | (unpressed ? 0 : 1);
-		if (_state == UINT32_MAX) {
-			_pressed = true;
-		} else if (_state == 0) {
-			_pressed = false;
-		}
-	}
-
-	static inline uint16_t position()
-	{
-		return (::cfg::encoder::Timer->CNT >> 1);
-	}
-
-	static inline void position(uint16_t pos) {
-		::cfg::encoder::Timer->CNT = (pos << 1);
-	}
-
-	static inline void limit(uint16_t limit) {
-		::cfg::encoder::Timer->ARR = (limit << 1);
-		::cfg::encoder::Timer->CNT = 0;
-	}
+	void scan();
 
 private:
-	static uint32_t _state;
-	static volatile bool _pressed;
+	GPIO_TypeDef* const _port;
+	TIM_TypeDef* const _timer;
+	uint16_t const _button_pin;
+	uint16_t const _encoder_pins;
 
-	static encoder g_instance;
-	encoder();
+	uint32_t _state; // Current debounce status
+	volatile bool _pressed; // Current button state
 };
 
 #endif /* __ENCODER_HPP */

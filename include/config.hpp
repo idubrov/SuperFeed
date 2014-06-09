@@ -45,21 +45,21 @@ constexpr uint16_t Led4Pin = GPIO_Pin_8;
 // 4th lead of the switch should be connected to GND.
 namespace sw5
 {
-constexpr uint32_t PortClock = RCC_APB2Periph_GPIOC;
-constexpr GPIO_TypeDef* Port = GPIOC;
-constexpr uint32_t Pins = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12;
-constexpr uint32_t PinShift = 10; // 3 pins starting from pin 10
+//constexpr uint32_t PortClock = RCC_APB2Periph_GPIOC;
+//constexpr GPIO_TypeDef* Port = GPIOC;
+//constexpr uint32_t Pins = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12;
+//constexpr uint32_t PinShift = 10; // 3 pins starting from pin 10
 }
 
 // PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
 namespace encoder {
-constexpr uint32_t PortClock = RCC_APB2Periph_GPIOA;
-constexpr uint32_t TimerClock = RCC_APB1Periph_TIM3;
-constexpr TIM_TypeDef* Timer = TIM3;
-
-constexpr GPIO_TypeDef* Port = GPIOA;
-constexpr uint16_t ButtonPin = GPIO_Pin_5;
-constexpr uint16_t EncoderPins = GPIO_Pin_6 | GPIO_Pin_7;
+//constexpr uint32_t PortClock = RCC_APB2Periph_GPIOA;
+//constexpr uint32_t TimerClock = RCC_APB1Periph_TIM3;
+//constexpr TIM_TypeDef* Timer = TIM3;
+//
+//constexpr GPIO_TypeDef* Port = GPIOA;
+//constexpr uint16_t ButtonPin = GPIO_Pin_5;
+//constexpr uint16_t EncoderPins = GPIO_Pin_6 | GPIO_Pin_7;
 }
 
 // PC0-PC7 should be connected to keypad pins.

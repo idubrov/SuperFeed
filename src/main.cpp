@@ -2,15 +2,39 @@
 #include "encoder.hpp"
 #include "5switch.hpp"
 #include "keypad.hpp"
+#include "systick.hpp"
 #include "util.hpp"
 #include "lcd.hpp"
 #include "driver.hpp"
 #include "stepper.hpp"
 
 // Initialize subsystems
-util util::g_instance;
-static switch5 g_switch5(::cfg::sw5::Port, ::cfg::sw5::PinShift);
-encoder encoder::g_instance;
+
+// First, enable clocks for utilized subsystems
+class init {
+private:
+	static init g_instance;
+
+	init() {
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	}
+};
+
+// Initialize clocks
+init init::g_instance;
+
+systick systick::g_instance; // SysTick interrupt management
+util util::g_instance; // Delays and on-board LEDs
+
+// PC10-PC12 should be connected to the first three output of the switch.
+// 4th lead of the switch should be connected to GND.
+static switch5 g_switch5(GPIOC, 10);
+
+// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
+static encoder g_encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7);
 keypad keypad::g_instance;
 //driver driver::g_instance;
 lcd lcd::g_instance;
@@ -41,10 +65,6 @@ void digit(int dig) {
  */
 int main()
 {
-	RCC_APB2PeriphClockCmd(::cfg::sw5::PortClock, ENABLE);
-
-	g_switch5.setup();
-
 //	bool dir = true;
 //	while(1) {
 //		for (int i = 0; i < 10000; i++) {
@@ -60,7 +80,7 @@ int main()
 //		driver::direction(dir ? Bit_SET : Bit_RESET);
 //		dir = !dir;
 //	}
-	encoder::limit(20);
+	g_encoder.limit(20);
 	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 	while (1) {
 		lcd::position(0, 0);
@@ -78,8 +98,8 @@ int main()
 		digit(GPIOC->IDR & GPIO_Pin_12 ? 1 : 0);
 		
 		lcd::position(0, 1);
-		lcd::print(encoder::pressed() ? 'P' : 'N');
-		int pos = encoder::position();
+		lcd::print(g_encoder.pressed() ? 'P' : 'N');
+		int pos = g_encoder.position();
 		digit((pos / 100) % 10);
 		digit((pos / 10) % 10);
 		digit((pos / 1) % 10);
@@ -92,13 +112,5 @@ int main()
 		util::delay_ms(100);
 	}
 	return 0;
-}
-
-extern "C"
-void __attribute__ ((section(".after_vectors")))
-SysTick_Handler(void)
-{
-	encoder::scan();
-	g_switch5.scan();
 }
 

@@ -17,12 +17,7 @@ public:
 	};
 
 public:
-	constexpr switch5(GPIO_TypeDef* port, uint8_t first_pin) :
-			_port(port), _first_pin(first_pin), _state(0), _position(NONE)
-	{
-	}
-
-	void setup();
+	switch5(GPIO_TypeDef* port, uint8_t first_pin);
 
 	Position position() const
 	{

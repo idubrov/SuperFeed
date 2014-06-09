@@ -1,6 +1,9 @@
 #include "5switch.hpp"
+#include "util.hpp"
+#include "systick.hpp"
 
-void switch5::setup()
+switch5::switch5(GPIO_TypeDef* port, uint8_t first_pin) :
+	_port(port), _first_pin(first_pin), _state(0), _position(NONE)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
@@ -8,6 +11,8 @@ void switch5::setup()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(_port, &GPIO_InitStructure);
 	_position = NONE;
+
+	systick::instance().bind(this, &switch5::scan);
 }
 
 // Should be called from SysTick interrupt handler.
