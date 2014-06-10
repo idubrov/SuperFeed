@@ -2,6 +2,8 @@
 #include "util.hpp"
 #include "systick.hpp"
 
+using namespace ::delegate;
+
 switch5::switch5(GPIO_TypeDef* port, uint8_t first_pin) :
 	_port(port), _first_pin(first_pin), _state(0), _position(NONE)
 {
@@ -12,7 +14,7 @@ switch5::switch5(GPIO_TypeDef* port, uint8_t first_pin) :
 	GPIO_Init(_port, &GPIO_InitStructure);
 	_position = NONE;
 
-	systick::instance().bind(DELEGATE(&switch5::scan, this));
+	systick::instance().bind(Delegate<void()>::from<switch5, &switch5::scan>(this));
 }
 
 // Should be called from SysTick interrupt handler.

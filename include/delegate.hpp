@@ -6,75 +6,90 @@ namespace delegate
 
 template<typename Func> class Delegate;
 
-template<typename ReturnType, typename ... Params>
-class Delegate<ReturnType(Params...)>
+template<typename Return, typename ... Params>
+class Delegate<Return(Params...)>
 {
-	typedef ReturnType (*Type)(void* callee, Params...);
+	typedef Return (*InvokerType)(void* callee, Params...);
 public:
 	Delegate() :
-			fpCallee(nullptr), fpCallbackFunction(nullptr)
+			_instance(nullptr), _invoker(nullptr)
 	{
 	}
 
-	Delegate(void* callee, Type function) :
-			fpCallee(callee), fpCallbackFunction(function)
-	{
+	Delegate(Delegate const& that) = default;
+	Delegate(Delegate&& that) = default;
+	Delegate& operator=(const Delegate& t) = default;
+
+
+	template<Return (*Function)(Params...)>
+	Delegate& bind() {
+		*this = from<Function>();
+		return *this;
 	}
 
-	template<class C, ReturnType (C::*method_ptr)(Params...)>
-	static Delegate from(C* object_ptr) noexcept
-	{
-		return
-		{	object_ptr, methodCaller<C, method_ptr>};
+	template<class C, Return (C::*Function)(Params...)>
+	Delegate& bind(C* c) {
+		*this = from<C, Function>(c);
+		return *this;
 	}
 
-	ReturnType operator()(Params ... xs) const
+	template<Return (*Function)(Params...)>
+	static Delegate from() {
+		return Delegate(nullptr, &staticCaller<Function>);
+	}
+
+	template<typename C, Return (C::*Function)(Params...)>
+	static Delegate from(C* c) {
+		return Delegate(c, &memberCaller<C, Function>);
+	}
+
+	Return operator()(Params ... xs) const
 	{
-		return (*fpCallbackFunction)(fpCallee, xs...);
+		return (*_invoker)(_instance, xs...);
 	}
 
 	bool empty() const
 	{
-		return !fpCallee;
+		return !_invoker;
 	}
+private:
+	Delegate(void* instance, InvokerType invoker) :
+				_instance(instance), _invoker(invoker)
+		{
+		}
 
 private:
-	void* fpCallee;
-	Type fpCallbackFunction;
+	void* _instance;
+	InvokerType _invoker;
 
-	template<class T, ReturnType (T::*TMethod)(Params...)>
-	static ReturnType methodCaller(void* callee, Params ... xs)
-	{
-		T* p = static_cast<T*>(callee);
-		return (p->*TMethod)(xs...);
+	// Caller functions
+	template<Return (*Function)(Params...)>
+	static inline Return staticCaller(void*, Params... params){
+		return (Function)(params...);
+	}
+	template<class C, Return (C::*Function)(Params...)>
+	static inline Return memberCaller(void* instance, Params... params){
+		return (static_cast<C*>(instance)->*Function)(params...);
 	}
 };
 
-template<typename T, typename ReturnType, typename ... Params>
+template<typename T, typename Return, typename ... Params>
 struct DelegateMaker
 {
-	template<ReturnType (T::*foo)(Params...)>
-	static ReturnType methodCaller(void* o, Params ... xs)
+	template<Return (T::*Member)(Params...)>
+	inline static Delegate<Return(Params...)> bind(T* o)
 	{
-		return (static_cast<T*>(o)->*foo)(xs...);
-	}
-
-	template<ReturnType (T::*foo)(Params...)>
-	inline static Delegate<ReturnType(Params...)> Bind(T* o)
-	{
-		return Delegate<ReturnType(Params...)>(o,
-				&DelegateMaker::methodCaller<foo>);
+		return Delegate<Return(Params...)>::template from<T, Member>(o);
 	}
 };
 
-template<typename T, typename ReturnType, typename ... Params>
-DelegateMaker<T, ReturnType, Params...> makeDelegate(
-		ReturnType (T::*)(Params...))
+template<typename T, typename Return, typename ... Params>
+DelegateMaker<T, Return, Params...> makeDelegate(Return (T::*)(Params...))
 {
-	return DelegateMaker<T, ReturnType, Params...>();
+	return DelegateMaker<T, Return, Params...>();
+}
 }
 
-#define DELEGATE(foo, thisPrt) (::delegate::makeDelegate(foo).Bind<foo>(thisPrt))
-}
+//#define DELEGATE(foo, thisPrt) (::delegate::detail::makeDelegate(foo).bind<foo>(thisPrt))
 
 #endif /* __DELEGATE_HPP */

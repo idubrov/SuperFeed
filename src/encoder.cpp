@@ -2,7 +2,7 @@
 #include "util.hpp"
 #include "systick.hpp"
 
-using namespace ::cfg::encoder;
+using namespace ::delegate;
 
 encoder::encoder(GPIO_TypeDef* port, TIM_TypeDef* timer, uint16_t button_pin, uint16_t encoder_pins) :
 		_port(port), _timer(timer), _button_pin(button_pin), _encoder_pins(encoder_pins),
@@ -35,7 +35,7 @@ encoder::encoder(GPIO_TypeDef* port, TIM_TypeDef* timer, uint16_t button_pin, ui
 	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_Cmd(_timer, ENABLE);
 
-	systick::instance().bind(DELEGATE(&encoder::scan, this));
+	systick::instance().bind(Delegate<void()>::from<encoder, &encoder::scan>(this));
 }
 
 void encoder::scan()
