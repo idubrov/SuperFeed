@@ -35,7 +35,7 @@ encoder::encoder(GPIO_TypeDef* port, TIM_TypeDef* timer, uint16_t button_pin, ui
 	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_Cmd(_timer, ENABLE);
 
-	systick::instance().bind(this, &encoder::scan);
+	systick::instance().bind(DELEGATE(&encoder::scan, this));
 }
 
 void encoder::scan()
