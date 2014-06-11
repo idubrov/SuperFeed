@@ -40,11 +40,6 @@ util::util()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(LedPort, &GPIO_InitStructure);
-
-	// Configure systick, we use it for software debouncer
-	// Run it at 10kHz (0.1msec delay)
-	SysTick_Config(RCC_Clocks.HCLK_Frequency / 8 / 10000);
-	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);
 }
 
 void util::delay_us(uint16_t usec)
