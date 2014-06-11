@@ -27,9 +27,9 @@ public:
 	}
 private:
 	static TickHandler& find_empty_slot() {
-		for (int i = 0; i < MaxHandlers; ++i) {
-			if (_handlers[i].empty()) {
-				return _handlers[i];
+		for (auto& handler : _handlers) {
+			if (handler.is_empty()) {
+				return handler;
 			}
 		}
 		abort(); // No more empty slots!
@@ -37,9 +37,9 @@ private:
 
 private:
 	static void tick() {
-		for (int i = 0; i < MaxHandlers; i++) {
-			if (!_handlers[i].empty()) {
-				_handlers[i]();
+		for (auto& handler : _handlers) {
+			if (!handler.is_empty()) {
+				handler();
 			}
 		}
 	}

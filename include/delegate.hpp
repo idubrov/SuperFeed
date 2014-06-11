@@ -48,7 +48,7 @@ public:
 		return (*_invoker)(_instance, xs...);
 	}
 
-	bool empty() const
+	bool is_empty() const
 	{
 		return !_invoker;
 	}
