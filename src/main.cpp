@@ -7,6 +7,7 @@
 #include "lcd.hpp"
 #include "driver.hpp"
 #include "stepper.hpp"
+#include "stm32f10x_gpio.h"
 
 // Initialize subsystems
 
@@ -23,21 +24,14 @@ private:
 	}
 };
 
-// Initialize clocks
+// Initialize clocks, SysTick handler and util module
 init init::g_instance;
-
 systick systick::g_instance; // SysTick interrupt management
-util util::g_instance; // Delays and on-board LEDs
+util util::g_instance;
 
-// PC10-PC12 should be connected to the first three output of the switch.
-// 4th lead of the switch should be connected to GND.
-static switch5 g_switch5(GPIOC, 10);
-
-// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
-static encoder g_encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7);
-keypad keypad::g_instance;
-//driver driver::g_instance;
+//keypad keypad::g_instance;
 lcd lcd::g_instance;
+//driver driver::g_instance;
 //stepper g_stepper;
 
 void digit(int dig) {
@@ -65,6 +59,16 @@ void digit(int dig) {
  */
 int main()
 {
+	// PC10-PC12 should be connected to the first three output of the switch.
+	// 4th lead of the switch should be connected to GND.
+	switch5 switch5(GPIOC, GPIO_PinSource10);
+
+	// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
+	encoder encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7);
+
+	// Columns start with pin PC0, rows start with PC4
+	keypad keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4);
+
 //	bool dir = true;
 //	while(1) {
 //		for (int i = 0; i < 10000; i++) {
@@ -80,7 +84,7 @@ int main()
 //		driver::direction(dir ? Bit_SET : Bit_RESET);
 //		dir = !dir;
 //	}
-	g_encoder.limit(20);
+	encoder.limit(20);
 	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 	while (1) {
 		lcd::position(0, 0);
@@ -91,21 +95,21 @@ int main()
 //			lcd::print("N ");
 //		}
 //
-		digit(g_switch5.position());
+		digit(switch5.position());
 		lcd::print(" ");
 		digit(GPIOC->IDR & GPIO_Pin_10 ? 1 : 0);
 		digit(GPIOC->IDR & GPIO_Pin_11 ? 1 : 0);
 		digit(GPIOC->IDR & GPIO_Pin_12 ? 1 : 0);
 		
 		lcd::position(0, 1);
-		lcd::print(g_encoder.pressed() ? 'P' : 'N');
-		int pos = g_encoder.position();
+		lcd::print(encoder.pressed() ? 'P' : 'N');
+		int pos = encoder.position();
 		digit((pos / 100) % 10);
 		digit((pos / 10) % 10);
 		digit((pos / 1) % 10);
 
 		lcd::position(0, 2);
-		int key = keypad::key();
+		int key = keypad.key();
 		digit(key / 10);
 		digit(key % 10);
 

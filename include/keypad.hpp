@@ -25,19 +25,21 @@ public:
 		N3 = 15,
 		A = 16
 	};
+public:
+	keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows);
 
-	static Key key();
+	Key key();
 private:
-	static Key from_state(int y, int xstate);
-	static int column_state()
+	Key from_state(uint8_t y, uint8_t xstate);
+	uint8_t column_state() const
 	{
-		using namespace ::cfg::keypad;
-		return (Port->IDR & ColumnsPins) >> ColumnsShift;
+		return (_port->IDR >> _columns) & 0x0f;
 	}
 
 private:
-	static keypad g_instance;
-	keypad();
+	GPIO_TypeDef* const _port;
+	uint8_t _columns;
+	uint8_t _rows;
 };
 
 #endif /* __KEYPAD_HPP */

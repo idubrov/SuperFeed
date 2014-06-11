@@ -31,9 +31,6 @@ namespace util
 // Timer used for delays
 constexpr uint32_t DelayTimerClock = RCC_APB1Periph_TIM6;
 constexpr TIM_TypeDef* DelayTimer = TIM6;
-// Timer used for counting ticks (with 1usec per tick)
-constexpr uint32_t TickTimerClock = RCC_APB1Periph_TIM7;
-constexpr TIM_TypeDef* TickTimer = TIM7;
 
 constexpr uint32_t LedPortClock = RCC_APB2Periph_GPIOC;
 constexpr GPIO_TypeDef* LedPort = GPIOC;
@@ -64,12 +61,12 @@ namespace encoder {
 
 // PC0-PC7 should be connected to keypad pins.
 namespace keypad {
-constexpr uint32_t PortClock = RCC_APB2Periph_GPIOC;
-constexpr GPIO_TypeDef* Port = GPIOC;
-constexpr uint16_t ColumnsPins = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
-constexpr uint16_t ColumnsShift = 0; // Rows start with pin 0
-constexpr uint16_t RowsPins = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
-constexpr uint16_t RowsShift = 4; // Columns start with pin 4
+//constexpr uint32_t PortClock = RCC_APB2Periph_GPIOC;
+//constexpr GPIO_TypeDef* Port = GPIOC;
+//constexpr uint16_t ColumnsPins = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+//constexpr uint16_t ColumnsShift = 0; // Rows start with pin 0
+//constexpr uint16_t RowsPins = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+//constexpr uint16_t RowsShift = 4; // Columns start with pin 4
 }
 
 /// PB8-PB15 should be connected to D0-D7
