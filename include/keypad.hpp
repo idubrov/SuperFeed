@@ -28,7 +28,14 @@ public:
 	static constexpr Key c_mappings[] =
 		{ None, Star, N0, Hash, D, N7, N8, N9, C, N4, N5, N6, B, N1, N2, N3, A, };
 public:
-	keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows);
+	constexpr keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
+			_port(port), _columns(columns), _rows(rows), _state(0),
+			_pressed(None)
+	{
+	}
+	keypad(keypad const&) = delete;
+
+	void initialize();
 
 	Key key() const {
 		return _pressed;

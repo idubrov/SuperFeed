@@ -2,13 +2,12 @@
 #include "systick.hpp"
 #include "delegate.hpp"
 
-using namespace delegate;
+using namespace ::delegate;
 
 constexpr keypad::Key keypad::c_mappings[];
 
-keypad::keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
-		_port(port), _columns(columns), _rows(rows), _state(0),
-		_pressed(None) {
+void keypad::initialize()
+{
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	// Columns, input

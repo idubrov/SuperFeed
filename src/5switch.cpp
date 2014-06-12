@@ -4,15 +4,13 @@
 
 using namespace ::delegate;
 
-switch5::switch5(GPIO_TypeDef* port, uint8_t first_pin) :
-	_port(port), _first_pin(first_pin), _state(0), _position(NONE)
+void switch5::initialize()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = 7 << _first_pin; // We use 3 consecutive pins.
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(_port, &GPIO_InitStructure);
-	_position = NONE;
 
 	systick::instance().bind(Delegate<void()>::from<switch5, &switch5::scan>(this));
 }

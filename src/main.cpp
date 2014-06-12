@@ -29,9 +29,6 @@ init init::g_instance;
 systick systick::g_instance; // SysTick interrupt management
 util util::g_instance;
 
-//driver driver::g_instance;
-//stepper g_stepper;
-
 //		// FIXME: For CN0162 setup time is 10usec at least, need to check...
 //
 //
@@ -63,41 +60,19 @@ int main()
 	// Columns start with pin PC0, rows start with PC4
 	keypad keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4);
 
+	// LCD display, RS pin should be connected to PB5, R/W to PB6 and E to PB7
+	// D0-D7 should be connected to PB8-PB15
 	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
 			GPIOB, GPIO_PinSource8);
 
-	//	constexpr uint32_t ControlPortClock = RCC_APB2Periph_GPIOB;
-	//	constexpr GPIO_TypeDef* ControlPort = GPIOB;
-	//	constexpr uint16_t RSPin = GPIO_Pin_5;
-	//	constexpr uint16_t RWPin = GPIO_Pin_6;
-	//	constexpr uint16_t EPin = GPIO_Pin_7;
-	//
-	//	// Data port
-	//	constexpr uint32_t DataPortClock = RCC_APB2Periph_GPIOB;
-	//	constexpr GPIO_TypeDef* DataPort = GPIOB;
-	//	constexpr uint16_t DataPins = GPIO_Pin_8  | GPIO_Pin_9  | GPIO_Pin_10 | GPIO_Pin_11 |
-	//			                       GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-	//	constexpr uint16_t DataShift = 8; // Data pins start with pin 8
-	//	constexpr uint16_t BusyFlagPin = GPIO_Pin_15; // DB7
-	//
-	//	// Configuration
-	//	constexpr bool UseBusyFlag = false;
+	switch5.initialize();
+	encoder.initialize();
+	keypad.initialize();
+	lcd.initialize();
 
-//	bool dir = true;
-//	while(1) {
-//		for (int i = 0; i < 10000; i++) {
-//			driver::step(Bit_SET);
-//			util::led4_on();
-//			util::delay_us(50);
-//			driver::step(Bit_RESET);
-//			util::led4_off();
-//			util::delay_us(50);
-//		}
-//
-//		util::delay_ms(1);
-//		driver::direction(dir ? Bit_SET : Bit_RESET);
-//		dir = !dir;
-//	}
+	//driver driver::g_instance;
+	//stepper g_stepper;
+
 	encoder.limit(20);
 	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
 	while (1) {

@@ -2,10 +2,8 @@
 
 using namespace ::cfg::lcd;
 
-lcd::lcd(GPIO_TypeDef* control_port, uint16_t rs_pin, uint16_t rw_pin, uint16_t e_pin,
-			GPIO_TypeDef* data_port, uint8_t data_shift, bool use_busy) :
-					_control_port(control_port), _rs_pin(rs_pin), _rw_pin(rw_pin), _e_pin(e_pin),
-					_data_port(data_port), _data_shift(data_shift), _use_busy(use_busy)
+
+void lcd::initialize()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 

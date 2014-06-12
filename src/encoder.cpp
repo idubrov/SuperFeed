@@ -4,9 +4,7 @@
 
 using namespace ::delegate;
 
-encoder::encoder(GPIO_TypeDef* port, TIM_TypeDef* timer, uint16_t button_pin, uint16_t encoder_pins) :
-		_port(port), _timer(timer), _button_pin(button_pin), _encoder_pins(encoder_pins),
-		_state(0), _pressed(false)
+void encoder::initialize()
 {
 	// Button
 	GPIO_InitTypeDef GPIO_InitStructure;
