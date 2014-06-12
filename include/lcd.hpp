@@ -56,36 +56,39 @@ public:
 		SetCGRamAddr = 0x40,
 		SetDDRamAddr = 0x80
 	};
+public:
+	lcd(GPIO_TypeDef* control_port, uint16_t rs_pin, uint16_t rw_pin, uint16_t e_pin,
+			GPIO_TypeDef* data_port, uint8_t data_shift, bool use_busy = false);
 
-	static inline void clear() {
+	inline void clear() {
 		command(ClearDisplay);
 		// This command could take as long as 1.52ms to execute
 		wait_ready(2000);
 	}
 
-	static void home() {
+	void home() {
 		command(ReturnHome);
 		// This command could take as long as 1.52ms to execute
 		wait_ready(2000);
 	}
 
-	static void display(DisplayMode display, DisplayCursor cursor, DisplayBlink blink) {
+	void display(DisplayMode display, DisplayCursor cursor, DisplayBlink blink) {
 		command(DisplayControl | display | cursor | blink);
 	}
 
-	static void entry_mode(EntryModeDirection dir, EntryModeShift scroll) {
+	void entry_mode(EntryModeDirection dir, EntryModeShift scroll) {
 		command(EntryModeSet | dir | scroll);
 	}
 
-	static void scroll(Direction dir) {
+	void scroll(Direction dir) {
 		command(CursorShift | DisplayMove | dir);
 	}
 
-	static void cursor(Direction dir) {
+	void cursor(Direction dir) {
 		command(CursorShift | CursorMove | dir);
 	}
 
-	static void position(uint8_t col, uint8_t row) {
+	void position(uint8_t col, uint8_t row) {
 		uint8_t offset = 0;
 		switch (row) {
 		case 1: offset = 0x40; break;
@@ -95,26 +98,26 @@ public:
 		command(SetDDRamAddr | (col + offset));
 	}
 
-	static void print(char data);
-	static void print(char const* data);
+	void print(char data);
+	void print(char const* data);
 private:
-	static void command(uint8_t cmd);
-	static void wait_busy_flag();
+	void command(uint8_t cmd);
+	void wait_busy_flag();
 
 	// Typical command wait time is 37us
-	static void wait_ready(uint16_t delay = 50) {
-		if (::cfg::lcd::UseBusyFlag) {
+	void wait_ready(uint16_t delay = 50) {
+		if (_use_busy) {
 			wait_busy_flag();
 		} else {
 			util::delay_us(delay);
 		}
 	}
 
-	static inline void pulse_enable() {
+	inline void pulse_enable() {
 		using namespace ::cfg::lcd;
-		ControlPort->BSRR = EPin;
+		_control_port->BSRR = _e_pin;
 		util::delay_us(1); // minimum delay is 450 ns
-		ControlPort->BRR = EPin;
+		_control_port->BRR = _e_pin;
 	}
 
 	static inline void wait_address() {
@@ -124,15 +127,19 @@ private:
 		__NOP();
 	}
 
-	static inline void send(uint8_t data) {
-		using namespace ::cfg::lcd;
-		DataPort->BSRR = (((uint16_t)   data ) << DataShift) & DataPins; // Set '1's
-		DataPort->BRR =  (((uint16_t) (~data)) << DataShift) & DataPins; // Clear '0's
+	inline void send(uint8_t data) {
+		_data_port->BSRR = ((uint16_t)   data ) << _data_shift; // Set '1's
+		_data_port->BRR =  ((uint16_t) (~data)) << _data_shift; // Clear '0's
 		pulse_enable();
 	}
 private:
-	static lcd g_instance;
-	lcd();
+	GPIO_TypeDef* const _control_port;
+	uint16_t const _rs_pin;
+	uint16_t const _rw_pin;
+	uint16_t const _e_pin;
+	GPIO_TypeDef* const _data_port;
+	uint8_t  const _data_shift;
+	bool const _use_busy;
 };
 
 #endif /* __LCD_HPP */

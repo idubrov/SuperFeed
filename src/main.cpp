@@ -29,14 +29,8 @@ init init::g_instance;
 systick systick::g_instance; // SysTick interrupt management
 util util::g_instance;
 
-//keypad keypad::g_instance;
-lcd lcd::g_instance;
 //driver driver::g_instance;
 //stepper g_stepper;
-
-void digit(int dig) {
-	lcd::print('0' + dig);
-}
 
 //		// FIXME: For CN0162 setup time is 10usec at least, need to check...
 //
@@ -69,6 +63,26 @@ int main()
 	// Columns start with pin PC0, rows start with PC4
 	keypad keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4);
 
+	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
+			GPIOB, GPIO_PinSource8);
+
+	//	constexpr uint32_t ControlPortClock = RCC_APB2Periph_GPIOB;
+	//	constexpr GPIO_TypeDef* ControlPort = GPIOB;
+	//	constexpr uint16_t RSPin = GPIO_Pin_5;
+	//	constexpr uint16_t RWPin = GPIO_Pin_6;
+	//	constexpr uint16_t EPin = GPIO_Pin_7;
+	//
+	//	// Data port
+	//	constexpr uint32_t DataPortClock = RCC_APB2Periph_GPIOB;
+	//	constexpr GPIO_TypeDef* DataPort = GPIOB;
+	//	constexpr uint16_t DataPins = GPIO_Pin_8  | GPIO_Pin_9  | GPIO_Pin_10 | GPIO_Pin_11 |
+	//			                       GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	//	constexpr uint16_t DataShift = 8; // Data pins start with pin 8
+	//	constexpr uint16_t BusyFlagPin = GPIO_Pin_15; // DB7
+	//
+	//	// Configuration
+	//	constexpr bool UseBusyFlag = false;
+
 //	bool dir = true;
 //	while(1) {
 //		for (int i = 0; i < 10000; i++) {
@@ -85,33 +99,33 @@ int main()
 //		dir = !dir;
 //	}
 	encoder.limit(20);
-	lcd::display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
+	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
 	while (1) {
-		lcd::position(0, 0);
+		lcd.position(0, 0);
 //		if (encoder::pressed()) {
-//			lcd::print("P ");
+//			lcd.print("P ");
 //			encoder::limit(10);
 //		} else {
-//			lcd::print("N ");
+//			lcd.print("N ");
 //		}
 //
-		digit(switch5.position());
-		lcd::print(" ");
-		digit(GPIOC->IDR & GPIO_Pin_10 ? 1 : 0);
-		digit(GPIOC->IDR & GPIO_Pin_11 ? 1 : 0);
-		digit(GPIOC->IDR & GPIO_Pin_12 ? 1 : 0);
+		lcd.print('0' + switch5.position());
+		lcd.print(" ");
+		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_10 ? 1 : 0));
+		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_11 ? 1 : 0));
+		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_12 ? 1 : 0));
 		
-		lcd::position(0, 1);
-		lcd::print(encoder.pressed() ? 'P' : 'N');
+		lcd.position(0, 1);
+		lcd.print(encoder.pressed() ? 'P' : 'N');
 		int pos = encoder.position();
-		digit((pos / 100) % 10);
-		digit((pos / 10) % 10);
-		digit((pos / 1) % 10);
+		lcd.print('0' + ((pos / 100) % 10));
+		lcd.print('0' + ((pos / 10) % 10));
+		lcd.print('0' + ((pos / 1) % 10));
 
-		lcd::position(0, 2);
+		lcd.position(0, 2);
 		int key = keypad.key();
-		digit(key / 10);
-		digit(key % 10);
+		lcd.print('0' + (key / 10));
+		lcd.print('0' + (key % 10));
 
 		util::delay_ms(100);
 	}

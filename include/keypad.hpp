@@ -38,8 +38,8 @@ private:
 
 private:
 	GPIO_TypeDef* const _port;
-	uint8_t _columns;
-	uint8_t _rows;
+	uint8_t const _columns;
+	uint8_t const _rows;
 };
 
 #endif /* __KEYPAD_HPP */
