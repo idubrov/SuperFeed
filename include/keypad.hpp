@@ -5,34 +5,35 @@
 
 class keypad {
 public:
-	enum Key
-	{
-		None = 0,	// no button pressed
-		Star = 1,
-		N0 = 2,
-		Hash = 3,
-		D = 4,
-		N7 = 5,
-		N8 = 6,
-		N9 = 7,
-		C = 8,
-		N4 = 9,
-		N5 = 10,
-		N6 = 11,
-		B = 12,
-		N1 = 13,
-		N2 = 14,
-		N3 = 15,
-		A = 16
+	enum Key {
+		None = ' ',	// no button pressed
+		Star = '*',
+		N0 = '0',
+		Hash = '#',
+		D = 'D',
+		N7 = '7',
+		N8 = '8',
+		N9 = '9',
+		C = 'C',
+		N4 = '4',
+		N5 = '5',
+		N6 = '6',
+		B = 'B',
+		N1 = '1',
+		N2 = '2',
+		N3 = '3',
+		A = 'A'
 	};
+
+	static constexpr Key c_mappings[] =
+		{ None, Star, N0, Hash, D, N7, N8, N9, C, N4, N5, N6, B, N1, N2, N3, A, };
 public:
 	keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows);
 
 	Key key();
 private:
 	Key from_state(uint8_t y, uint8_t xstate);
-	uint8_t column_state() const
-	{
+	uint8_t column_state() const {
 		return (_port->IDR >> _columns) & 0x0f;
 	}
 

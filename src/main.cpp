@@ -102,30 +102,19 @@ int main()
 	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
 	while (1) {
 		lcd.position(0, 0);
-//		if (encoder::pressed()) {
-//			lcd.print("P ");
-//			encoder::limit(10);
-//		} else {
-//			lcd.print("N ");
-//		}
-//
 		lcd.print('0' + switch5.position());
-		lcd.print(" ");
-		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_10 ? 1 : 0));
-		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_11 ? 1 : 0));
-		lcd.print('0' + (GPIOC->IDR & GPIO_Pin_12 ? 1 : 0));
 		
 		lcd.position(0, 1);
 		lcd.print(encoder.pressed() ? 'P' : 'N');
+		lcd.print(' ');
 		int pos = encoder.position();
 		lcd.print('0' + ((pos / 100) % 10));
 		lcd.print('0' + ((pos / 10) % 10));
 		lcd.print('0' + ((pos / 1) % 10));
 
 		lcd.position(0, 2);
-		int key = keypad.key();
-		lcd.print('0' + (key / 10));
-		lcd.print('0' + (key % 10));
+		keypad::Key key = keypad.key();
+		lcd.print(key);
 
 		util::delay_ms(100);
 	}
