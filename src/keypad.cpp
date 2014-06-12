@@ -1,9 +1,14 @@
 #include "keypad.hpp"
+#include "systick.hpp"
+#include "delegate.hpp"
+
+using namespace delegate;
 
 constexpr keypad::Key keypad::c_mappings[];
 
 keypad::keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
-		_port(port), _columns(columns), _rows(rows) {
+		_port(port), _columns(columns), _rows(rows), _state(0),
+		_pressed(None) {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
 	// Columns, input
@@ -21,36 +26,44 @@ keypad::keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
 
 	// Set all rows to zero
 	GPIO_ResetBits(_port, 0x0f << _rows);
+
+	systick::instance().bind(Delegate<void()>::from<keypad, &keypad::scan>(this));
 }
 
-keypad::Key keypad::from_state(uint8_t offset, uint8_t xstate) {
-	uint8_t idx = offset;
+void keypad::scan() {
+	// Only change current pressed key if last four keys match.
+	_state <<= 8;
+	_state |= raw_key();
+	uint16_t low = _state & 0xffff;
+	if ((_state >> 16) == low) {
+		uint8_t lowlow = low & 0xff;
+		if ((low >> 8) == lowlow) {
+			_pressed = c_mappings[lowlow];
+		}
+	}
+}
+
+uint8_t keypad::from_state(uint8_t offset, uint8_t xstate) const {
 	switch (xstate) {
 	case 14: // 1110
-		idx += 4;
-		break;
+		return offset + 4;
 	case 13: // 1101
-		idx += 3;
-		break;
+		return offset + 3;
 	case 11: // 1011
-		idx += 2;
-		break;
+		return offset + 2;
 	case 7: // 0111
-		idx += 1;
-		break;
-	default:
-		idx = 0;
+		return offset + 1;
 	}
 	// Multiple columns match, return nothing
-	return c_mappings[idx];
+	return 0;
 
 }
 
-keypad::Key keypad::key() {
+uint8_t keypad::raw_key() const {
 	uint8_t xstate = column_state();
 	if (xstate == 0xf) {
 		// All '1', no buttons are pressed
-		return None;
+		return 0;
 	}
 
 	// Let's find row by scanning
@@ -69,8 +82,8 @@ keypad::Key keypad::key() {
 			}
 
 			// Key was depressed or another key was pressed while we were scanning
-			return None;
+			return 0;
 		}
 	}
-	return None;
+	return 0;
 }

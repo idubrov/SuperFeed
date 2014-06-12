@@ -30,17 +30,25 @@ public:
 public:
 	keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows);
 
-	Key key();
+	Key key() const {
+		return _pressed;
+	}
 private:
-	Key from_state(uint8_t y, uint8_t xstate);
-	uint8_t column_state() const {
+	void scan();
+	uint8_t raw_key() const;
+
+	inline uint8_t column_state() const {
 		return (_port->IDR >> _columns) & 0x0f;
 	}
+	uint8_t from_state(uint8_t y, uint8_t xstate) const;
 
 private:
 	GPIO_TypeDef* const _port;
 	uint8_t const _columns;
 	uint8_t const _rows;
+
+	uint32_t _state; // Current debounce status
+	volatile Key _pressed; // Current button state
 };
 
 #endif /* __KEYPAD_HPP */
