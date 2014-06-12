@@ -21,9 +21,9 @@ public:
 
 	static void bind(const TickHandler& delegate) {
 		// Disable SysTick interrupts while we are adding a new handler
-		NVIC_DisableIRQ(SysTick_IRQn);
+		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 		find_empty_slot() = delegate;
-		NVIC_EnableIRQ(SysTick_IRQn);
+		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
 	}
 private:
 	static TickHandler& find_empty_slot() {
