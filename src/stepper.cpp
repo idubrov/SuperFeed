@@ -5,7 +5,8 @@ using namespace ::cfg::stepper;
 
 #define TIM1_CCR1_Address    0x40012C34
 
-uint16_t Delays[] = {100, 200, 1100, 1200, 1300, 1400, 2100, 2200, 2300, 2400, 2500, 2600};
+uint16_t Delays[] =
+{ 100, 200, 1100, 1200, 1300, 1400, 2100, 2200, 2300, 2400, 2500, 2600 };
 
 void stepper::initialize()
 {
@@ -22,31 +23,40 @@ void stepper::initialize()
 	TIM_ITConfig(StepperTimer, TIM_IT_CC1, ENABLE);
 	TIM_DMACmd(TIM1, TIM_DMA_CC1, ENABLE); // Load new delay on compare match
 
+	// Timer interrupt
+	NVIC_InitTypeDef timerIT;
+	timerIT.NVIC_IRQChannel = TIM1_CC_IRQn;
+	timerIT.NVIC_IRQChannelPreemptionPriority = 0;
+	timerIT.NVIC_IRQChannelSubPriority = 0;
+	timerIT.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&timerIT);
+
 	// DMA configuration
-	DMA_InitTypeDef DMA_InitStructure;
-	DMA_DeInit(DMA1_Channel2);
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) TIM1_CCR1_Address;
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) Delays;
-	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-	DMA_InitStructure.DMA_BufferSize = sizeof(Delays) / sizeof(Delays[0]);
-	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
-	DMA_Init(DMA1_Channel2, &DMA_InitStructure);
-	DMA_Cmd(DMA1_Channel2, ENABLE);
+	DMA_InitTypeDef dma;
+	DMA_DeInit(DMAChannel);
+	dma.DMA_PeripheralBaseAddr = (uint32_t) TIM1_CCR1_Address;
+	dma.DMA_MemoryBaseAddr = (uint32_t) Delays;
+	dma.DMA_DIR = DMA_DIR_PeripheralDST;
+	dma.DMA_BufferSize = sizeof(Delays) / sizeof(Delays[0]);
+	dma.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
+	dma.DMA_Mode = DMA_Mode_Circular;
+	dma.DMA_Priority = DMA_Priority_High;
+	dma.DMA_M2M = DMA_M2M_Disable;
+	DMA_Init(DMAChannel, &dma);
+	DMA_ITConfig(DMAChannel, DMA_IT_HT | DMA_IT_TC, ENABLE);
+	DMA_Cmd(DMAChannel, ENABLE);
 
+	// DMA interrupt
+	NVIC_InitTypeDef dmaIT;
+	dmaIT.NVIC_IRQChannel = DMA1_Channel2_IRQn;
+	dmaIT.NVIC_IRQChannelPreemptionPriority = 0;
+	dmaIT.NVIC_IRQChannelSubPriority = 1;
+	dmaIT.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&dmaIT);
 
-	// Master interrupt
-	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
 
 	// DMA transfer from buffer to CCR1
 
@@ -69,4 +79,18 @@ TIM1_CC_IRQHandler(void)
 		util::led4_off();
 	}
 	flag = !flag;
+}
+
+extern "C" void __attribute__ ((section(".after_vectors")))
+DMA1_Channel2_IRQHandler(void)
+{
+	if (DMA_GetITStatus(DMA1_IT_HT2))
+	{
+		util::led3_on();
+	}
+	if (DMA_GetITStatus(DMA1_IT_TC2))
+	{
+		util::led3_off();
+	}
+	DMA_ClearITPendingBit(DMA1_IT_GL2);
 }
