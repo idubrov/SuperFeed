@@ -23,8 +23,10 @@
 // K keypad
 //
 // Timers:
-// TIM1 -- PWM for stepper driver
+// TIM1 -- slave timer for stepper PWM (signal generation)?
+// TIM2 -- quadrature encoder for spindle
 // TIM3 -- rotary encoder
+// TIM4 -- master timer for stepper PWM?
 // TIM6 -- delay timer
 // TI15 -- indexing for spindle
 //
@@ -79,7 +81,7 @@ constexpr uint32_t DirectionSetup = 1000;
 constexpr uint32_t DirectionHold = 1000;
 
 // Note that stepper module also has an IRQ handler to reload DMA data
-constexpr DMA_Channel_TypeDef* DMAChannel = DMA1_Channel2; // CC1 of TIM1
+constexpr DMA_Channel_TypeDef* DMAChannel = DMA1_Channel5; // UP of TIM1
 constexpr TIM_TypeDef* StepperTimer = TIM1;
 
 // CN0162
