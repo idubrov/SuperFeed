@@ -28,7 +28,7 @@
 // PB6-PB7 -- TIM4 (currently allocated to LCD!)
 // TIM3 -- encoder
 //
-// TIM15 is slave for stepper delays, ITR2 (010).
+// TIM4 is slave for stepper delays, ITR2 (010).
 // TIM16 is master for stepper delays
 //
 // TIM1-TIM4 could be configured as slaves

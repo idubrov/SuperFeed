@@ -23,6 +23,7 @@ util::util()
 	TIM_TimeBaseStructure.TIM_Period = 0;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 	TIM_TimeBaseInit(DelayTimer, &TIM_TimeBaseStructure);
 
 	// Delay timer runs in single pulse mode

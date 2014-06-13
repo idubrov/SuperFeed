@@ -1,70 +1,75 @@
 #include "stepper.hpp"
+#include "lcd.hpp"
 
 void stepper::initialize()
 {
+	// Master configuration
 	// Tick every 65536 CPU clock
 	TIM_TimeBaseInitTypeDef master;
 	master.TIM_Prescaler = 0xffff;
-	master.TIM_Period = 20;
+	master.TIM_Period = 0;
 	master.TIM_ClockDivision = TIM_CKD_DIV1;
 	master.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_DeInit(_master_tim);
-	TIM_TimeBaseInit(_master_tim, &master);
-	TIM_SelectOnePulseMode(_master_tim, TIM_OPMode_Single);
-	TIM_ClearITPendingBit(_master_tim, TIM_IT_CC1);
-	TIM_ITConfig(_master_tim, TIM_IT_CC1, ENABLE);
-	//_master_tim->DIER = 0;
+	master.TIM_RepetitionCounter = 0;
+	TIM_DeInit(TIM15);
+	TIM_TimeBaseInit(TIM15, &master);
+	TIM_SelectOnePulseMode(TIM15, TIM_OPMode_Single);
+	TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+	TIM_ITConfig(TIM15, TIM_IT_Update, ENABLE);
+	TIM_SelectOutputTrigger(TIM15, TIM_TRGOSource_Update);
 
-	// Tick every clock
-	TIM_TimeBaseInitTypeDef slave;
-	slave.TIM_Prescaler = 0;
-	slave.TIM_Period = 0;
-	slave.TIM_ClockDivision = TIM_CKD_DIV1;
-	slave.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_DeInit(_slave_tim);
-	TIM_TimeBaseInit(_slave_tim, &slave);
-	TIM_SelectOnePulseMode(_slave_tim, TIM_OPMode_Single);
-	TIM_SelectInputTrigger(_slave_tim, TIM_TS_ITR2);
-	TIM_SelectSlaveMode(_slave_tim, TIM_SlaveMode_Trigger);
-	TIM_SelectMasterSlaveMode(_slave_tim, TIM_MasterSlaveMode_Enable);
-	TIM_ClearITPendingBit(_slave_tim, TIM_IT_Update);
-	TIM_ITConfig(_slave_tim, TIM_IT_Update, ENABLE);
-
-	NVIC_InitTypeDef NVIC_InitStructure; //create NVIC structure
+	// Master interrupt
+	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-	NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_TIM16_IRQn;
+	// Slave configuration
+	TIM_TimeBaseInitTypeDef slave;
+	slave.TIM_Prescaler = 0;
+	slave.TIM_Period = 0;
+	slave.TIM_ClockDivision = TIM_CKD_DIV1;
+	slave.TIM_CounterMode = TIM_CounterMode_Up;
+	slave.TIM_RepetitionCounter = 0;
+	TIM_DeInit(TIM4);
+	TIM_TimeBaseInit(TIM4, &slave);
+	TIM_SelectOnePulseMode(TIM4, TIM_OPMode_Single);
+	TIM_SelectInputTrigger(TIM4, TIM_TS_ITR3);
+	TIM_SelectSlaveMode(TIM4, TIM_SlaveMode_Trigger);
+	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);
+
+	// Slave interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
+
 	// Some testing...
-	TIM_SetAutoreload(_slave_tim, 1);
-	TIM_SetCompare1(_master_tim, 1);
-	TIM_Cmd(_master_tim, ENABLE);
-	//TIM_Cmd(_slave_tim, ENABLE);
+	TIM_SetAutoreload(TIM4, 366); // LSB
+	TIM_SetAutoreload(TIM15, 366); // HSB
+	TIM_Cmd(TIM15, ENABLE);
+}
+
+
+extern "C"
+void __attribute__ ((section(".after_vectors")))
+TIM4_IRQHandler(void)
+{
+	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+	util::led4_on();
 }
 
 extern "C"
 void __attribute__ ((section(".after_vectors")))
 TIM1_BRK_TIM15_IRQHandler(void)
 {
-	util::led4_on();
-}
-
-extern "C"
-void __attribute__ ((section(".after_vectors")))
-TIM1_UP_TIM16_IRQHandler(void)
-{
-	if (TIM16->SR & TIM_FLAG_CC1) {
-		util::led3_on();
-		//TIM_Cmd(TIM15, ENABLE);
-	}
+	TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+	util::led3_on();
 }
 
 
