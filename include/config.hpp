@@ -12,7 +12,7 @@
 //   0123456789ABCDEF
 // A +++++EEE++DDDXXD
 // B +++XXLLLLLLLLLLL
-// C KKKKKKKK##SSS+++
+// C KKKKKKKK##SSSXXX
 // D +++
 //
 // XX STLINK connection
@@ -32,6 +32,13 @@
 // TIM16 is master for stepper delays
 //
 // TIM1-TIM4 could be configured as slaves
+// PA15 -- JTDI?
+// PC13-PC15 -- low power
+//
+// TODO:
+// PA0, PA1 -- TIM2, quadrature encoder for spindle
+// PA2 -- TIM15, indexing for spindle
+// PA8 -- TIM1 ch1, re-route to driver step,  from PA15
 
 //
 namespace cfg
