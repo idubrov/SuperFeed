@@ -21,6 +21,8 @@ private:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM16, ENABLE);
 	}
 };
 
@@ -65,10 +67,13 @@ int main()
 	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
 			GPIOB, GPIO_PinSource8);
 
+	stepper stepper(TIM15, TIM16);
+
 	switch5.initialize();
 	encoder.initialize();
 	keypad.initialize();
 	lcd.initialize();
+	stepper.initialize();
 
 	//driver driver::g_instance;
 	//stepper g_stepper;

@@ -13,13 +13,15 @@ public:
 		Stopped, Accelerating, Slewing, Decelerating
 	};
 public:
-	stepper() :
-			_state(Stopped), _position(0)
+	stepper(TIM_TypeDef* slave_tim, TIM_TypeDef* master_tim) :
+		_slave_tim(slave_tim), _master_tim(master_tim), _state(Stopped), _position(0)
 	{
 		_acceleration = 20; // IPM/sec
 		_deceleration = 20; // IPM/sec
 		_max_speed = 30; // IPM
 	}
+
+	void initialize();
 
 	State state() const
 	{
@@ -47,6 +49,10 @@ private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
 			* ::cfg::stepper::Microsteps * ::cfg::stepper::LeadscrewTPI;
+
+	// Timers
+	TIM_TypeDef* const _slave_tim;
+	TIM_TypeDef* const _master_tim;
 
 	// Speed settings
 	uint32_t _acceleration;
