@@ -1,8 +1,5 @@
 #include "lcd.hpp"
 
-using namespace ::cfg::lcd;
-
-
 void lcd::initialize()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
