@@ -21,6 +21,17 @@
 // E rotary encoder
 // D stepper motor driver (not yet configured!)
 // K keypad
+//
+// PA0-PA3 -- TIM2
+// PA2-PA3 -- TIM15
+// PA8-PA9 -- TIM1
+// PB6-PB7 -- TIM4 (currently allocated to LCD!)
+// TIM3 -- encoder
+//
+// TIM15 is slave for stepper delays, ITR2 (010).
+// TIM16 is master for stepper delays
+//
+// TIM1-TIM4 could be configured as slaves
 
 //
 namespace cfg
