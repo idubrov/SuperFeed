@@ -6,7 +6,7 @@ using namespace ::cfg::stepper;
 #define TIM4_ARR_Address    0x4000082C
 
 uint16_t Delays[] =
-{ 1000, 500, 1000, 500, 500 };
+{ 500, 3000 };
 
 void setup_slave_timer()
 {
@@ -45,7 +45,7 @@ void setup_master_timer()
 {
 	TIM_TimeBaseInitTypeDef init;
 	init.TIM_Prescaler = 23999; // 1ms period
-	init.TIM_Period = 0xffff;
+	init.TIM_Period = 1;
 	init.TIM_ClockDivision = TIM_CKD_DIV1;
 	init.TIM_CounterMode = TIM_CounterMode_Up;
 	init.TIM_RepetitionCounter = 0;
@@ -115,9 +115,7 @@ void stepper::initialize()
 
 	// Load data
 	TIM_InternalClockConfig(OutputTimer);
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Regular);
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Global);
 	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
 	TIM_Cmd(StepperTimer, ENABLE);
 }
@@ -136,9 +134,13 @@ TIM1_CC_IRQHandler(void)
 	TIM_ClearITPendingBit(OutputTimer, TIM_IT_CC1);
 }
 
+static bool stop = false;
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM4_IRQHandler(void)
 {
+	if (stop) {
+		TIM_Cmd(StepperTimer, DISABLE);
+	}
 	static bool flag = true;
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
 	if (flag) {
@@ -150,13 +152,12 @@ TIM4_IRQHandler(void)
 
 }
 
-
 extern "C" void __attribute__ ((section(".after_vectors")))
 DMA1_Channel7_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
-		TIM_Cmd(StepperTimer, DISABLE);
+		stop = true;
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
