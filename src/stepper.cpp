@@ -4,7 +4,7 @@
 using namespace ::cfg::stepper;
 
 uint16_t Delays[] =
-{ 1000, 750, 500, 250 };
+{ 750, 500, 250 };
 
 void stepper::setup_port() {
 	// Control port
@@ -23,6 +23,7 @@ void stepper::setup_output_timer()
 	init.TIM_ClockDivision = TIM_CKD_DIV1;
 	init.TIM_CounterMode = TIM_CounterMode_Up;
 	init.TIM_RepetitionCounter = 0;
+
 	TIM_TimeBaseInit(OutputTimer, &init);
 	TIM_CCPreloadControl(OutputTimer, DISABLE);
 	TIM_ARRPreloadConfig(OutputTimer, DISABLE);
@@ -65,11 +66,13 @@ void stepper::setup_step_timer()
 	TIM_SetCompare1(StepperTimer, 0);
 
 	// Initialize timer
+	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Regular);
 	TIM_TimeBaseInit(StepperTimer, &init);
+	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Global);
 
 	// Check if we need to stop
-	TIM_ClearITPendingBit(OutputTimer, TIM_IT_Update);
-	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
+	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
+	//TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 
 	// Load new delay on update
 	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
@@ -78,7 +81,7 @@ void stepper::setup_step_timer()
 	NVIC_InitTypeDef timerIT;
 	timerIT.NVIC_IRQChannel = TIM4_IRQn;
 	timerIT.NVIC_IRQChannelPreemptionPriority = 0;
-	timerIT.NVIC_IRQChannelSubPriority = 0;
+	timerIT.NVIC_IRQChannelSubPriority = 1;
 	timerIT.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&timerIT);
 }
@@ -96,7 +99,7 @@ void stepper::setup_dma()
 	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-	dma.DMA_Mode = DMA_Mode_Circular;
+	dma.DMA_Mode = DMA_Mode_Normal;
 	dma.DMA_Priority = DMA_Priority_High;
 	dma.DMA_M2M = DMA_M2M_Disable;
 	DMA_Init(DMAChannel, &dma);
@@ -107,7 +110,7 @@ void stepper::setup_dma()
 	NVIC_InitTypeDef dmaIT;
 	dmaIT.NVIC_IRQChannel = DMA1_Channel7_IRQn;
 	dmaIT.NVIC_IRQChannelPreemptionPriority = 0;
-	dmaIT.NVIC_IRQChannelSubPriority = 1;
+	dmaIT.NVIC_IRQChannelSubPriority = 0;
 	dmaIT.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&dmaIT);
 }
@@ -123,28 +126,36 @@ void stepper::initialize()
 	setup_dma();
 
 	// Load data and start timer!
+	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
+	while (!TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
+	TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
+	while (TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
+	TIM_Cmd(StepperTimer, ENABLE);
 
+	while(StepperTimer->CR1 & TIM_CR1_CEN);
+
+	util::led4_on();
+
+	// Second time
+	setup_dma();
+	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
+	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
+	while (!TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
+	TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
+	while (TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
 	TIM_Cmd(StepperTimer, ENABLE);
 }
-
-static bool stop = false;
 
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM4_IRQHandler(void)
 {
-	if (stop) {
-		TIM_Cmd(StepperTimer, DISABLE);
-	}
-	static bool flag = true;
+	// Stop itself
+	TIM_Cmd(StepperTimer, DISABLE);
+	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	if (flag) {
-		util::led3_on();
-	} else {
-		util::led3_off();
-	}
-	flag = !flag;
-
+	TIM_SetAutoreload(StepperTimer, 0);
+	util::led3_on();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -152,7 +163,9 @@ DMA1_Channel7_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
-		//stop = true;
+		// No more data to send: allow timer to stop itself after the last cycle
+		TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
+		TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
