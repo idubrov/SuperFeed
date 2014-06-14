@@ -3,18 +3,10 @@
 
 using namespace ::cfg::stepper;
 
-namespace {
-	constexpr uint32_t TIM4CR1Offset = reinterpret_cast<uint32_t>(&TIM4->CR1) - PERIPH_BASE;
-	constexpr uint32_t CENBit = 0;
-	constexpr uint32_t TIM4CEN_BB = PERIPH_BB_BASE + TIM4CR1Offset * 32 + CENBit * 4;
-}
-
-#define TIM4_ARR_Address    0x4000082C
-
 uint16_t Delays[] =
 { 1000, 500, 500, 500 };
 
-void setup_output_port() {
+void stepper::setup_port() {
 	// Control port
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
@@ -23,7 +15,7 @@ void setup_output_port() {
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
-void setup_slave_timer()
+void stepper::setup_output_timer()
 {
 	TIM_TimeBaseInitTypeDef init;
 	init.TIM_Prescaler = 239; // 10us period
@@ -43,7 +35,7 @@ void setup_slave_timer()
 	ocInit.TIM_OCMode = TIM_OCMode_PWM2; // '0' till CCR1, then '1'
 	ocInit.TIM_OutputState = TIM_OutputState_Enable;
 	ocInit.TIM_OutputNState = TIM_OutputNState_Disable;
-	ocInit.TIM_Pulse = 1; // Start step pulse on next cycle
+	ocInit.TIM_Pulse = 1; // Start step pulse right on the next cycle
 	ocInit.TIM_OCPolarity = TIM_OCPolarity_Low; // Step pulse on IM483 is '0'
 	ocInit.TIM_OCNPolarity = TIM_OCNPolarity_High;
 	ocInit.TIM_OCIdleState = TIM_OCIdleState_Set; // Set STEP to '1' when idle
@@ -69,7 +61,7 @@ void setup_slave_timer()
 	NVIC_Init(&timerIT);
 }
 
-void setup_master_timer()
+void stepper::setup_step_timer()
 {
 	TIM_TimeBaseInitTypeDef init;
 	init.TIM_Prescaler = 23999; // 1ms period
@@ -106,7 +98,7 @@ void setup_master_timer()
 	NVIC_Init(&timerIT);
 }
 
-void setup_master_dma()
+void stepper::setup_dma()
 {
 	// DMA configuration
 	DMA_InitTypeDef dma;
@@ -140,16 +132,15 @@ void stepper::initialize()
 	TIM_DeInit(OutputTimer);
 	TIM_DeInit(StepperTimer);
 
-	setup_output_port();
-	setup_slave_timer();
-	setup_master_timer();
-	setup_master_dma();
+	setup_port();
+	setup_output_timer();
+	setup_step_timer();
+	setup_dma();
 
 	// Load data and start timer!
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
 
-	//TIM_Cmd(StepperTimer, ENABLE);
-	*(__IO uint32_t *) TIM4CEN_BB = (uint32_t)1;
+	TIM_Cmd(StepperTimer, ENABLE);
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))

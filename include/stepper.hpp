@@ -45,6 +45,12 @@ private:
 	{
 
 	}
+
+	void setup_port();
+	void setup_output_timer();
+	void setup_step_timer();
+	void setup_dma();
+
 private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
