@@ -89,12 +89,6 @@ void stepper::setup_step_timer()
 
 void stepper::setup_dma()
 {
-	// Timer might have pending DMA request latched.
-	// Need to toggle the flag to reset the latch.
-	// Otherwise, a transfer would happen once we re-enable DMA channel!
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, DISABLE);
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
-
 	// DMA configuration
 	DMA_InitTypeDef dma;
 	DMA_Cmd(DMAChannel, DISABLE);
@@ -113,7 +107,6 @@ void stepper::setup_dma()
 
 	DMA_Init(DMAChannel, &dma);
 	DMA_ITConfig(DMAChannel, DMA_IT_TC, ENABLE);
-	DMA_Cmd(DMAChannel, ENABLE);
 
 	// DMA interrupt
 	NVIC_InitTypeDef dmaIT;
@@ -134,24 +127,41 @@ void stepper::initialize()
 	setup_step_timer();
 	setup_dma();
 
-	// Load data and start timer!
-	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
-	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	TIM_Cmd(StepperTimer, ENABLE);
+	// First series of pulses
+	start_stepgen();
 
-	// Wait for timers to finish
+	// Wait for step timer to finish
 	while(StepperTimer->CR1 & TIM_CR1_CEN);
-	while(TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
 
-	setup_dma();
+	// Load data again
+	load_data();
 
+	// Second series of pulses
+	start_stepgen();
+}
+
+void stepper::start_stepgen() {
+	// Timer might have pending DMA request latched.
+	// Need to toggle the flag to reset the latch.
+	// Otherwise, a transfer would happen once we re-enable DMA channel!
+	TIM_DMACmd(StepperTimer, TIM_DMA_Update, DISABLE);
+	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
+
+	// Disable timer update interrupt generation
+	// We use it for stopping the timer after last chunk is transmitted
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
+	// Enable DMA channel
+	DMA_Cmd(DMAChannel, ENABLE);
+	// Load first chunk of data
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
+	// Start pulse generation
 	TIM_Cmd(StepperTimer, ENABLE);
 }
 
 void stepper::load_data() {
-
+	DMA_Cmd(DMAChannel, DISABLE);
+	DMAChannel->CMAR = (uint32_t) Delays;
+	DMAChannel->CNDTR = sizeof(Delays) / sizeof(Delays[0]);
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -176,5 +186,4 @@ DMA1_Channel7_IRQHandler(void)
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
-
 

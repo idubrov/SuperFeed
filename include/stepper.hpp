@@ -52,6 +52,7 @@ private:
 	void setup_dma();
 
 	void load_data();
+	void start_stepgen();
 private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
