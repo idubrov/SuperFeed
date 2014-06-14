@@ -83,7 +83,7 @@ void setup_master_dma()
 	// DMA configuration
 	DMA_InitTypeDef dma;
 	DMA_DeInit(DMAChannel);
-	dma.DMA_PeripheralBaseAddr = (uint32_t) TIM4_ARR_Address;
+	dma.DMA_PeripheralBaseAddr = (uint32_t) &(TIM4->ARR);
 	dma.DMA_MemoryBaseAddr = (uint32_t) Delays;
 	dma.DMA_DIR = DMA_DIR_PeripheralDST;
 	dma.DMA_BufferSize = sizeof(Delays) / sizeof(Delays[0]);
