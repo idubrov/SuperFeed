@@ -3,6 +3,7 @@
 
 using namespace ::cfg::stepper;
 
+uint16_t Source[] = { 750, 500, 250, 500, 500 };
 uint16_t Delays[] =
 { 750, 500, 250 };
 
@@ -88,8 +89,15 @@ void stepper::setup_step_timer()
 
 void stepper::setup_dma()
 {
+	// Timer might have pending DMA request latched.
+	// Need to toggle the flag to reset the latch.
+	// Otherwise, a transfer would happen once we re-enable DMA channel!
+	TIM_DMACmd(StepperTimer, TIM_DMA_Update, DISABLE);
+	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
+
 	// DMA configuration
 	DMA_InitTypeDef dma;
+	DMA_Cmd(DMAChannel, DISABLE);
 	DMA_DeInit(DMAChannel);
 	dma.DMA_PeripheralBaseAddr = (uint32_t) &(TIM4->ARR);
 	dma.DMA_MemoryBaseAddr = (uint32_t) Delays;
@@ -102,6 +110,7 @@ void stepper::setup_dma()
 	dma.DMA_Mode = DMA_Mode_Normal;
 	dma.DMA_Priority = DMA_Priority_High;
 	dma.DMA_M2M = DMA_M2M_Disable;
+
 	DMA_Init(DMAChannel, &dma);
 	DMA_ITConfig(DMAChannel, DMA_IT_TC, ENABLE);
 	DMA_Cmd(DMAChannel, ENABLE);
@@ -128,23 +137,21 @@ void stepper::initialize()
 	// Load data and start timer!
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	while (!TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
-	TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
-	while (TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
 	TIM_Cmd(StepperTimer, ENABLE);
 
+	// Wait for timers to finish
 	while(StepperTimer->CR1 & TIM_CR1_CEN);
+	while(TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
 
-	util::led4_on();
-
-	// Second time
 	setup_dma();
+
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	while (!TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
-	TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
-	while (TIM_GetFlagStatus(StepperTimer, TIM_FLAG_Update));
 	TIM_Cmd(StepperTimer, ENABLE);
+}
+
+void stepper::load_data() {
+
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -154,7 +161,7 @@ TIM4_IRQHandler(void)
 	TIM_Cmd(StepperTimer, DISABLE);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	TIM_SetAutoreload(StepperTimer, 0);
+
 	util::led3_on();
 }
 
@@ -164,7 +171,7 @@ DMA1_Channel7_IRQHandler(void)
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
 		// No more data to send: allow timer to stop itself after the last cycle
-		TIM_ClearFlag(StepperTimer, TIM_FLAG_Update);
+		TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
 		TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
