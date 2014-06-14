@@ -3,10 +3,25 @@
 
 using namespace ::cfg::stepper;
 
+namespace {
+	constexpr uint32_t TIM4CR1Offset = reinterpret_cast<uint32_t>(&TIM4->CR1) - PERIPH_BASE;
+	constexpr uint32_t CENBit = 0;
+	constexpr uint32_t TIM4CEN_BB = PERIPH_BB_BASE + TIM4CR1Offset * 32 + CENBit * 4;
+}
+
 #define TIM4_ARR_Address    0x4000082C
 
 uint16_t Delays[] =
-{ 1000, 500, 500 };
+{ 1000, 500, 500, 500 };
+
+void setup_output_port() {
+	// Control port
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+}
 
 void setup_slave_timer()
 {
@@ -22,8 +37,21 @@ void setup_slave_timer()
 	TIM_ClearITPendingBit(OutputTimer, TIM_IT_CC1 | TIM_IT_Update);
 	TIM_ITConfig(OutputTimer, TIM_IT_CC1 | TIM_IT_Update, ENABLE);
 	TIM_SelectOnePulseMode(OutputTimer, TIM_OPMode_Single);
-	TIM_SetCompare1(OutputTimer, 1);
 
+	// Configure PWM
+	TIM_OCInitTypeDef ocInit;
+	ocInit.TIM_OCMode = TIM_OCMode_PWM2; // '0' till CCR1, then '1'
+	ocInit.TIM_OutputState = TIM_OutputState_Enable;
+	ocInit.TIM_OutputNState = TIM_OutputNState_Disable;
+	ocInit.TIM_Pulse = 1; // Start step pulse on next cycle
+	ocInit.TIM_OCPolarity = TIM_OCPolarity_Low; // Step pulse on IM483 is '0'
+	ocInit.TIM_OCNPolarity = TIM_OCNPolarity_High;
+	ocInit.TIM_OCIdleState = TIM_OCIdleState_Set; // Set STEP to '1' when idle
+	ocInit.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+	TIM_OC1Init(OutputTimer, &ocInit);
+	TIM_CtrlPWMOutputs(OutputTimer, ENABLE);
+
+	// Configure as slave
 	TIM_SelectInputTrigger(OutputTimer, TIM_TS_ITR3); // TIM4 (master) -> TIM1 (slave)
 	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
 
@@ -107,21 +135,12 @@ void setup_master_dma()
 	NVIC_Init(&dmaIT);
 }
 
-/* ------------ SDIO registers bit address in the alias region ----------- */
-#define TIM4_OFFSET                (TIM4_BASE - PERIPH_BASE)
-
-/* --- CLKCR Register ---*/
-
-/* Alias word address of CLKEN bit */
-#define CR1_OFFSET            (TIM4_OFFSET + 0x00)
-#define CR1CEN_BitNumber      0x00
-#define CR1_CEN_BB            (PERIPH_BB_BASE + (CR1_OFFSET * 32) + (CR1CEN_BitNumber * 4))
-
 void stepper::initialize()
 {
 	TIM_DeInit(OutputTimer);
 	TIM_DeInit(StepperTimer);
 
+	setup_output_port();
 	setup_slave_timer();
 	setup_master_timer();
 	setup_master_dma();
@@ -129,15 +148,8 @@ void stepper::initialize()
 	// Load data and start timer!
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
 
-	__NOP();
-	__NOP();
-	__NOP();
-
 	//TIM_Cmd(StepperTimer, ENABLE);
-	*(__IO uint32_t *) CR1_CEN_BB = (uint32_t)1;
-	__NOP();
-	__NOP();
-	__NOP();
+	*(__IO uint32_t *) TIM4CEN_BB = (uint32_t)1;
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -181,4 +193,5 @@ DMA1_Channel7_IRQHandler(void)
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
+
 
