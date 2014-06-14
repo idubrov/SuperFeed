@@ -80,9 +80,10 @@ constexpr uint32_t StepSpace = 1000;
 constexpr uint32_t DirectionSetup = 1000;
 constexpr uint32_t DirectionHold = 1000;
 
-// Note that stepper module also has an IRQ handler to reload DMA data
-constexpr DMA_Channel_TypeDef* DMAChannel = DMA1_Channel5; // UP of TIM1
-constexpr TIM_TypeDef* StepperTimer = TIM1;
+// Note that you also would need to change IRQs in stepper.cpp
+constexpr TIM_TypeDef* OutputTimer = TIM1;
+constexpr TIM_TypeDef* StepperTimer = TIM4;
+constexpr DMA_Channel_TypeDef* DMAChannel = DMA1_Channel7; // Update of TIM4
 
 // CN0162
 //constexpr uint32_t StepLen = 300;
