@@ -4,7 +4,7 @@
 using namespace ::cfg::stepper;
 
 uint16_t Delays[] =
-{ 1000, 500, 500, 500 };
+{ 1000, 750, 500, 250 };
 
 void stepper::setup_port() {
 	// Control port
@@ -26,8 +26,6 @@ void stepper::setup_output_timer()
 	TIM_TimeBaseInit(OutputTimer, &init);
 	TIM_CCPreloadControl(OutputTimer, DISABLE);
 	TIM_ARRPreloadConfig(OutputTimer, DISABLE);
-	TIM_ClearITPendingBit(OutputTimer, TIM_IT_CC1 | TIM_IT_Update);
-	TIM_ITConfig(OutputTimer, TIM_IT_CC1 | TIM_IT_Update, ENABLE);
 	TIM_SelectOnePulseMode(OutputTimer, TIM_OPMode_Single);
 
 	// Configure PWM
@@ -46,19 +44,6 @@ void stepper::setup_output_timer()
 	// Configure as slave
 	TIM_SelectInputTrigger(OutputTimer, TIM_TS_ITR3); // TIM4 (master) -> TIM1 (slave)
 	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
-
-	// Output timer interrupts
-	NVIC_InitTypeDef timerIT;
-	timerIT.NVIC_IRQChannel = TIM1_CC_IRQn;
-	timerIT.NVIC_IRQChannelPreemptionPriority = 0;
-	timerIT.NVIC_IRQChannelSubPriority = 0;
-	timerIT.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&timerIT);
-	timerIT.NVIC_IRQChannel = TIM1_UP_TIM16_IRQn;
-	timerIT.NVIC_IRQChannelPreemptionPriority = 0;
-	timerIT.NVIC_IRQChannelSubPriority = 0;
-	timerIT.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&timerIT);
 }
 
 void stepper::setup_step_timer()
@@ -82,7 +67,7 @@ void stepper::setup_step_timer()
 	// Initialize timer
 	TIM_TimeBaseInit(StepperTimer, &init);
 
-	// DMA is configured to transfer on update
+	// Check if we need to stop
 	TIM_ClearITPendingBit(OutputTimer, TIM_IT_Update);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 
@@ -143,21 +128,8 @@ void stepper::initialize()
 	TIM_Cmd(StepperTimer, ENABLE);
 }
 
-extern "C" void __attribute__ ((section(".after_vectors")))
-TIM1_UP_TIM16_IRQHandler(void)
-{
-	util::led4_off();
-	TIM_ClearITPendingBit(OutputTimer, TIM_IT_Update);
-}
-
-extern "C" void __attribute__ ((section(".after_vectors")))
-TIM1_CC_IRQHandler(void)
-{
-	util::led4_on();
-	TIM_ClearITPendingBit(OutputTimer, TIM_IT_CC1);
-}
-
 static bool stop = false;
+
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM4_IRQHandler(void)
 {
