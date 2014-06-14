@@ -107,6 +107,16 @@ void setup_master_dma()
 	NVIC_Init(&dmaIT);
 }
 
+/* ------------ SDIO registers bit address in the alias region ----------- */
+#define TIM4_OFFSET                (TIM4_BASE - PERIPH_BASE)
+
+/* --- CLKCR Register ---*/
+
+/* Alias word address of CLKEN bit */
+#define CR1_OFFSET            (TIM4_OFFSET + 0x00)
+#define CR1CEN_BitNumber      0x00
+#define CR1_CEN_BB            (PERIPH_BB_BASE + (CR1_OFFSET * 32) + (CR1CEN_BitNumber * 4))
+
 void stepper::initialize()
 {
 	TIM_DeInit(OutputTimer);
@@ -118,7 +128,16 @@ void stepper::initialize()
 
 	// Load data and start timer!
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	TIM_Cmd(StepperTimer, ENABLE);
+
+	__NOP();
+	__NOP();
+	__NOP();
+
+	//TIM_Cmd(StepperTimer, ENABLE);
+	*(__IO uint32_t *) CR1_CEN_BB = (uint32_t)1;
+	__NOP();
+	__NOP();
+	__NOP();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
