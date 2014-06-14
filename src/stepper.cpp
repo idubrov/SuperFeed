@@ -6,7 +6,7 @@ using namespace ::cfg::stepper;
 #define TIM4_ARR_Address    0x4000082C
 
 uint16_t Delays[] =
-{ 500, 3000 };
+{ 1000, 500, 500 };
 
 void setup_slave_timer()
 {
@@ -45,23 +45,28 @@ void setup_master_timer()
 {
 	TIM_TimeBaseInitTypeDef init;
 	init.TIM_Prescaler = 23999; // 1ms period
-	init.TIM_Period = 1;
+	init.TIM_Period = 0;
 	init.TIM_ClockDivision = TIM_CKD_DIV1;
 	init.TIM_CounterMode = TIM_CounterMode_Up;
 	init.TIM_RepetitionCounter = 0;
 
-	// Don't generate interrupts while we are configuring timer
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Regular);
+	// Start STEP pulse once timer overflows.
+	// Note: we don't use Update event as TRGO since we emit Update's manually
+	// to trigger DMA to load first pulse delay. We don't want slave timer
+	// to fire when we do it.
+	// Note: set it before configuring timer, so slave is not fired when
+	// we do TIM_TimeBaseInit
+	TIM_SelectOutputTrigger(StepperTimer, TIM_TRGOSource_OC1);
+	TIM_SetCompare1(StepperTimer, 0);
+
 	TIM_TimeBaseInit(StepperTimer, &init);
 	TIM_SelectOnePulseMode(StepperTimer, TIM_OPMode_Repetitive);
-	TIM_ARRPreloadConfig(StepperTimer, DISABLE);
 
 	// DMA is configured to transfer on update
 	TIM_ClearITPendingBit(OutputTimer, TIM_IT_Update);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE); // Load new delay on compare match
-	TIM_SelectOutputTrigger(StepperTimer, TIM_TRGOSource_Update);
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Global);
+
 
 	// Output timer interrupts
 	NVIC_InitTypeDef timerIT;
@@ -85,7 +90,7 @@ void setup_master_dma()
 	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
 	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-	dma.DMA_Mode = DMA_Mode_Normal;
+	dma.DMA_Mode = DMA_Mode_Circular;
 	dma.DMA_Priority = DMA_Priority_High;
 	dma.DMA_M2M = DMA_M2M_Disable;
 	DMA_Init(DMAChannel, &dma);
@@ -106,17 +111,12 @@ void stepper::initialize()
 	TIM_DeInit(OutputTimer);
 	TIM_DeInit(StepperTimer);
 
-	// Configure master first (so slave is not triggered while we setting up master)
-	setup_master_timer();
 	setup_slave_timer();
+	setup_master_timer();
 	setup_master_dma();
 
-	// Enable the link between master and slave timers
-
-	// Load data
-	TIM_InternalClockConfig(OutputTimer);
+	// Load data and start timer!
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
-	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
 	TIM_Cmd(StepperTimer, ENABLE);
 }
 
@@ -157,7 +157,7 @@ DMA1_Channel7_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
-		stop = true;
+		//stop = true;
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
