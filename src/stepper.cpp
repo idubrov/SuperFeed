@@ -59,14 +59,15 @@ void setup_master_timer()
 	TIM_SelectOutputTrigger(StepperTimer, TIM_TRGOSource_OC1);
 	TIM_SetCompare1(StepperTimer, 0);
 
+	// Initialize timer
 	TIM_TimeBaseInit(StepperTimer, &init);
-	TIM_SelectOnePulseMode(StepperTimer, TIM_OPMode_Repetitive);
 
 	// DMA is configured to transfer on update
 	TIM_ClearITPendingBit(OutputTimer, TIM_IT_Update);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE); // Load new delay on compare match
 
+	// Load new delay on update
+	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
 
 	// Output timer interrupts
 	NVIC_InitTypeDef timerIT;
