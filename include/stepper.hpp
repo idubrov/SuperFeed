@@ -5,8 +5,15 @@
 #include "driver.hpp"
 #include "util.hpp"
 
+extern "C" {
+void DMA1_Channel7_IRQHandler();
+void TIM4_IRQHandler();
+}
+
 class stepper
 {
+	friend void ::DMA1_Channel7_IRQHandler();
+	friend void ::TIM4_IRQHandler();
 public:
 	enum State
 	{
@@ -14,11 +21,13 @@ public:
 	};
 public:
 	stepper(TIM_TypeDef* slave_tim, TIM_TypeDef* master_tim) :
+		_steps_ready(0),
 		_slave_tim(slave_tim), _master_tim(master_tim), _state(Stopped), _position(0)
 	{
 		_acceleration = 20; // IPM/sec
 		_deceleration = 20; // IPM/sec
 		_max_speed = 30; // IPM
+		g_instance = this;
 	}
 
 	void initialize();
@@ -41,20 +50,28 @@ public:
 	// define by given TPI.
 	bool move_sync_tpi(uint32_t tpi);
 private:
-	inline void update()
-	{
-
-	}
-
 	void setup_port();
 	void setup_output_timer();
 	void setup_step_timer();
 	void setup_dma();
-
-	void load_data();
 	void start_stepgen();
 private:
-	// Interrupt management
+	// Pulse generation control
+
+	// Number of steps prepared by DMA handlers
+	volatile uint32_t _steps_ready;
+
+	// Load new chunk of data
+	void load_data();
+	// Update timer
+	void update();
+
+private:
+	static stepper* g_instance;
+
+	inline static stepper* instance() {
+		return g_instance;
+	}
 private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev

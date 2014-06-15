@@ -1,10 +1,13 @@
 #include "stepper.hpp"
+#include "lcd.hpp"
 
 using namespace ::cfg::stepper;
 
-uint16_t Source[] = { 750, 500, 250, 500, 500 };
-uint16_t Delays[] =
-{ 750, 500, 250 };
+uint16_t Source[] = { 500, 500, 500 };
+static uint16_t Buffer[20];
+constexpr int Buffer_Size = sizeof(Buffer) / sizeof(Buffer[0]);
+
+stepper* stepper::g_instance;
 
 void stepper::setup_port() {
 	// Control port
@@ -70,12 +73,8 @@ void stepper::setup_step_timer()
 	TIM_TimeBaseInit(StepperTimer, &init);
 	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Global);
 
-	// Check if we need to stop
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	//TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
-
-	// Load new delay on update
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
+	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 
 	// Output timer interrupts
 	NVIC_InitTypeDef timerIT;
@@ -90,12 +89,12 @@ void stepper::setup_dma()
 {
 	// Configure DMA channel
 	DMAChannel->CCR = DMA_IT_TC |
-			DMA_DIR_PeripheralDST | DMA_Mode_Normal |
+			DMA_DIR_PeripheralDST | DMA_Mode_Circular |
 			DMA_PeripheralInc_Disable | DMA_PeripheralDataSize_HalfWord |
 			DMA_MemoryInc_Enable | DMA_MemoryDataSize_HalfWord |
 			DMA_Priority_High | DMA_M2M_Disable;
-	DMAChannel->CNDTR = 0; // Will be set after data is loaded
-	DMAChannel->CMAR = 0; // Will be set after data is loaded
+	DMAChannel->CNDTR = Buffer_Size;
+	DMAChannel->CMAR = (uint32_t) Buffer;
 	DMAChannel->CPAR = (uint32_t) &(TIM4->ARR);
 
 	// DMA interrupts
@@ -112,21 +111,24 @@ void stepper::initialize()
 	TIM_DeInit(OutputTimer);
 	TIM_DeInit(StepperTimer);
 
-	setup_port();
 	setup_output_timer();
 	setup_step_timer();
 	setup_dma();
+	setup_port();
 
 	// First series of pulses
 	load_data();
 	start_stepgen();
 
-	// Wait for step timer to finish
-	while(StepperTimer->CR1 & TIM_CR1_CEN);
+	util::led3_on();
+	while(1);
 
-	// Second series of pulses
-	load_data();
-	start_stepgen();
+//	// Wait for step timer to finish
+//	while(StepperTimer->CR1 & TIM_CR1_CEN);
+//
+//	// Second series of pulses
+//	load_data();
+//	start_stepgen();
 }
 
 void stepper::start_stepgen() {
@@ -134,11 +136,10 @@ void stepper::start_stepgen() {
 	// Need to toggle the flag to reset the latch.
 	// Otherwise, a transfer would happen once we re-enable DMA channel!
 	TIM_DMACmd(StepperTimer, TIM_DMA_Update, DISABLE);
+
+	// Load new data on timer update
 	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
 
-	// Disable timer update interrupt generation
-	// We use it for stopping the timer after last chunk is transmitted
-	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	// Enable DMA channel
 	DMA_Cmd(DMAChannel, ENABLE);
 	// Load first chunk of data
@@ -147,19 +148,37 @@ void stepper::start_stepgen() {
 	TIM_Cmd(StepperTimer, ENABLE);
 }
 
+extern lcd* g_lcd;
 void stepper::load_data() {
-	DMA_Cmd(DMAChannel, DISABLE);
-	DMAChannel->CMAR = (uint32_t) Delays;
-	DMAChannel->CNDTR = sizeof(Delays) / sizeof(Delays[0]);
+	static int position = 0;
+	constexpr int size = sizeof(Source) / sizeof(Source[0]);
+	int i;
+	for (i = 0; i < Buffer_Size && position < size; i++) {
+		Buffer[i] = Source[position++];
+		_steps_ready++;
+	}
+
+	// Fill remaining with zeroes (just to be sure)
+	for (; i < Buffer_Size; i++) {
+		Buffer[i] = 0;
+	}
+}
+
+void stepper::update() {
+	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
+	if (_steps_ready == 0) {
+		// This is interrupt after we generated last delay, disable step generation.
+		TIM_Cmd(StepperTimer, DISABLE);
+	} else {
+		// DMA just loaded new delay into the ARR
+		_steps_ready--;
+	}
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM4_IRQHandler(void)
 {
-	// Stop step generation timer and clear all pending interrupt flags
-	TIM_Cmd(StepperTimer, DISABLE);
-	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
-	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
+	stepper::instance()->update();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -167,9 +186,8 @@ DMA1_Channel7_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
-		// No more data to send: allow timer to stop itself after the last cycle
-		TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-		TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
+		stepper::instance()->load_data();
+		DMA_Cmd(DMAChannel, ENABLE);
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }

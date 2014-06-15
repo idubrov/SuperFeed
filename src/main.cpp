@@ -47,6 +47,7 @@ util util::g_instance;
 //
 //		Port->BRR = StepPin;
 
+lcd* g_lcd;
 /**
  * @brief  Main program.
  * @param  None
@@ -68,6 +69,8 @@ int main()
 	// D0-D7 should be connected to PB8-PB15
 	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
 			GPIOB, GPIO_PinSource8);
+	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
+	g_lcd = &lcd;
 
 	stepper stepper(TIM4, TIM15);
 
@@ -78,7 +81,7 @@ int main()
 	stepper.initialize();
 
 	encoder.limit(20);
-	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
+
 	while (1) {
 		lcd.position(0, 0);
 		lcd.print('0' + switch5.position());
