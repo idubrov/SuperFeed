@@ -54,6 +54,8 @@ private:
 	void load_data();
 	void start_stepgen();
 private:
+	// Interrupt management
+private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
 			* ::cfg::stepper::Microsteps * ::cfg::stepper::LeadscrewTPI;

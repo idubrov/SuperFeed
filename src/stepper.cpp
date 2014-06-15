@@ -1,5 +1,4 @@
 #include "stepper.hpp"
-#include "lcd.hpp"
 
 using namespace ::cfg::stepper;
 
@@ -89,26 +88,17 @@ void stepper::setup_step_timer()
 
 void stepper::setup_dma()
 {
-	// DMA configuration
-	DMA_InitTypeDef dma;
-	DMA_Cmd(DMAChannel, DISABLE);
-	DMA_DeInit(DMAChannel);
-	dma.DMA_PeripheralBaseAddr = (uint32_t) &(TIM4->ARR);
-	dma.DMA_MemoryBaseAddr = (uint32_t) Delays;
-	dma.DMA_DIR = DMA_DIR_PeripheralDST;
-	dma.DMA_BufferSize = sizeof(Delays) / sizeof(Delays[0]);
-	dma.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	dma.DMA_MemoryInc = DMA_MemoryInc_Enable;
-	dma.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-	dma.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-	dma.DMA_Mode = DMA_Mode_Normal;
-	dma.DMA_Priority = DMA_Priority_High;
-	dma.DMA_M2M = DMA_M2M_Disable;
+	// Configure DMA channel
+	DMAChannel->CCR = DMA_IT_TC |
+			DMA_DIR_PeripheralDST | DMA_Mode_Normal |
+			DMA_PeripheralInc_Disable | DMA_PeripheralDataSize_HalfWord |
+			DMA_MemoryInc_Enable | DMA_MemoryDataSize_HalfWord |
+			DMA_Priority_High | DMA_M2M_Disable;
+	DMAChannel->CNDTR = 0; // Will be set after data is loaded
+	DMAChannel->CMAR = 0; // Will be set after data is loaded
+	DMAChannel->CPAR = (uint32_t) &(TIM4->ARR);
 
-	DMA_Init(DMAChannel, &dma);
-	DMA_ITConfig(DMAChannel, DMA_IT_TC, ENABLE);
-
-	// DMA interrupt
+	// DMA interrupts
 	NVIC_InitTypeDef dmaIT;
 	dmaIT.NVIC_IRQChannel = DMA1_Channel7_IRQn;
 	dmaIT.NVIC_IRQChannelPreemptionPriority = 0;
@@ -128,15 +118,14 @@ void stepper::initialize()
 	setup_dma();
 
 	// First series of pulses
+	load_data();
 	start_stepgen();
 
 	// Wait for step timer to finish
 	while(StepperTimer->CR1 & TIM_CR1_CEN);
 
-	// Load data again
-	load_data();
-
 	// Second series of pulses
+	load_data();
 	start_stepgen();
 }
 
@@ -167,12 +156,10 @@ void stepper::load_data() {
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM4_IRQHandler(void)
 {
-	// Stop itself
+	// Stop step generation timer and clear all pending interrupt flags
 	TIM_Cmd(StepperTimer, DISABLE);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, DISABLE);
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-
-	util::led3_on();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
