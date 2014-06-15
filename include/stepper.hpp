@@ -62,7 +62,7 @@ private:
 	volatile uint32_t _steps_ready;
 
 	// Load new chunk of data
-	void load_data();
+	void load_data(bool first);
 	// Update timer
 	void update();
 

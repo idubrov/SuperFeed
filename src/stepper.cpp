@@ -3,13 +3,16 @@
 
 using namespace ::cfg::stepper;
 
-uint16_t Source[] = { 500, 500, 500 };
-static uint16_t Buffer[20];
+uint16_t Source[] =
+{ 500, 500, 500, 500, 500 };
+static uint16_t Buffer[4];
 constexpr int Buffer_Size = sizeof(Buffer) / sizeof(Buffer[0]);
+constexpr int Half_Buffer_Size = Buffer_Size / 2;
 
 stepper* stepper::g_instance;
 
-void stepper::setup_port() {
+void stepper::setup_port()
+{
 	// Control port
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
@@ -88,11 +91,11 @@ void stepper::setup_step_timer()
 void stepper::setup_dma()
 {
 	// Configure DMA channel
-	DMAChannel->CCR = DMA_IT_TC |
-			DMA_DIR_PeripheralDST | DMA_Mode_Circular |
-			DMA_PeripheralInc_Disable | DMA_PeripheralDataSize_HalfWord |
-			DMA_MemoryInc_Enable | DMA_MemoryDataSize_HalfWord |
-			DMA_Priority_High | DMA_M2M_Disable;
+	DMAChannel->CCR = DMA_IT_TC | DMA_IT_HT |
+	DMA_DIR_PeripheralDST | DMA_Mode_Circular |
+	DMA_PeripheralInc_Disable | DMA_PeripheralDataSize_HalfWord |
+	DMA_MemoryInc_Enable | DMA_MemoryDataSize_HalfWord |
+	DMA_Priority_High | DMA_M2M_Disable;
 	DMAChannel->CNDTR = Buffer_Size;
 	DMAChannel->CMAR = (uint32_t) Buffer;
 	DMAChannel->CPAR = (uint32_t) &(TIM4->ARR);
@@ -117,11 +120,13 @@ void stepper::initialize()
 	setup_port();
 
 	// First series of pulses
-	load_data();
+	load_data(true);
+	load_data(false);
 	start_stepgen();
 
 	util::led3_on();
-	while(1);
+	while (1)
+		;
 
 //	// Wait for step timer to finish
 //	while(StepperTimer->CR1 & TIM_CR1_CEN);
@@ -131,7 +136,8 @@ void stepper::initialize()
 //	start_stepgen();
 }
 
-void stepper::start_stepgen() {
+void stepper::start_stepgen()
+{
 	// Timer might have pending DMA request latched.
 	// Need to toggle the flag to reset the latch.
 	// Otherwise, a transfer would happen once we re-enable DMA channel!
@@ -149,27 +155,34 @@ void stepper::start_stepgen() {
 }
 
 extern lcd* g_lcd;
-void stepper::load_data() {
+void stepper::load_data(bool first)
+{
 	static int position = 0;
 	constexpr int size = sizeof(Source) / sizeof(Source[0]);
 	int i;
-	for (i = 0; i < Buffer_Size && position < size; i++) {
-		Buffer[i] = Source[position++];
+	for (i = 0; i < Half_Buffer_Size && position < size; i++)
+	{
+		Buffer[i + (first ? 0 : Half_Buffer_Size)] = Source[position++];
 		_steps_ready++;
 	}
 
 	// Fill remaining with zeroes (just to be sure)
-	for (; i < Buffer_Size; i++) {
-		Buffer[i] = 0;
+	for (; i < Half_Buffer_Size; i++)
+	{
+		Buffer[i + (first ? 0 : Half_Buffer_Size)] = 0;
 	}
 }
 
-void stepper::update() {
+void stepper::update()
+{
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	if (_steps_ready == 0) {
+	if (_steps_ready == 0)
+	{
 		// This is interrupt after we generated last delay, disable step generation.
 		TIM_Cmd(StepperTimer, DISABLE);
-	} else {
+	}
+	else
+	{
 		// DMA just loaded new delay into the ARR
 		_steps_ready--;
 	}
@@ -184,10 +197,15 @@ TIM4_IRQHandler(void)
 extern "C" void __attribute__ ((section(".after_vectors")))
 DMA1_Channel7_IRQHandler(void)
 {
+	if (DMA_GetITStatus(DMA1_IT_HT7))
+	{
+		// Load first half of the buffer
+		stepper::instance()->load_data(true);
+	}
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
-		stepper::instance()->load_data();
-		DMA_Cmd(DMAChannel, ENABLE);
+		// Load second half of the buffer
+		stepper::instance()->load_data(false);
 	}
 	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
