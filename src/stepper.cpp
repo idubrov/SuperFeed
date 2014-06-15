@@ -4,7 +4,7 @@
 using namespace ::cfg::stepper;
 
 uint16_t Source[] =
-{ 500, 500, 500, 500, 500 };
+{ 500, 500, 500, 500, 200 };
 static uint16_t Buffer[4];
 constexpr int Buffer_Size = sizeof(Buffer) / sizeof(Buffer[0]);
 constexpr int Half_Buffer_Size = Buffer_Size / 2;
@@ -176,7 +176,8 @@ void stepper::load_data(bool first)
 void stepper::update()
 {
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	if (_steps_ready == 0)
+	uint32_t steps = _steps_ready;
+	if (steps == 0)
 	{
 		// This is interrupt after we generated last delay, disable step generation.
 		TIM_Cmd(StepperTimer, DISABLE);
@@ -184,7 +185,7 @@ void stepper::update()
 	else
 	{
 		// DMA just loaded new delay into the ARR
-		_steps_ready--;
+		_steps_ready = steps - 1;
 	}
 }
 
@@ -199,14 +200,15 @@ DMA1_Channel7_IRQHandler(void)
 {
 	if (DMA_GetITStatus(DMA1_IT_HT7))
 	{
+		DMA_ClearITPendingBit(DMA1_IT_GL7);
 		// Load first half of the buffer
 		stepper::instance()->load_data(true);
 	}
 	if (DMA_GetITStatus(DMA1_IT_TC7))
 	{
+		DMA_ClearITPendingBit(DMA1_IT_GL7);
 		// Load second half of the buffer
 		stepper::instance()->load_data(false);
 	}
-	DMA_ClearITPendingBit(DMA1_IT_GL7);
 }
 
