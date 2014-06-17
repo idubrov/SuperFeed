@@ -14,11 +14,9 @@ class hw
 {
 public:
 	constexpr hw(GPIO_TypeDef* port, uint16_t step_pin, uint16_t dir_pin,
-			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* pulse_tim,
-			uint16_t pulse_tim_trigger_source, TIM_TypeDef* step_tim) :
+			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* timer) :
 			_port(port), _step_pin(step_pin), _dir_pin(dir_pin), _enable_pin(
-					enable_pin), _reset_pin(reset_pin), _pulse_tim(pulse_tim), _pulse_tim_trigger_source(
-					pulse_tim_trigger_source), _step_tim(step_tim)
+					enable_pin), _reset_pin(reset_pin), _timer(timer)
 	{
 	}
 	hw(hw const&) = default;
@@ -31,9 +29,7 @@ public:
 	uint16_t const _reset_pin;
 
 	// Timers
-	TIM_TypeDef* const _pulse_tim;
-	uint16_t const _pulse_tim_trigger_source;
-	TIM_TypeDef* const _step_tim;
+	TIM_TypeDef* const _timer;
 };
 
 // Stepper delays configuration
@@ -84,31 +80,21 @@ public:
 	bool move_sync_tpi(uint32_t tpi);
 
 	// Step complete
-	inline void step_completed()
-	{
-		update();
-	}
+	void step_completed();
 
 	// Step signal pulse complete
-	inline void step_pulsed()
-	{
-		TIM_ClearITPendingBit(_hw._pulse_tim, TIM_IT_Update);
-		_offset++;
-	}
+	// Update state machine and load new delay into timer
+	void update();
 
 private:
 	// Hardware setup
 	void setup_port();
-	void setup_pulse_timer();
-	void setup_step_timer();
+	void setup_timer();
 	void start_stepgen();
 
 private:
 	// Pulse generation control
 	volatile uint32_t _step;
-
-	// Update state machine and load new delay into timer
-	void update();
 
 private:
 	hw const _hw; // Hardware configuration

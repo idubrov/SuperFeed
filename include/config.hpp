@@ -23,17 +23,15 @@
 // K keypad
 //
 // Timers:
-// TIM1 -- slave timer for stepper PWM (signal generation)?
-// TIM2 -- quadrature encoder for spindle
+// TIM1 -- step signal generator
+// TIM2 -- quadrature encoder for spindle (not used yet)
 // TIM3 -- rotary encoder
-// TIM4 -- master timer for stepper PWM?
 // TIM6 -- delay timer
-// TI15 -- indexing for spindle
+// TIM15 -- indexing for spindle
 //
 // TODO:
 // PA0, PA1 -- TIM2, quadrature encoder for spindle
 // PA2 -- TIM15, indexing for spindle
-// PA8 -- TIM1 ch1, re-route to driver step,  from PA15
 
 //
 namespace cfg

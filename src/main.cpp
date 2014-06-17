@@ -13,15 +13,12 @@ extern "C"
 {
 void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
-void TIM4_IRQHandler(); // STEP delay
-
 }
 
 // First, enable clocks for utilized subsystems
 class application
 {
 	friend void ::TIM1_UP_TIM16_IRQHandler();
-	friend void ::TIM4_IRQHandler();
 public:
 	application() :
 			// PC10-PC12 should be connected to the first three output of the switch.
@@ -38,8 +35,7 @@ public:
 			// Stepper driver, PA8 should be connected to STEP, PA10 to DIR,
 			// PA11 to ENABLE and PA12 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			_stepper(stepper::hw(GPIOA, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_11,
-			GPIO_Pin_12, TIM1, TIM_TS_ITR3, TIM4),
+			_stepper(stepper::hw(GPIOA, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_11, GPIO_Pin_12, TIM1),
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
@@ -56,7 +52,6 @@ public:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
 
 		// Setup interrupt for pulse timer
@@ -140,12 +135,6 @@ SysTick_Handler()
 
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_UP_TIM16_IRQHandler()
-{
-	application::instance()._stepper.step_pulsed();
-}
-
-extern "C" void __attribute__ ((section(".after_vectors")))
-TIM4_IRQHandler()
 {
 	application::instance()._stepper.step_completed();
 }
