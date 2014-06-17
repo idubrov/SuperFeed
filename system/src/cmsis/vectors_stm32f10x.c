@@ -7,7 +7,16 @@ Default_Handler(void);
 // precedence over these weak definitions
 
 void __attribute__ ((weak, alias ("Default_Handler")))
-Reset_Handler(void);
+Reset_Handler(void) {
+asm volatile
+  (
+      " b _start \n"
+      :
+      :
+      :
+  );
+}
+
 void __attribute__ ((weak, alias ("Default_Handler")))
 NMI_Handler(void);
 void __attribute__ ((weak, alias ("Default_Handler")))
