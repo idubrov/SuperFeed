@@ -44,6 +44,7 @@ S const& operator<<(S const& sink, __radix<N, Radix> nn) {
 	int pos = size;
 	int n = nn.value;
 
+	// FIXME: won't work for min_value
 	if (n < 0) {
 		sink << '-';
 		n = -n;

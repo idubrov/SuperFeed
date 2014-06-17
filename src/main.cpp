@@ -4,7 +4,7 @@
 #include "keypad.hpp"
 #include "systick.hpp"
 #include "util.hpp"
-#include "lcd.hpp"
+#include "HD44780.hpp"
 #include "driver.hpp"
 #include "stepper.hpp"
 #include "simstream.hpp"
@@ -69,12 +69,12 @@ public:
 		_lcd.clear();
 		while (1)
 		{
-			_lcd << position(0, 0) << "Switch: " << _switch5.position() << ' '
+			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position() << ' '
 					<< radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
-			_lcd << position(0, 1) << "Encoder: "
+			_lcd << lcd::position(0, 1) << "Encoder: "
 					<< (_encoder.pressed() ? 'P' : 'N') << ' '
 					<< _encoder.position() << "  ";
-			_lcd << position(0, 2) << "Keypad: " << (char) _keypad.key();
+			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
 			util::delay_ms(100);
 		}
 	}
@@ -87,7 +87,7 @@ private:
 	switch5 _switch5;
 	encoder _encoder;
 	keypad _keypad;
-	lcd _lcd;
+	lcd::HD44780 _lcd;
 	stepper _stepper;
 private:
 	static application g_app;

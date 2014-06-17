@@ -1,6 +1,6 @@
-#include "lcd.hpp"
+#include "HD44780.hpp"
 
-void lcd::initialize() const
+void lcd::HD44780::initialize() const
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -38,7 +38,7 @@ void lcd::initialize() const
 	entry_mode(EntryRight, NoShift);
 }
 
-void lcd::write(char data) const {
+void lcd::HD44780::write(char data) const {
 	_control_port->BSRR = _rs_pin;
 	wait_address(); // tAS
 	send(data);
@@ -47,14 +47,14 @@ void lcd::write(char data) const {
 	util::delay_us(5);
 }
 
-void lcd::command(uint8_t cmd) const {
+void lcd::HD44780::command(uint8_t cmd) const {
 	_control_port->BRR = _rs_pin;
 	wait_address(); // tAS
 	send(cmd);
 	wait_ready();
 }
 
-void lcd::wait_busy_flag() const {
+void lcd::HD44780::wait_busy_flag() const {
 	// LCD has OD output, set all to '0' just to be sure.
 	_data_port->BRR = 0xff << _data_shift;
 

@@ -4,10 +4,10 @@
 #include "util.hpp"
 #include "simstream.hpp"
 
-class lcd
+namespace lcd
 {
-public:
-	enum FunctionMode
+// Constants
+enum FunctionMode
 	{
 		Bit8 = 0x10
 	};
@@ -59,8 +59,14 @@ public:
 		SetCGRamAddr = 0x40,
 		SetDDRamAddr = 0x80
 	};
+
+
+// HD44780 LCD screen controller
+class HD44780
+{
 public:
-	constexpr lcd(GPIO_TypeDef* control_port, uint16_t rs_pin, uint16_t rw_pin,
+	public:
+	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin, uint16_t rw_pin,
 			uint16_t e_pin, GPIO_TypeDef* data_port, uint8_t data_shift,
 			bool use_busy = false) :
 			_control_port(control_port), _rs_pin(rs_pin), _rw_pin(rw_pin), _e_pin(
@@ -68,7 +74,7 @@ public:
 					use_busy)
 	{
 	}
-	lcd(lcd const&) = delete;
+	HD44780(HD44780 const&) = delete;
 
 	void initialize() const;
 
@@ -174,9 +180,9 @@ private:
 	bool const _use_busy;
 };
 
-// Fancy API
+// Stream API for LCDscreen
 
-inline lcd const& operator<<(lcd const& l, char c)
+inline HD44780 const& operator<<(HD44780 const& l, char c)
 {
 	l.write(c);
 	return l;
@@ -190,7 +196,7 @@ inline __clear clear()
 	return __clear();
 }
 
-inline lcd const& operator<<(lcd const& l, __clear )
+inline HD44780 const& operator<<(HD44780 const& l, __clear )
 {
 	l.clear();
 	return l;
@@ -206,10 +212,12 @@ inline __position position(uint8_t col, uint8_t row)
 	return { col, row };
 }
 
-inline lcd const& operator<<(lcd const& l, __position p)
+inline HD44780 const& operator<<(HD44780 const& l, __position p)
 {
 	l.position(p.col, p.row);
 	return l;
+}
+
 }
 
 #endif /* __LCD_HPP */

@@ -1,5 +1,4 @@
 #include "stepper.hpp"
-#include "lcd.hpp"
 
 using namespace ::cfg::stepper;
 
