@@ -66,6 +66,7 @@ void controller::setup_pulse_timer()
 void controller::setup_step_timer()
 {
 	TIM_TimeBaseInitTypeDef init;
+	// FIXME: should be 23 for real delay timer, to have 1usec period.
 	init.TIM_Prescaler = 23999; // 1ms period
 	init.TIM_Period = 0;
 	init.TIM_ClockDivision = TIM_CKD_DIV1;

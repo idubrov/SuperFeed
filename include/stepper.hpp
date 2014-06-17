@@ -111,10 +111,6 @@ private:
 	void update();
 
 private:
-	// Configuration
-	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
-			* ::cfg::stepper::Microsteps * ::cfg::stepper::LeadscrewTPI;
-
 	hw const _hw; // Hardware configuration
 	delays const _delays; // Delays required by the stepper driver
 
