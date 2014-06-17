@@ -33,7 +33,7 @@ void encoder::initialize()
 	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_Cmd(_timer, ENABLE);
 
-	systick::instance().bind(Delegate<void()>::from<encoder, &encoder::scan>(this));
+	systick::bind(Delegate<void()>::from<encoder, &encoder::scan>(this));
 }
 
 void encoder::scan()

@@ -3,7 +3,7 @@
 using namespace ::cfg::util;
 
 // Configuration
-util::util()
+void util::setup()
 {
 	// Enable clocks for LED port and timer
 	RCC_APB2PeriphClockCmd(LedPortClock, ENABLE);

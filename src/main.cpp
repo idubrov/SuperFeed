@@ -10,15 +10,35 @@
 #include "simstream.hpp"
 #include "stm32f10x_gpio.h"
 
-
-// Initialize subsystems
+extern "C" {
+	void SysTick_Handler();
+	void TIM4_IRQHandler();
+}
 
 // First, enable clocks for utilized subsystems
-class init {
-private:
-	static init g_instance;
+class application
+{
+	friend void ::TIM4_IRQHandler();
+public:
+	application() :
+			// PC10-PC12 should be connected to the first three output of the switch.
+			// 4th lead of the switch should be connected to GND.
+			_switch5(GPIOC, GPIO_PinSource10),
+			// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
+			_encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
+			// Columns start with pin PC0, rows start with PC4
+			_keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4),
+			// LCD display, RS pin should be connected to PB5, R/W to PB6 and E to PB7
+			// D0-D7 should be connected to PB8-PB15
+			_lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7, GPIOB,
+			GPIO_PinSource8),
+			// TODO:
+			_stepper(GPIOA, GPIO_Pin_8, TIM4, TIM15)
+	{
+	}
 
-	init() {
+	void setup()
+	{
 		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
@@ -27,29 +47,54 @@ private:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+
+		// Setup SysTick handler and util module
+		systick::setup();
+		util::setup();
+
+		// Setup all used hardware
+		_switch5.initialize();
+		_encoder.initialize();
+		_keypad.initialize();
+		_lcd.initialize();
+		_stepper.initialize();
 	}
+
+	void run()
+	{
+
+		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
+		_encoder.limit(20);
+		_lcd.clear();
+		while (1)
+		{
+			_lcd << position(0, 0) << "Switch: " << _switch5.position() << ' '
+					<< radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
+			_lcd << position(0, 1) << "Encoder: "
+					<< (_encoder.pressed() ? 'P' : 'N') << ' '
+					<< _encoder.position() << "  ";
+			_lcd << position(0, 2) << "Keypad: " << (char) _keypad.key();
+			util::delay_ms(100);
+		}
+	}
+
+	static application& instance()
+	{
+		return g_app;
+	}
+private:
+	switch5 _switch5;
+	encoder _encoder;
+	keypad _keypad;
+	lcd _lcd;
+	stepper _stepper;
+private:
+	static application g_app;
 };
 
-// Initialize clocks, SysTick handler and util module
-init init::g_instance;
-systick systick::g_instance; // SysTick interrupt management
-util util::g_instance;
+application application::g_app;
 
-//		// FIXME: For CN0162 setup time is 10usec at least, need to check...
-//
-//
-//		Port->BSRR = StepPin;
-//		// Wait at least 75ns (for IMS483). Each NOP should be ~40ns (1/24000000 sec)
-//		__NOP();
-//		__NOP();
-//
-//		// for CN0162, wait time should be 300ns at least
-//		//__NOP(); __NOP(); __NOP(); __NOP();
-//		//__NOP(); __NOP(); __NOP(); __NOP();
-//
-//		Port->BRR = StepPin;
-
-lcd* g_lcd;
 /**
  * @brief  Main program.
  * @param  None
@@ -57,37 +102,20 @@ lcd* g_lcd;
  */
 int main()
 {
-	// PC10-PC12 should be connected to the first three output of the switch.
-	// 4th lead of the switch should be connected to GND.
-	switch5 switch5(GPIOC, GPIO_PinSource10);
-	switch5.initialize();
-
-	// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
-	encoder encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7);
-	encoder.initialize();
-
-	// Columns start with pin PC0, rows start with PC4
-	keypad keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4);
-	keypad.initialize();
-
-	// LCD display, RS pin should be connected to PB5, R/W to PB6 and E to PB7
-	// D0-D7 should be connected to PB8-PB15
-	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
-			GPIOB, GPIO_PinSource8);
-	lcd.initialize();
-	lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
-
-	stepper stepper(GPIOA, GPIO_Pin_8, TIM4, TIM15);
-	stepper.initialize();
-
-	encoder.limit(20);
-	lcd.clear();
-	while (1) {
-		lcd << position(0, 0) << "Switch: " << switch5.position() << ' ' <<  radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
-		lcd << position(0, 1) << "Encoder: " << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position() << "  ";
-		lcd << position(0, 2) << "Keypad: " << (char) keypad.key();
-		util::delay_ms(100);
-	}
+	application::instance().setup();
+	application::instance().run();
 	return 0;
 }
 
+// IRQ
+extern "C" void __attribute__ ((section(".after_vectors")))
+SysTick_Handler()
+{
+	systick::tick();
+}
+
+extern "C" void __attribute__ ((section(".after_vectors")))
+TIM4_IRQHandler()
+{
+	application::instance()._stepper.interrupt();
+}

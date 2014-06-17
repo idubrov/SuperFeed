@@ -17,9 +17,7 @@ class systick
 
 	using TickHandler = delegate::Delegate<void ()>;
 public:
-	static systick instance() {
-		return g_instance;
-	}
+	static void setup();
 
 	static void bind(const TickHandler& delegate) {
 		// Disable SysTick interrupts while we are adding a new handler
@@ -47,9 +45,6 @@ private:
 	}
 private:
 	static TickHandler _handlers[MaxHandlers];
-
-	static systick g_instance;
-	systick();
 };
 
 #endif /* __SYSTICK_HPP */

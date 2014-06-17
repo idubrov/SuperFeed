@@ -12,7 +12,7 @@ void switch5::initialize()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(_port, &GPIO_InitStructure);
 
-	systick::instance().bind(Delegate<void()>::from<switch5, &switch5::scan>(this));
+	systick::bind(Delegate<void()>::from<switch5, &switch5::scan>(this));
 }
 
 // Should be called from SysTick interrupt handler.

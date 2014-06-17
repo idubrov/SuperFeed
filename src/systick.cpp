@@ -2,15 +2,8 @@
 
 systick::TickHandler systick::_handlers[MaxHandlers];
 
-extern "C"
-void __attribute__ ((section(".after_vectors")))
-SysTick_Handler(void)
-{
-	systick::tick();
-}
-
 // Configuration
-systick::systick()
+void systick::setup()
 {
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;

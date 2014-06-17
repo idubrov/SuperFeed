@@ -27,7 +27,6 @@ public:
 		_acceleration = 20; // IPM/sec
 		_deceleration = 20; // IPM/sec
 		_max_speed = 30; // IPM
-		g_instance = this;
 	}
 
 	void initialize();
@@ -49,6 +48,11 @@ public:
 	// Spindle synchronized motion. Start moving when index pulse is received with the speed
 	// define by given TPI.
 	bool move_sync_tpi(uint32_t tpi);
+
+	// Step generation timer interrupt tick
+	inline void interrupt() {
+		update();
+	}
 private:
 	void setup_port();
 	void setup_output_timer();
@@ -58,17 +62,9 @@ private:
 	// Pulse generation control
 	volatile uint32_t _step;
 
-	// Load new chunk of data
-	void load_data(bool first);
-	// Update timer
+	// Update state machine and load new delay into timer
 	void update();
 
-private:
-	static stepper* g_instance;
-
-	inline static stepper* instance() {
-		return g_instance;
-	}
 private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev

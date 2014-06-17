@@ -7,8 +7,6 @@ uint16_t Source[] =
 { 200, 200, 200 };
 constexpr int DataCount = sizeof(Source) / sizeof(Source[0]);
 
-stepper* stepper::g_instance;
-
 void stepper::setup_port()
 {
 	// Control port
@@ -135,10 +133,4 @@ void stepper::update()
 	// Otherwise, if step == Datacount, ARR was reloaded from preload register for the last time.
 	// We would need to stop timer overflows for the next time.
 	_step = step + 1;
-}
-
-extern "C" void __attribute__ ((section(".after_vectors")))
-TIM4_IRQHandler(void)
-{
-	stepper::instance()->update();
 }

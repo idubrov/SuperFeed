@@ -6,6 +6,8 @@
 class util
 {
 public:
+	static void setup();
+
 	static void delay_us(uint16_t usec);
 	static void delay_ms(uint16_t msec);
 
@@ -28,9 +30,6 @@ public:
 	{
 		::cfg::util::LedPort->BRR = ::cfg::util::Led4Pin;
 	}
-private:
-	static util g_instance;
-	util();
 };
 
 #endif /* __UTIL_HPP */

@@ -26,7 +26,7 @@ void keypad::initialize()
 	// Set all rows to zero
 	GPIO_ResetBits(_port, 0x0f << _rows);
 
-	systick::instance().bind(Delegate<void()>::from<keypad, &keypad::scan>(this));
+	systick::bind(Delegate<void()>::from<keypad, &keypad::scan>(this));
 }
 
 void keypad::scan() {
