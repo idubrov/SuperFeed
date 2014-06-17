@@ -85,23 +85,11 @@ int main()
 
 	encoder.limit(20);
 
+	lcd << clear();
 	while (1) {
-		lcd.position(0, 0);
-		lcd << "Switch: ";
-		lcd << switch5.position();
-		
-		lcd.position(0, 1);
-		lcd.write(encoder.pressed() ? 'P' : 'N');
-		lcd.write(' ');
-		int pos = encoder.position();
-		lcd.write('0' + ((pos / 100) % 10));
-		lcd.write('0' + ((pos / 10) % 10));
-		lcd.write('0' + ((pos / 1) % 10));
-
-		lcd.position(0, 2);
-		keypad::Key key = keypad.key();
-		lcd.write(key);
-
+		lcd << position(0, 0) << "Switch: " << switch5.position();
+		lcd << position(0, 1) << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position();
+		lcd << position(0, 2) << (char) keypad.key();
 		util::delay_ms(100);
 	}
 	return 0;
