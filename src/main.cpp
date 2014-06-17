@@ -7,7 +7,9 @@
 #include "lcd.hpp"
 #include "driver.hpp"
 #include "stepper.hpp"
+#include "simstream.hpp"
 #include "stm32f10x_gpio.h"
+
 
 // Initialize subsystems
 
@@ -69,7 +71,7 @@ int main()
 	// D0-D7 should be connected to PB8-PB15
 	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
 			GPIOB, GPIO_PinSource8);
-	lcd.display(lcd.DisplayOn, lcd.CursorOff, lcd.BlinkOff);
+	//lcds lcd(lcd);
 	g_lcd = &lcd;
 
 	stepper stepper(TIM4, TIM15);
@@ -78,25 +80,27 @@ int main()
 	encoder.initialize();
 	keypad.initialize();
 	lcd.initialize();
+	lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 	stepper.initialize();
 
 	encoder.limit(20);
 
 	while (1) {
 		lcd.position(0, 0);
-		lcd.print('0' + switch5.position());
+		lcd << "Switch: ";
+		lcd << switch5.position();
 		
 		lcd.position(0, 1);
-		lcd.print(encoder.pressed() ? 'P' : 'N');
-		lcd.print(' ');
+		lcd.write(encoder.pressed() ? 'P' : 'N');
+		lcd.write(' ');
 		int pos = encoder.position();
-		lcd.print('0' + ((pos / 100) % 10));
-		lcd.print('0' + ((pos / 10) % 10));
-		lcd.print('0' + ((pos / 1) % 10));
+		lcd.write('0' + ((pos / 100) % 10));
+		lcd.write('0' + ((pos / 10) % 10));
+		lcd.write('0' + ((pos / 1) % 10));
 
 		lcd.position(0, 2);
 		keypad::Key key = keypad.key();
-		lcd.print(key);
+		lcd.write(key);
 
 		util::delay_ms(100);
 	}

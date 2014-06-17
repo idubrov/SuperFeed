@@ -1,6 +1,6 @@
 #include "lcd.hpp"
 
-void lcd::initialize()
+void lcd::initialize() const
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -38,7 +38,7 @@ void lcd::initialize()
 	entry_mode(EntryRight, NoShift);
 }
 
-void lcd::print(char data) {
+void lcd::write(char data) const {
 	_control_port->BSRR = _rs_pin;
 	wait_address(); // tAS
 	send(data);
@@ -47,21 +47,14 @@ void lcd::print(char data) {
 	util::delay_us(5);
 }
 
-void lcd::print(char const* data) {
-	while(*data) {
-		print(*data++);
-	}
-}
-
-
-void lcd::command(uint8_t cmd) {
+void lcd::command(uint8_t cmd) const {
 	_control_port->BRR = _rs_pin;
 	wait_address(); // tAS
 	send(cmd);
 	wait_ready();
 }
 
-void lcd::wait_busy_flag() {
+void lcd::wait_busy_flag() const {
 	// LCD has OD output, set all to '0' just to be sure.
 	_data_port->BRR = 0xff << _data_shift;
 

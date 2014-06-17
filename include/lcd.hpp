@@ -2,7 +2,7 @@
 #define __LCD_HPP
 
 #include "util.hpp"
-#include "config.hpp"
+#include "simstream.hpp"
 
 class lcd {
 public:
@@ -65,37 +65,37 @@ public:
 	}
 	lcd(lcd const&) = delete;
 
-	void initialize();
+	void initialize() const;
 
-	inline void clear() {
+	inline void clear() const {
 		command(ClearDisplay);
 		// This command could take as long as 1.52ms to execute
 		wait_ready(2000);
 	}
 
-	void home() {
+	void home() const {
 		command(ReturnHome);
 		// This command could take as long as 1.52ms to execute
 		wait_ready(2000);
 	}
 
-	void display(DisplayMode display, DisplayCursor cursor, DisplayBlink blink) {
+	void display(DisplayMode display, DisplayCursor cursor, DisplayBlink blink) const {
 		command(DisplayControl | display | cursor | blink);
 	}
 
-	void entry_mode(EntryModeDirection dir, EntryModeShift scroll) {
+	void entry_mode(EntryModeDirection dir, EntryModeShift scroll) const {
 		command(EntryModeSet | dir | scroll);
 	}
 
-	void scroll(Direction dir) {
+	void scroll(Direction dir) const {
 		command(CursorShift | DisplayMove | dir);
 	}
 
-	void cursor(Direction dir) {
+	void cursor(Direction dir) const {
 		command(CursorShift | CursorMove | dir);
 	}
 
-	void position(uint8_t col, uint8_t row) {
+	void position(uint8_t col, uint8_t row) const {
 		uint8_t offset = 0;
 		switch (row) {
 		case 1: offset = 0x40; break;
@@ -105,14 +105,13 @@ public:
 		command(SetDDRamAddr | (col + offset));
 	}
 
-	void print(char data);
-	void print(char const* data);
+	void write(char data) const;
 private:
-	void command(uint8_t cmd);
-	void wait_busy_flag();
+	void command(uint8_t cmd) const;
+	void wait_busy_flag() const;
 
 	// Typical command wait time is 37us
-	void wait_ready(uint16_t delay = 50) {
+	void wait_ready(uint16_t delay = 50) const {
 		if (_use_busy) {
 			wait_busy_flag();
 		} else {
@@ -120,7 +119,7 @@ private:
 		}
 	}
 
-	inline void pulse_enable() {
+	inline void pulse_enable() const {
 		_control_port->BSRR = _e_pin;
 		util::delay_us(1); // minimum delay is 450 ns
 		_control_port->BRR = _e_pin;
@@ -133,7 +132,7 @@ private:
 		__NOP();
 	}
 
-	inline void send(uint8_t data) {
+	inline void send(uint8_t data) const {
 		_data_port->BSRR = ((uint16_t)   data ) << _data_shift; // Set '1's
 		_data_port->BRR =  ((uint16_t) (~data)) << _data_shift; // Clear '0's
 		pulse_enable();
@@ -147,5 +146,14 @@ private:
 	uint8_t  const _data_shift;
 	bool const _use_busy;
 };
+
+// Fancy API
+
+template<typename S>
+S const& operator<<(S const& sink, char c)
+{
+	sink.write(c);
+	return sink;
+}
 
 #endif /* __LCD_HPP */
