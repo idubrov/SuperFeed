@@ -81,15 +81,16 @@ int main()
 	keypad.initialize();
 	lcd.initialize();
 	lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
-	stepper.initialize();
+	//stepper.initialize();
 
 	encoder.limit(20);
 
-	lcd << clear();
+	lcd.clear();
 	while (1) {
-		lcd << position(0, 0) << "Switch: " << switch5.position();
-		lcd << position(0, 1) << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position();
-		lcd << position(0, 2) << (char) keypad.key();
+		lcd.write('a');
+		//lcd << position(0, 0) << "Switch: " << switch5.position();
+		//lcd << position(0, 1) << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position();
+		//lcd << position(0, 2) << (char) keypad.key();
 		util::delay_ms(100);
 	}
 	return 0;
