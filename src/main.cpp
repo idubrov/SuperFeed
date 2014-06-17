@@ -71,7 +71,6 @@ int main()
 	// D0-D7 should be connected to PB8-PB15
 	lcd lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7,
 			GPIOB, GPIO_PinSource8);
-	//lcds lcd(lcd);
 	g_lcd = &lcd;
 
 	stepper stepper(TIM4, TIM15);
@@ -84,13 +83,11 @@ int main()
 	//stepper.initialize();
 
 	encoder.limit(20);
-
 	lcd.clear();
 	while (1) {
-		lcd.write('a');
-		//lcd << position(0, 0) << "Switch: " << switch5.position();
-		//lcd << position(0, 1) << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position();
-		//lcd << position(0, 2) << (char) keypad.key();
+		lcd << position(0, 0) << "Switch: " << switch5.position() << ' ' <<  radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
+		lcd << position(0, 1) << "Encoder: " << (encoder.pressed() ? 'P' : 'N') << ' ' << encoder.position();
+		lcd << position(0, 2) << "Keypad: " << (char) keypad.key();
 		util::delay_ms(100);
 	}
 	return 0;
