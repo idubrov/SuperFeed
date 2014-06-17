@@ -4,21 +4,19 @@
 using namespace ::cfg::stepper;
 
 uint16_t Source[] =
-{ 500, 500, 500, 500, 200 };
-static uint16_t Buffer[4];
-constexpr int Buffer_Size = sizeof(Buffer) / sizeof(Buffer[0]);
-constexpr int Half_Buffer_Size = Buffer_Size / 2;
+{ 200, 200, 200 };
+constexpr int DataCount = sizeof(Source) / sizeof(Source[0]);
 
 stepper* stepper::g_instance;
 
 void stepper::setup_port()
 {
 	// Control port
-	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_InitTypeDef gpio;
+	gpio.GPIO_Pin = _step_pin;
+	gpio.GPIO_Mode = GPIO_Mode_AF_OD;
+	gpio.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(_port, &gpio);
 }
 
 void stepper::setup_output_timer()
@@ -48,9 +46,8 @@ void stepper::setup_output_timer()
 	TIM_OC1Init(OutputTimer, &ocInit);
 	TIM_CtrlPWMOutputs(OutputTimer, ENABLE);
 
-	// Configure as slave
+	// Configure input trigger
 	TIM_SelectInputTrigger(OutputTimer, TIM_TS_ITR3); // TIM4 (master) -> TIM1 (slave)
-	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
 }
 
 void stepper::setup_step_timer()
@@ -63,19 +60,12 @@ void stepper::setup_step_timer()
 	init.TIM_RepetitionCounter = 0;
 
 	// Start STEP pulse once timer overflows.
-	// Note: we don't use Update event as TRGO since we emit Update's manually
-	// to trigger DMA to load first pulse delay. We don't want slave timer
-	// to fire when we do it.
-	// Note: set it before configuring timer, so slave is not fired when
-	// we do TIM_TimeBaseInit
-	TIM_SelectOutputTrigger(StepperTimer, TIM_TRGOSource_OC1);
-	TIM_SetCompare1(StepperTimer, 0);
+	TIM_SelectOutputTrigger(StepperTimer, TIM_TRGOSource_Update);
 
 	// Initialize timer
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Regular);
 	TIM_TimeBaseInit(StepperTimer, &init);
-	TIM_UpdateRequestConfig(StepperTimer, TIM_UpdateSource_Global);
 
+	TIM_ARRPreloadConfig(StepperTimer, ENABLE);
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
 	TIM_ITConfig(StepperTimer, TIM_IT_Update, ENABLE);
 
@@ -88,105 +78,63 @@ void stepper::setup_step_timer()
 	NVIC_Init(&timerIT);
 }
 
-void stepper::setup_dma()
-{
-	// Configure DMA channel
-	DMAChannel->CCR = DMA_IT_TC | DMA_IT_HT |
-	DMA_DIR_PeripheralDST | DMA_Mode_Circular |
-	DMA_PeripheralInc_Disable | DMA_PeripheralDataSize_HalfWord |
-	DMA_MemoryInc_Enable | DMA_MemoryDataSize_HalfWord |
-	DMA_Priority_High | DMA_M2M_Disable;
-	DMAChannel->CNDTR = Buffer_Size;
-	DMAChannel->CMAR = (uint32_t) Buffer;
-	DMAChannel->CPAR = (uint32_t) &(TIM4->ARR);
-
-	// DMA interrupts
-	NVIC_InitTypeDef dmaIT;
-	dmaIT.NVIC_IRQChannel = DMA1_Channel7_IRQn;
-	dmaIT.NVIC_IRQChannelPreemptionPriority = 0;
-	dmaIT.NVIC_IRQChannelSubPriority = 0;
-	dmaIT.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&dmaIT);
-}
-
 void stepper::initialize()
 {
-	TIM_DeInit(OutputTimer);
-	TIM_DeInit(StepperTimer);
-
+//	TIM_DeInit(OutputTimer);
+//	TIM_DeInit(StepperTimer);
+//
 	setup_output_timer();
 	setup_step_timer();
-	setup_dma();
 	setup_port();
 
-	// First series of pulses
-	load_data(true);
-	load_data(false);
-	start_stepgen();
+		// First series of pulses
+		start_stepgen();
 
-	util::led3_on();
-	while (1)
-		;
+		// Wait for step timer to finish
+		while(StepperTimer->CR1 & TIM_CR1_CEN);
+		while(OutputTimer->CR1 & TIM_CR1_CEN);
 
-//	// Wait for step timer to finish
-//	while(StepperTimer->CR1 & TIM_CR1_CEN);
-//
-//	// Second series of pulses
-//	load_data();
-//	start_stepgen();
+		// Second series of pulses
+		start_stepgen();
+
+		while(1);
+
 }
 
 void stepper::start_stepgen()
 {
-	// Timer might have pending DMA request latched.
-	// Need to toggle the flag to reset the latch.
-	// Otherwise, a transfer would happen once we re-enable DMA channel!
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, DISABLE);
+	_step = 0;
 
-	// Load new data on timer update
-	TIM_DMACmd(StepperTimer, TIM_DMA_Update, ENABLE);
-
-	// Enable DMA channel
-	DMA_Cmd(DMAChannel, ENABLE);
-	// Load first chunk of data
+	// Don't trigger pulse generation.
+	// It should only be generated when timer overflows.
+	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Reset);
+	// Load first delay
+	update();
+	// Load ARR from preload register, load second delay into ARR.
 	TIM_GenerateEvent(StepperTimer, TIM_EventSource_Update);
+	TIM_SelectSlaveMode(OutputTimer, TIM_SlaveMode_Trigger);
+
 	// Start pulse generation
 	TIM_Cmd(StepperTimer, ENABLE);
-}
-
-extern lcd* g_lcd;
-void stepper::load_data(bool first)
-{
-	static int position = 0;
-	constexpr int size = sizeof(Source) / sizeof(Source[0]);
-	int i;
-	for (i = 0; i < Half_Buffer_Size && position < size; i++)
-	{
-		Buffer[i + (first ? 0 : Half_Buffer_Size)] = Source[position++];
-		_steps_ready++;
-	}
-
-	// Fill remaining with zeroes (just to be sure)
-	for (; i < Half_Buffer_Size; i++)
-	{
-		Buffer[i + (first ? 0 : Half_Buffer_Size)] = 0;
-	}
 }
 
 void stepper::update()
 {
 	TIM_ClearITPendingBit(StepperTimer, TIM_IT_Update);
-	uint32_t steps = _steps_ready;
-	if (steps == 0)
+	uint32_t step = _step;
+	if (step < DataCount)
+	{
+		// Load new step into ARR
+		StepperTimer->ARR = Source[step];
+	}
+	else if (step > DataCount)
 	{
 		// This is interrupt after we generated last delay, disable step generation.
 		TIM_Cmd(StepperTimer, DISABLE);
 	}
-	else
-	{
-		// DMA just loaded new delay into the ARR
-		_steps_ready = steps - 1;
-	}
+	// Otherwise, if step == Datacount, ARR was reloaded from preload register for the last time.
+	// We would need to stop timer overflows for the next time.
+	_step = step + 1;
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -194,21 +142,3 @@ TIM4_IRQHandler(void)
 {
 	stepper::instance()->update();
 }
-
-extern "C" void __attribute__ ((section(".after_vectors")))
-DMA1_Channel7_IRQHandler(void)
-{
-	if (DMA_GetITStatus(DMA1_IT_HT7))
-	{
-		DMA_ClearITPendingBit(DMA1_IT_GL7);
-		// Load first half of the buffer
-		stepper::instance()->load_data(true);
-	}
-	if (DMA_GetITStatus(DMA1_IT_TC7))
-	{
-		DMA_ClearITPendingBit(DMA1_IT_GL7);
-		// Load second half of the buffer
-		stepper::instance()->load_data(false);
-	}
-}
-

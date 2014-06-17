@@ -6,13 +6,11 @@
 #include "util.hpp"
 
 extern "C" {
-void DMA1_Channel7_IRQHandler();
 void TIM4_IRQHandler();
 }
 
 class stepper
 {
-	friend void ::DMA1_Channel7_IRQHandler();
 	friend void ::TIM4_IRQHandler();
 public:
 	enum State
@@ -20,8 +18,10 @@ public:
 		Stopped, Accelerating, Slewing, Decelerating
 	};
 public:
-	stepper(TIM_TypeDef* slave_tim, TIM_TypeDef* master_tim) :
-		_steps_ready(0),
+	stepper(GPIO_TypeDef* port, uint16_t step_pin,
+			TIM_TypeDef* slave_tim, TIM_TypeDef* master_tim) :
+		_step(0),
+		_port(port), _step_pin(step_pin),
 		_slave_tim(slave_tim), _master_tim(master_tim), _state(Stopped), _position(0)
 	{
 		_acceleration = 20; // IPM/sec
@@ -53,13 +53,10 @@ private:
 	void setup_port();
 	void setup_output_timer();
 	void setup_step_timer();
-	void setup_dma();
 	void start_stepgen();
 private:
 	// Pulse generation control
-
-	// Number of steps prepared by DMA handlers
-	volatile uint32_t _steps_ready;
+	volatile uint32_t _step;
 
 	// Load new chunk of data
 	void load_data(bool first);
@@ -76,6 +73,10 @@ private:
 	// Configuration
 	static constexpr uint32_t MicrostepsPerInch = ::cfg::stepper::StepsPerRev
 			* ::cfg::stepper::Microsteps * ::cfg::stepper::LeadscrewTPI;
+
+	// Port and pins
+	GPIO_TypeDef* const _port;
+	uint16_t const _step_pin;
 
 	// Timers
 	TIM_TypeDef* const _slave_tim;
