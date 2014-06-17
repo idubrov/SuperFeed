@@ -51,21 +51,6 @@ constexpr uint16_t Led3Pin = GPIO_Pin_9;
 constexpr uint16_t Led4Pin = GPIO_Pin_8;
 }
 
-// Driver should be connected as following:
-// PA10 STEP
-// PA11 DIR
-// PA12 EN
-// PA15 RESET
-namespace driver {
-// Control port
-constexpr uint32_t PortClock = RCC_APB2Periph_GPIOA;
-constexpr GPIO_TypeDef* Port = GPIOA;
-constexpr uint16_t StepPin = GPIO_Pin_10;
-constexpr uint16_t DirPin = GPIO_Pin_11;
-constexpr uint16_t EnablePin = GPIO_Pin_12;
-constexpr uint16_t ResetPin = GPIO_Pin_15;
-}
-
 // Stepper motor configuration
 namespace stepper {
 constexpr uint32_t Microsteps = 16;
@@ -79,10 +64,6 @@ constexpr uint32_t StepLen = 1000;
 constexpr uint32_t StepSpace = 1000;
 constexpr uint32_t DirectionSetup = 1000;
 constexpr uint32_t DirectionHold = 1000;
-
-// Note that you also would need to change IRQs in stepper.cpp
-constexpr TIM_TypeDef* OutputTimer = TIM1;
-constexpr TIM_TypeDef* StepperTimer = TIM4;
 
 // CN0162
 //constexpr uint32_t StepLen = 300;
