@@ -4,9 +4,11 @@
 #include "config.hpp"
 #include "delegate.hpp"
 
-#include "cortexm/ExceptionHandlers.h"
 #include <stdlib.h>
 
+extern "C" {
+void SysTick_Handler();
+}
 
 class systick
 {
