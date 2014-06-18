@@ -1,10 +1,13 @@
 #include "stepper.hpp"
+#include "HD44780.hpp"
 
 using namespace ::stepper;
 
 uint16_t Source[] =
-{ 2000, 2000, 2000 };
+{ 20000, 2000, 20000 };
 constexpr int DataCount = sizeof(Source) / sizeof(Source[0]);
+
+extern lcd::HD44780* g_lcd;
 
 void controller::setup_port()
 {
@@ -20,9 +23,9 @@ void controller::setup_port()
 	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
-
-	// Start in reset mode
-	_hw._port->BRR = _hw._reset_pin;
+//
+//	// Start in reset mode
+	_hw._port->BSRR = _hw._dir_pin | _hw._enable_pin | _hw._reset_pin;
 }
 
 void controller::setup_timer()
@@ -32,9 +35,10 @@ void controller::setup_timer()
 	init.TIM_Prescaler = 2399; // 100us period
 	init.TIM_ClockDivision = TIM_CKD_DIV1;
 	init.TIM_CounterMode = TIM_CounterMode_Up;
-	init.TIM_Period = 0; // Used for delay
+	init.TIM_Period = 0; // Configured later
 	init.TIM_RepetitionCounter = 0; // Used for microstepping
 
+	TIM_DeInit(_hw._timer);
 	TIM_TimeBaseInit(_hw._timer, &init);
 
 	// We load CC1 and ARR with next value while timer is running
@@ -44,16 +48,16 @@ void controller::setup_timer()
 
 	// Configure PWM
 	TIM_OCInitTypeDef ocInit;
-	ocInit.TIM_OCMode = TIM_OCMode_PWM1; // '1' till CCR1, then '0'
+	ocInit.TIM_OCMode = TIM_OCMode_PWM2; // inactive till CCR1, then active
 	ocInit.TIM_OutputState = TIM_OutputState_Enable;
 	ocInit.TIM_OutputNState = TIM_OutputNState_Disable;
-	ocInit.TIM_Pulse = 1; // Start step pulse right on the next cycle
+	ocInit.TIM_Pulse = 0; // Configured later
 	ocInit.TIM_OCPolarity = TIM_OCPolarity_Low; // Step pulse on IM483 is '0'
 	ocInit.TIM_OCNPolarity = TIM_OCNPolarity_High;
 	ocInit.TIM_OCIdleState = TIM_OCIdleState_Set; // Set STEP to '1' when idle
 	ocInit.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
 	TIM_OC1Init(_hw._timer, &ocInit);
-	TIM_CtrlPWMOutputs(_hw._timer, ENABLE);
+	TIM_CtrlPWMOutputs(_hw._timer, DISABLE);
 
 	// Enable interrupts
 	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
@@ -65,19 +69,9 @@ void controller::initialize()
 	setup_timer();
 	setup_port();
 
+
 	// First series of pulses
 	start_stepgen();
-
-	// Wait for step timer to finish
-	while (_hw._timer->CR1 & TIM_CR1_CEN)
-		;
-
-	// Second series of pulses
-	start_stepgen();
-
-	while (1)
-		;
-
 }
 
 void controller::start_stepgen()
@@ -90,6 +84,7 @@ void controller::start_stepgen()
 	TIM_GenerateEvent(_hw._timer, TIM_EventSource_Update);
 
 	// Start pulse generation
+	TIM_CtrlPWMOutputs(_hw._timer, ENABLE);
 	TIM_Cmd(_hw._timer, ENABLE);
 }
 

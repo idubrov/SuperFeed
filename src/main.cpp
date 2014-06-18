@@ -15,6 +15,8 @@ void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
 }
 
+lcd::HD44780* g_lcd;
+
 // First, enable clocks for utilized subsystems
 class application
 {
@@ -45,7 +47,6 @@ public:
 
 	void setup()
 	{
-		RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
@@ -62,28 +63,23 @@ public:
 		timerIT.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&timerIT);
 
-		// Setup interrupts for step timer
-		timerIT.NVIC_IRQChannel = TIM4_IRQn;
-		timerIT.NVIC_IRQChannelPreemptionPriority = 0;
-		timerIT.NVIC_IRQChannelSubPriority = 0;
-		timerIT.NVIC_IRQChannelCmd = ENABLE;
-		NVIC_Init(&timerIT);
-
 		// Setup SysTick handler and util module
 		systick::setup();
 		util::setup();
 
+		g_lcd = &_lcd;
 		// Setup all used hardware
 		_switch5.initialize();
 		_encoder.initialize();
 		_keypad.initialize();
 		_lcd.initialize();
+		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_stepper.initialize();
 	}
 
 	void run()
 	{
-		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
+
 		_encoder.limit(20);
 		_lcd.clear();
 		while (1)
