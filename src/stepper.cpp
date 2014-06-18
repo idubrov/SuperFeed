@@ -11,13 +11,13 @@ void controller::setup_port()
 	// Control port, STEP pin (timer controlled)
 	GPIO_InitTypeDef gpio;
 	gpio.GPIO_Pin = _hw._step_pin;
-	gpio.GPIO_Mode = GPIO_Mode_AF_OD;
+	gpio.GPIO_Mode = GPIO_Mode_AF_PP;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
 
 	// Control port (manually controlled)
 	gpio.GPIO_Pin = _hw._dir_pin | _hw._enable_pin | _hw._reset_pin;
-	gpio.GPIO_Mode = GPIO_Mode_Out_OD;
+	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
 
@@ -38,8 +38,9 @@ void controller::setup_timer()
 	TIM_TimeBaseInit(_hw._timer, &init);
 
 	// We load CC1 and ARR with next value while timer is running
-	TIM_CCPreloadControl(_hw._timer, ENABLE);
+	TIM_CCPreloadControl(_hw._timer, DISABLE);
 	TIM_ARRPreloadConfig(_hw._timer, ENABLE);
+	TIM_OC1PreloadConfig(_hw._timer, TIM_OCPreload_Enable);
 
 	// Configure PWM
 	TIM_OCInitTypeDef ocInit;
