@@ -76,14 +76,17 @@ static constexpr uint32_t MicrostepsPerInch =
 // Limits
 namespace limits
 {
-constexpr uint32_t F = 24000000; // Timer frequency
+constexpr uint32_t F = 24000000; // Clock frequency
 constexpr uint32_t Prescaler = 23;
 constexpr uint32_t TicksPerSec = F / (Prescaler + 1);
 
 // Maximum amount of pulses per second (driver limitation)
 constexpr uint32_t MaxPulseDR = 1000000000 / (StepLen + StepSpace);
+
+// Our guestimation how many cycles one update could take
+constexpr uint32_t CyclesPerUpdate = 100;
 // Maximum amount of pulses per second (timer limitation)
-constexpr uint32_t MaxPulseTIM = TicksPerSec / 2; // Period = 2 ticks
+constexpr uint32_t MaxPulseTIM = (F + CyclesPerUpdate - 1) / CyclesPerUpdate;
 
 // Maximum full steps per second
 constexpr uint32_t MaxPulse = MaxPulseTIM < MaxPulseDR ? MaxPulseTIM : MaxPulseDR;
