@@ -94,6 +94,10 @@ build/%.o: %.c build/%.d
 	mkdir -p `dirname $@`
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 	
+build/stepgen: test/stepgen.cpp src/stepgen.cpp include/stepgen.hpp
+	mkdir -p `dirname $@`
+	g++ -std=c++0x -Iinclude -o $@ test/stepgen.cpp src/stepgen.cpp
+	
 all: build/$(PROJ_NAME).elf build/$(PROJ_NAME).hex build/$(PROJ_NAME).bin build/$(PROJ_NAME).lst
 
 openocd:
