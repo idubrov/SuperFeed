@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 #include "util.hpp"
+#include "stepgen.hpp"
 
 namespace stepper
 {
@@ -65,7 +66,7 @@ public:
 	};
 public:
 	controller(hw&& hw, delays&& delays) :
-			_step(0), _hw(hw), _delays(delays)
+			_hw(hw), _delays(delays), _stepgen()
 	{
 	}
 
@@ -93,10 +94,6 @@ private:
 	void start_stepgen();
 
 private:
-	// Pulse generation control
-	volatile uint32_t _step;
-
-private:
 	hw const _hw; // Hardware configuration
 	delays const _delays; // Delays required by the stepper driver
 
@@ -106,6 +103,7 @@ private:
 	// Note that it is always positive. The current position is
 	// _dir ? (_base + _offset : _base - _offset)
 	volatile uint32_t _offset;
+	stepgen::stepgen _stepgen;
 };
 }
 

@@ -13,12 +13,19 @@ enum State
 class stepgen
 {
 public:
+	constexpr stepgen() :
+			_step(0), _decel_step(0), _midstep(0), _steps(0), _denom(0), _delay(
+					0), _slew_delay(0), _state(Stopped)
+	{
+	}
 	constexpr stepgen(uint32_t steps, uint32_t start_delay, uint32_t slew_delay) :
 			_step(0), _decel_step(0), _midstep((steps + 1) / 2), _steps(steps), _denom(
 					1), _delay(start_delay), _slew_delay(slew_delay), _state(
 					Accelerating)
 	{
 	}
+
+	stepgen& operator=(const stepgen &) = default;
 
 	// Returns '0' if should stop
 	// Otherwise, timer delay in 24.8 format
@@ -35,16 +42,17 @@ public:
 	static uint32_t first(uint32_t frequency, uint32_t acceleration);
 private:
 	static uint64_t sqrt(uint64_t x);
+	void calc_delay();
 
 private:
-	volatile uint32_t _step;
+	uint32_t _step;
 	uint32_t _decel_step;
-	uint32_t const _midstep;
-	uint32_t const _steps;
+	uint32_t _midstep;
+	uint32_t _steps;
 	uint32_t _denom;
 	uint32_t _delay;
-	uint32_t const _slew_delay;
-	volatile State _state;
+	uint32_t _slew_delay;
+	State _state;
 };
 }
 

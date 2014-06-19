@@ -69,15 +69,25 @@ void controller::initialize()
 	setup_timer();
 	setup_port();
 
+	int thread = 8;
+	int microsteps = 1;
+	int rpm = 120;
+	int leadscrew = 16; // 16 TPI
+	int spr = 200 * microsteps; // steps per revolution
+	int K = leadscrew * spr / thread; // steps per revolution
+	int F = 1000000;
+	int a = 1000 * microsteps;
+	int v = K * rpm / 60; // steps per sec
+	uint32_t c0 = stepgen::stepgen::first(F, a);
+	uint32_t cs = stepgen::stepgen::slew(F, v);
 
+	_stepgen = stepgen::stepgen(10, c0, cs);
 	// First series of pulses
 	start_stepgen();
 }
 
 void controller::start_stepgen()
 {
-	_step = 0;
-
 	// Load first delay into ARR/CC1
 	step_completed();
 	// Load ARR/CC1 from preload registers, load second delay into ARR & CC1.
@@ -92,20 +102,16 @@ void controller::step_completed()
 {
 	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
 	_offset++;
-	uint32_t step = _step;
-	if (step < DataCount)
+	uint32_t step = _stepgen.next() / 10; // FIXME:
+	if (step != 0)
 	{
-		// Load new step into ARR
-		_hw._timer->ARR = Source[step];
-		// Start STEP pulse in the end
-		_hw._timer->CCR1 = Source[step] - _delays._step_len;
+		// Load new step into ARR, start pulse at the end
+		_hw._timer->ARR = step;
+		_hw._timer->CCR1 = step - _delays._step_len;
 	}
-	else if (step > DataCount)
+	else
 	{
-		// This is interrupt after we generated last delay, disable step generation.
-		TIM_Cmd(_hw._timer, DISABLE);
+		// Stop on the next update, one pulse mode
+		_hw._timer->CR1 |= TIM_CR1_OPM;
 	}
-	// Otherwise, if step == Datacount, ARR was reloaded from preload register for the last time.
-	// We would need to stop timer overflows for the next time.
-	_step = step + 1;
 }

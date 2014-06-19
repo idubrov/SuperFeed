@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	uint32_t c0 = stepgen::stepgen::first(F, a);
 	if (c0 == 0)
 	{
-		cout << "First step is too slow!" << endl;
+		cout << "First step is too long!" << endl;
 	}
 	uint32_t cs = stepgen::stepgen::slew(F, v);
 
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	uint32_t delay;
 	while ((delay = gen.next()) != 0)
 	{
-		cout << (delay >> 8) << endl;
+		cout << delay << endl;
 	}
 
 	return 0;
