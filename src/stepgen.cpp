@@ -23,7 +23,7 @@ void stepgen::stepgen::calc_delay()
 		{
 			_state = Slewing;
 			_delay = _slew_delay;
-			_decel_step = _steps - _step - 1;
+			_to_stop = _step + 1;
 		}
 
 		if (_step == _midstep - 1)
@@ -35,10 +35,11 @@ void stepgen::stepgen::calc_delay()
 		}
 		break;
 	case Slewing:
-		if (_step == _decel_step)
+		_delay = _slew_delay; // In case slew speed was updated
+		if (_step == _steps - _to_stop)
 		{
 			_state = Decelerating;
-			_denom = 4 * (_steps - _decel_step) - 1;
+			_denom = 4 * _to_stop - 1;
 		}
 		break;
 	case Decelerating:
