@@ -8,20 +8,23 @@ namespace stepgen
 
 enum State
 {
-	Accelerating, Decelerating, Slewing, Stopped, MidStep
+	Starting, Accelerating, Decelerating, Slewing, Stopped, MidStep
 };
 class stepgen
 {
 public:
 	constexpr stepgen() :
-			_step(0), _to_stop(0), _midstep(0), _steps(0), _denom(0), _delay(
-					0), _slew_delay(0), _state(Stopped)
+			_step(0), _to_stop(0), _midstep(0), _steps(0), _denom(0), _delay(0), _start_delay(
+					0), _slew_delay(0), _state(Stopped), _stop(false)
 	{
 	}
+
+	/// \param steps amount of steps to make. If steps is 0, stepgen would reach
+	///	slew speed and run infinitely (until explicit stop is called)
 	constexpr stepgen(uint32_t steps, uint32_t start_delay, uint32_t slew_delay) :
 			_step(0), _to_stop(0), _midstep((steps + 1) / 2), _steps(steps), _denom(
-					1), _delay(start_delay), _slew_delay(slew_delay), _state(
-					Accelerating)
+					0), _delay(0), _start_delay(start_delay), _slew_delay(
+					slew_delay), _state(Starting), _stop(false)
 	{
 	}
 
@@ -30,6 +33,10 @@ public:
 	// Returns '0' if should stop
 	// Otherwise, timer delay in 24.8 format
 	uint32_t next();
+
+	void stop() {
+		_stop = true;
+	}
 
 	/// \param frequency timer frequency, ticks per second
 	/// \param slew_speed slew speed, steps per second
@@ -42,7 +49,7 @@ public:
 	static uint32_t first(uint32_t frequency, uint32_t acceleration);
 private:
 	static uint64_t sqrt(uint64_t x);
-	void calc_delay();
+	void do_stop();
 
 private:
 	uint32_t _step;
@@ -51,8 +58,10 @@ private:
 	uint32_t _steps;
 	uint32_t _denom;
 	uint32_t _delay;
+	uint32_t _start_delay;
 	uint32_t _slew_delay;
 	State _state;
+	bool _stop;
 };
 }
 

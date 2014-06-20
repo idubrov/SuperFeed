@@ -1,17 +1,61 @@
 #include "stepgen.hpp"
+#include <iostream>
 
 using namespace ::stepgen;
 
-void stepgen::stepgen::calc_delay()
+void stepgen::stepgen::do_stop()
 {
 	switch (_state)
 	{
+	case Starting:
+		_state = Stopped;
+		_delay = 0;
+		break;
+	case MidStep:
+	case Accelerating:
+		_state = Decelerating;
+		_denom = 4 * _step - 1;
+		_steps = _step * 2 - 1; // We need one step less to stop
+		break;
+	case Slewing:
+		_state = Decelerating;
+		_denom = 4 * _to_stop + 3; // 4 * (_to_stop + 1) - 1
+		_steps = _step + _to_stop;
+		break;
+	case Decelerating:
 	case Stopped:
+		// Nothing
+		break;
+	}
+}
+
+uint32_t stepgen::stepgen::next()
+{
+	if (_stop) {
+		do_stop();
+		_stop = false;
+	}
+	_step++;
+
+	switch (_state)
+	{
+	case Stopped:
+		_delay = 0;
 		// Nothing to do!
 		break;
 	case MidStep:
 		// Even move, return same delay as on previous step
 		_state = Decelerating;
+		break;
+	case Starting:
+		_delay = _start_delay;
+		_denom = 1;
+		_state = _steps == 1 ? Decelerating : Accelerating;
+		if (_steps == 2)
+		{
+			// We are only starting, return the same step
+			_state = MidStep;
+		}
 		break;
 	case Accelerating:
 		// Update speed
@@ -23,51 +67,38 @@ void stepgen::stepgen::calc_delay()
 		{
 			_state = Slewing;
 			_delay = _slew_delay;
-			_to_stop = _step + 1;
+			_to_stop = _step - 1;
 		}
-
-		if (_step == _midstep - 1)
+		else if (_step == _midstep)
 		{
-			_state = Decelerating;
-			_denom = 4 * _step + 3;
+			_denom = 4 * _step - 1;
 			// If we have even amount of steps, return same delay twice
 			_state = _steps % 2 == 0 ? MidStep : Decelerating;
 		}
 		break;
 	case Slewing:
 		_delay = _slew_delay; // In case slew speed was updated
-		if (_step == _steps - _to_stop)
+		if (_step >= _steps - _to_stop)
 		{
 			_state = Decelerating;
-			_denom = 4 * _to_stop - 1;
+			_denom = 4 * _to_stop + 3; // 4 * (_to_stop + 1) - 1
 		}
 		break;
 	case Decelerating:
+		// Last step indicator: decelerating and denominator is <= 3 (actually, it should be == 3)
+		if (_denom <= 3) {
+			_state = Stopped;
+			_delay = 0;
+			break;
+		}
 		// Update speed
 		_denom -= 4;
 		_delay += ((2 * _delay + _denom / 2) / _denom);
 		break;
 	}
-}
 
-uint32_t stepgen::stepgen::next()
-{
-	uint32_t delay = _delay;
-	uint32_t step = ++_step;
-
-	// Last step, return calculated delay an transition to stopped state
-	if (step == _steps)
-	{
-		_state = Stopped;
-		_delay = 0; // Next delay is zero, which is indication of completion.
-	}
-	else
-	{
-		calc_delay();
-	}
-
-	// Round previously calculated delay
-	return (delay + 128) >> 8;
+	// Round calculated delay
+	return (_delay + 128) >> 8;
 }
 
 uint32_t stepgen::stepgen::slew(uint32_t frequency, uint32_t slew_speed)

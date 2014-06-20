@@ -61,7 +61,7 @@ CPPFLAGS += -nostartfiles -Xlinker --gc-sections
 CPPFLAGS += -Lldscripts/
 CPPFLAGS += -Wl,-Map,build/$(PROJ_NAME).map --specs=nano.specs
 
-.PHONY: program
+.PHONY: program test
 
 build/$(PROJ_NAME).elf : $(OBJECTS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
@@ -97,6 +97,13 @@ build/%.o: %.c build/%.d
 build/stepgen: test/stepgen.cpp src/stepgen.cpp include/stepgen.hpp
 	mkdir -p `dirname $@`
 	g++ -std=c++0x -Iinclude -o $@ test/stepgen.cpp src/stepgen.cpp
+	
+test: build/stepgen
+	mkdir -p build/testresult
+	cat test/testdata | \
+	while read CMD; do \
+		build/stepgen $$CMD > "build/testresult/$${CMD// /_}" ; \
+	done
 	
 all: build/$(PROJ_NAME).elf build/$(PROJ_NAME).hex build/$(PROJ_NAME).bin build/$(PROJ_NAME).lst
 

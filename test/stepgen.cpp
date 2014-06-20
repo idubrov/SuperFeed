@@ -18,6 +18,11 @@ int main(int argc, char** argv)
 	{
 		microsteps = stoi(argv[2]);
 	}
+	int stopat = -1;
+	if (argc > 3)
+	{
+		stopat = stoi(argv[3]);
+	}
 	steps *= microsteps;
 
 	int rpm = 120;
@@ -39,9 +44,23 @@ int main(int argc, char** argv)
 
 	stepgen::stepgen gen(steps, c0, cs);
 	uint32_t delay;
-	while ((delay = gen.next()) != 0)
+	int i = 0;
+
+	while (true)
 	{
+		if (i == stopat)
+		{
+			cout << "Stopping" << endl;
+			gen.stop();
+		}
+		delay = gen.next();
+		if (delay == 0)
+		{
+			break;
+		}
 		cout << delay << endl;
+
+		i++;
 	}
 
 	return 0;
