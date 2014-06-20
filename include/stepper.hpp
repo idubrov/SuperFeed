@@ -66,32 +66,29 @@ public:
 	};
 public:
 	controller(hw&& hw, delays&& delays) :
-			_hw(hw), _delays(delays), _stepgen()
+			_hw(hw), _delays(delays), _offset(0), _stepgen()
 	{
 	}
 
 	void initialize();
 
-	bool move_to(int32_t position, uint32_t max_speed = 0);
-	bool move(int32_t speed);
-	bool stop();
-
-	// Spindle synchronized motion. Start moving when index pulse is received with the speed
-	// define by given TPI.
-	bool move_sync_tpi(uint32_t tpi);
-
-	// Step complete
+	// Step complete, should be called from the timer update IRQ
 	void step_completed();
 
-	// Step signal pulse complete
-	// Update state machine and load new delay into timer
-	void update();
+	void stop() {
+		_stepgen.stop();
+	}
+
+	bool move(uint32_t steps);
+
+	uint32_t offset() const {
+		return _offset;
+	}
 
 private:
 	// Hardware setup
 	void setup_port();
 	void setup_timer();
-	void start_stepgen();
 
 private:
 	hw const _hw; // Hardware configuration

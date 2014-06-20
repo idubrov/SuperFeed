@@ -1,5 +1,4 @@
 #include "stepgen.hpp"
-#include <iostream>
 
 using namespace ::stepgen;
 

@@ -68,6 +68,14 @@ void controller::initialize()
 {
 	setup_timer();
 	setup_port();
+}
+
+bool controller::move(uint32_t steps)
+{
+	// Timer is running already, we can't process moves
+	if (_hw._timer->CR1 & TIM_CR1_CEN) {
+		return false;
+	}
 
 	int thread = 8;
 	int microsteps = 1;
@@ -76,38 +84,41 @@ void controller::initialize()
 	int spr = 200 * microsteps; // steps per revolution
 	int K = leadscrew * spr / thread; // steps per revolution
 	int F = 1000000;
-	int a = 1000 * microsteps;
+	int a = 10000 * microsteps;
 	int v = K * rpm / 60; // steps per sec
 	uint32_t c0 = stepgen::stepgen::first(F, a);
 	uint32_t cs = stepgen::stepgen::slew(F, v);
 
-	_stepgen = stepgen::stepgen(10, c0, cs);
-	// First series of pulses
-	start_stepgen();
-}
+	_stepgen = stepgen::stepgen(steps, c0, cs);
 
-void controller::start_stepgen()
-{
+
 	// Load first delay into ARR/CC1
 	step_completed();
 	// Load ARR/CC1 from preload registers, load second delay into ARR & CC1.
 	TIM_GenerateEvent(_hw._timer, TIM_EventSource_Update);
 
+	// Wait till interrupt finishes
+	while (TIM_GetITStatus(_hw._timer, TIM_IT_Update));
+	_offset = 0;
+
 	// Start pulse generation
+	TIM_SelectOnePulseMode(_hw._timer, TIM_OPMode_Repetitive);
 	TIM_CtrlPWMOutputs(_hw._timer, ENABLE);
 	TIM_Cmd(_hw._timer, ENABLE);
+
+	return true;
 }
 
 void controller::step_completed()
 {
 	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
 	_offset++;
-	uint32_t step = _stepgen.next() / 10; // FIXME:
-	if (step != 0)
+	uint32_t delay = _stepgen.next(); // FIXME:
+	if (delay != 0)
 	{
 		// Load new step into ARR, start pulse at the end
-		_hw._timer->ARR = step;
-		_hw._timer->CCR1 = step - _delays._step_len;
+		_hw._timer->ARR = delay;
+		_hw._timer->CCR1 = delay - _delays._step_len;
 	}
 	else
 	{

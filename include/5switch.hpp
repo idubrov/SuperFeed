@@ -8,7 +8,7 @@ class switch5
 public:
 	enum Position
 	{
-		NONE = 0,	// invalid state
+		None = 0,	// invalid state
 		LL = 1,		// left-left
 		L = 2,		// left
 		M = 3,		// middle
@@ -18,7 +18,7 @@ public:
 
 public:
 	constexpr switch5(GPIO_TypeDef* port, uint8_t first_pin) :
-		_port(port), _first_pin(first_pin), _state(0), _position(NONE)
+		_port(port), _first_pin(first_pin), _state(0), _position(None)
 	{
 	}
 	switch5(switch5 const&) = delete;
