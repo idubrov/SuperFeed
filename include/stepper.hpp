@@ -66,7 +66,7 @@ public:
 	};
 public:
 	controller(hw&& hw, delays&& delays) :
-			_hw(hw), _delays(delays), _offset(0), _stepgen()
+			_hw(hw), _delays(delays), _offset(0), _stepgen(), _stop(false)
 	{
 	}
 
@@ -76,7 +76,7 @@ public:
 	void step_completed();
 
 	void stop() {
-		_stepgen.stop();
+		_stop = true;
 	}
 
 	bool move(uint32_t steps);
@@ -101,6 +101,9 @@ private:
 	// _dir ? (_base + _offset : _base - _offset)
 	volatile uint32_t _offset;
 	stepgen::stepgen _stepgen;
+
+	// Stop signal
+	volatile bool _stop;
 };
 }
 

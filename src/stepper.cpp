@@ -112,6 +112,10 @@ bool controller::move(uint32_t steps)
 void controller::step_completed()
 {
 	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
+
+	if (_stop) {
+		_stepgen.stop();
+	}
 	_offset++;
 	uint32_t delay = _stepgen.next(); // FIXME:
 	if (delay != 0)

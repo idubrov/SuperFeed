@@ -1,97 +1,60 @@
 #include "stepgen.hpp"
 
-void stepgen::stepgen::do_stop()
-{
-	switch (_state)
-	{
-	case Starting:
-		_state = Stopped;
-		_delay = 0;
-		break;
-	case MidStep:
-	case Running:
-		_state = Decelerating;
-		break;
-	case Decelerating:
-	case Stopped:
-		// Nothing
-		break;
-	}
-}
-
 uint32_t stepgen::stepgen::next()
 {
-	if (_stop)
+	if (stopped())
 	{
-		do_stop();
-		_stop = false;
-	}
-	_step++;
-
-	switch (_state)
-	{
-	case Stopped:
-		// Nothing to do!
 		return 0;
-	case MidStep:
-		// Even move, return same delay as on previous step
-		_state = Decelerating;
-		break;
-	case Starting:
-		_delay = _start_delay;
-		_denom = 1;
-		_state = _steps == 1 ? Decelerating : Running;
-		if (_steps == 2)
-		{
-			// We are only starting, return the same step
-			_state = MidStep;
-		}
-		break;
-	case Running:
+	}
+
+	// Steps made so far
+	_step++;
+	if (_speed == 0)
 	{
-		// Amount of steps we need to stop from the current speed
-		uint32_t to_stop = ((_denom - 1) / 4);
-		uint32_t midstep = _steps - to_stop;
-
-		if (_step >= midstep)
-		{
-			_state = Decelerating;
-			if (_step != midstep)
-			{
-				// Well, we have one step less to stop (uneven amount of steps).
-				// Let's decelerate right now.
-				_denom -= 4;
-				uint32_t decel_denom = _denom + 2; // 4n - 1 for acceleration, 4n + 1 for deceleration
-				_delay += ((2 * _delay + decel_denom / 2) / decel_denom);
-			}
-		}
-		else if (_delay > _slew_delay)
-		{
-			// Accelerate
-			_denom += 4;
-			_delay -= ((2 * _delay + _denom / 2) / _denom);
-		}
-		break;
-	}
-	case Decelerating:
-		// Last step indicator: decelerating and denominator is <= 3 (actually, it should be == 3)
-		if (_denom <= 3)
-		{
-			_state = Stopped;
-			return 0;
-		}
-		// Update speed
-		_denom -= 4;
-		uint32_t decel_denom = _denom + 2; // 4n - 1 for acceleration, 4n + 1 for deceleration
-		_delay += ((2 * _delay + decel_denom / 2) / decel_denom);
-		break;
+		// First step: load first delay
+		_delay = _start_delay;
+		_speed = 1;
+		return (_delay + 128) >> 8;
 	}
 
-	// FIXME-isd: allow deceleration to target speed....
-	// If running too fast, return slew_delay
-	uint32_t delay = (_delay < _slew_delay) ? _slew_delay : _delay;
-	// Round calculated delay
+	// Calculate the projected step we would stop at if we start decelerating right now
+	uint32_t est_stop = _step + _speed - 1;
+	if (est_stop == _target_step)
+	{
+		// We would stop one step earlier than we want, so let's just
+		// return the same delay as the current one and start deceleration
+		// on the next step.
+	}
+	else if (est_stop > _target_step)
+	{
+		// We need to stop at target step, slow down
+		slowdown();
+
+		// We are not slewing even though we could have slowed down below the slewing speed
+		_slewing = false;
+	}
+	else if (!_slewing && _delay < _slew_delay)
+	{
+		// Not slewing and running too fast, slow down
+		slowdown();
+
+		// Switch to slewing if we slowed down enough
+		_slewing = _delay >= _slew_delay;
+	}
+	else if (!_slewing && _delay > _slew_delay)
+	{
+		// Not slewing and running too slow, speed up
+		speedup();
+
+		// Switch to slewing if we accelerated enough
+		_slewing = _delay <= _slew_delay;
+	}
+
+	// If slewing, return slew delay. _delay should be close enough, but could
+	// be different due to the accumulated rounding errors
+	uint32_t delay = _slewing ? _slew_delay : _delay;
 	return (delay + 128) >> 8;
+
 }
 
 uint32_t stepgen::stepgen::slew(uint32_t frequency, uint32_t slew_speed)
