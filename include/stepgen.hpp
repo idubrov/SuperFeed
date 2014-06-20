@@ -62,10 +62,10 @@ private:
 	uint32_t _slew_delay;
 	State _state;
 
-	// Note that since state machine could be updated from different threads,
-	// it is necessary to update and read command atomically.
-	// highest 8 bit is for the command, data is in 16.8 format
-	volatile uint32_t _command;
+//	// Note that since state machine could be updated from different threads,
+//	// it is necessary to update and read command atomically.
+//	// highest 8 bit is for the command, data is in 16.8 format
+//	volatile uint32_t _command;
 
 	volatile bool _stop;
 };

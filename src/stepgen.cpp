@@ -1,6 +1,5 @@
 #include "stepgen.hpp"
-
-using namespace ::stepgen;
+#include <iostream>
 
 void stepgen::stepgen::do_stop()
 {
@@ -13,12 +12,14 @@ void stepgen::stepgen::do_stop()
 	case MidStep:
 	case Accelerating:
 		_state = Decelerating;
-		_denom = 4 * _step - 1;
+		// Switching from acceleration to deceleration
+		_denom = _denom + 2;
 		_steps = _step * 2 - 1; // We need one step less to stop
 		break;
 	case Slewing:
 		_state = Decelerating;
-		_denom = 4 * _to_stop + 3; // 4 * (_to_stop + 1) - 1
+		// Switching from acceleration to deceleration
+		_denom = _denom + 2;
 		_steps = _step + _to_stop;
 		break;
 	case Decelerating:
@@ -70,7 +71,8 @@ uint32_t stepgen::stepgen::next()
 		}
 		else if (_step == _midstep)
 		{
-			_denom = 4 * _step - 1;
+			// Switching from acceleration to deceleration
+			_denom = _denom + 2;
 			// If we have even amount of steps, return same delay twice
 			_state = _steps % 2 == 0 ? MidStep : Decelerating;
 		}
@@ -80,7 +82,8 @@ uint32_t stepgen::stepgen::next()
 		if (_step >= _steps - _to_stop)
 		{
 			_state = Decelerating;
-			_denom = 4 * _to_stop + 3; // 4 * (_to_stop + 1) - 1
+			// Switching from acceleration to deceleration
+			_denom = _denom + 2;
 		}
 		break;
 	case Decelerating:
