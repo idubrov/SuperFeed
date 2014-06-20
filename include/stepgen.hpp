@@ -8,13 +8,13 @@ namespace stepgen
 
 enum State
 {
-	Starting, Accelerating, Decelerating, Slewing, Stopped, MidStep
+	Starting, Running, Decelerating, Stopped, MidStep
 };
 class stepgen
 {
 public:
 	constexpr stepgen() :
-			_step(0), _to_stop(0), _midstep(0), _steps(0), _denom(0), _delay(0), _start_delay(
+			_step(0), _midstep(0), _steps(0), _denom(0), _delay(0), _start_delay(
 					0), _slew_delay(0), _state(Stopped), _stop(false)
 	{
 	}
@@ -22,7 +22,7 @@ public:
 	/// \param steps amount of steps to make. If steps is 0, stepgen would reach
 	///	slew speed and run infinitely (until explicit stop is called)
 	constexpr stepgen(uint32_t steps, uint32_t start_delay, uint32_t slew_delay) :
-			_step(0), _to_stop(0), _midstep((steps + 1) / 2), _steps(steps), _denom(
+			_step(0), _midstep((steps + 1) / 2), _steps(steps), _denom(
 					0), _delay(0), _start_delay(start_delay), _slew_delay(
 					slew_delay), _state(Starting), _stop(false)
 	{
@@ -53,7 +53,6 @@ private:
 
 private:
 	uint32_t _step;
-	uint32_t _to_stop;
 	uint32_t _midstep;
 	uint32_t _steps;
 	uint32_t _denom;
