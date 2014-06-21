@@ -2,8 +2,12 @@
 
 uint32_t stepgen::stepgen::next()
 {
+	// Read latest values once
+	uint32_t target_step = _target_step;
+	uint32_t target_delay = _target_delay;
 	if (stopped())
 	{
+		_speed = 0;
 		return 0;
 	}
 
@@ -19,13 +23,13 @@ uint32_t stepgen::stepgen::next()
 
 	// Calculate the projected step we would stop at if we start decelerating right now
 	uint32_t est_stop = _step + _speed - 1;
-	if (est_stop == _target_step)
+	if (est_stop == target_step)
 	{
 		// We would stop one step earlier than we want, so let's just
 		// return the same delay as the current one and start deceleration
 		// on the next step.
 	}
-	else if (est_stop > _target_step)
+	else if (est_stop > target_step)
 	{
 		// We need to stop at target step, slow down
 		slowdown();
@@ -33,26 +37,26 @@ uint32_t stepgen::stepgen::next()
 		// We are not slewing even though we could have slowed down below the slewing speed
 		_slewing = false;
 	}
-	else if (!_slewing && _delay < _target_delay)
+	else if (!_slewing && _delay < target_delay)
 	{
 		// Not slewing and running too fast, slow down
 		slowdown();
 
 		// Switch to slewing if we slowed down enough
-		_slewing = _delay >= _target_delay;
+		_slewing = _delay >= target_delay;
 	}
-	else if (!_slewing && _delay > _target_delay)
+	else if (!_slewing && _delay > target_delay)
 	{
 		// Not slewing and running too slow, speed up
 		speedup();
 
 		// Switch to slewing if we accelerated enough
-		_slewing = _delay <= _target_delay;
+		_slewing = _delay <= target_delay;
 	}
 
 	// If slewing, return slew delay. _delay should be close enough, but could
 	// be different due to the accumulated rounding errors
-	return _slewing ? _target_delay : _delay;
+	return _slewing ? target_delay : _delay;
 
 }
 

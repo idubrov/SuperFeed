@@ -7,9 +7,6 @@
 
 namespace stepper
 {
-
-extern "C" void TIM4_IRQHandler();
-
 // Stepper hardware configuration (pins and their timers)
 class hw
 {
@@ -58,7 +55,6 @@ public:
 // Stepper motor controller
 class controller
 {
-	friend void TIM4_IRQHandler();
 public:
 	enum State
 	{
@@ -66,8 +62,8 @@ public:
 	};
 public:
 	controller(hw&& hw, delays&& delays) :
-			_hw(hw), _delays(delays), _offset(0), _stepgen(
-					::cfg::stepper::TicksPerSec), _stop(false)
+			_hw(hw), _delays(delays), _stepgen(::cfg::stepper::TicksPerSec), _stop(
+					false)
 	{
 	}
 
@@ -83,31 +79,38 @@ public:
 
 	bool move(uint32_t steps);
 
-	uint32_t offset() const
+	template<typename S>
+	S const& dump(S const& sink) const
 	{
-		return _offset;
+		sink << "S:" << _stepgen.step();
+		sink << " T:" << _stepgen.target_step();
+		sink << " Sp:" << _stepgen.speed() << "   ";
+		return sink;
 	}
-
 private:
 	// Hardware setup
 	void setup_port();
 	void setup_timer();
+
+	uint32_t load_delay();
 
 private:
 	hw const _hw; // Hardware configuration
 	delays const _delays; // Delays required by the stepper driver
 
 	// Current state
-
-	// Offset against base position current move started on
-	// Note that it is always positive. The current position is
-	// _dir ? (_base + _offset : _base - _offset)
-	volatile uint32_t _offset;
 	stepgen::stepgen _stepgen;
 
 	// Stop signal
 	volatile bool _stop;
 };
+}
+
+template<typename S>
+inline S const& operator<<(S const& l, stepper::controller const& ctrl)
+{
+	ctrl.dump(l);
+	return l;
 }
 
 #endif /* __STEPPER_HPP */

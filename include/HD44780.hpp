@@ -182,12 +182,6 @@ private:
 
 // Stream API for LCDscreen
 
-inline HD44780 const& operator<<(HD44780 const& l, char c)
-{
-	l.write(c);
-	return l;
-}
-
 struct __clear
 {
 };

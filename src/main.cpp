@@ -5,8 +5,9 @@
 #include "systick.hpp"
 #include "util.hpp"
 #include "HD44780.hpp"
-#include "stepper.hpp"
 #include "simstream.hpp"
+#include "stepper.hpp"
+
 #include "stm32f10x_gpio.h"
 
 extern "C"
@@ -98,21 +99,21 @@ public:
 
 		while(1)
 		{
-			_lcd << lcd::position(0, 0) << "Offset: " << _stepper.offset() << "    ";
+			_lcd << lcd::position(0, 0) << _stepper;
 
 			switch5::Position pos = _switch5.position();
 			if (pos != last) {
 				if (pos == switch5::M) {
 					_stepper.stop();
 				} else if (pos == switch5::L) {
-					_stepper.move(0); // Infinite move
+					_stepper.move(0xffffffff); // Infinite move
 				}
 			}
 			last = pos;
 
 			if (_encoder.pressed()) {
 				if (!pressed) {
-					_stepper.move(100);
+					_stepper.move(20);
 				}
 				pressed = true;
 			} else {

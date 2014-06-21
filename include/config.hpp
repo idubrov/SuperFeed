@@ -1,5 +1,5 @@
-#ifndef __RESOURCES_HPP
-#define __RESOURCES_HPP
+#ifndef __CONFIG_HPP
+#define __CONFIG_HPP
 
 #include "stm32f10x.h"
 
@@ -69,7 +69,7 @@ constexpr uint32_t LeadscrewTPI = 16;
 constexpr uint32_t GearingNom = 1; // Gearing nominator
 constexpr uint32_t GearingDenom = 1; // Gearing denominator
 constexpr uint32_t FullSteps = 200; // Steps per revolution
-constexpr uint32_t Acceleration = 1000; // Steps per second per second
+constexpr uint32_t Acceleration = 10000; // Steps per second per second
 
 // All delays are in nanoseconds
 // IM483
@@ -110,4 +110,4 @@ constexpr uint32_t MinFullPulsePS = (MinPulsePS + Microsteps - 1) / Microsteps; 
 }
 }
 
-#endif /* __UTIL_HPP */
+#endif /* __CONFIG_HPP */

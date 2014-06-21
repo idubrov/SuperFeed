@@ -70,44 +70,49 @@ void controller::initialize()
 
 bool controller::move(uint32_t steps)
 {
-	// Timer is running already, we can't process moves
-	if (_hw._timer->CR1 & TIM_CR1_CEN) {
+	// Timer is running already, we can't start new moves!
+	if (_hw._timer->CR1 & TIM_CR1_CEN)
+	{
 		return false;
 	}
 
 	uint32_t thread = 8; // TPI of the thread we are cutting
 	uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
 	uint32_t v = StepsPerInch * RPM / (60 * thread); // steps per sec
-	if (!_stepgen.set_target_speed(v)) {
+	if (!_stepgen.set_target_speed(v))
+	{
 		return false;
 	}
 	_stepgen.set_target_step(steps);
+	_stop = false;
 
-	// Load first delay into ARR/CC1
-	step_completed();
-	// Load ARR/CC1 from preload registers, load second delay into ARR & CC1.
+	// Load first delay into ARR/CC1, if not stopped
+	if (load_delay() == 0)
+	{
+		// Not making even a single step
+		return false;
+	}
+
+	// Load ARR/CC1 from preload registers
 	TIM_GenerateEvent(_hw._timer, TIM_EventSource_Update);
 
 	// Wait till interrupt finishes
-	while (TIM_GetITStatus(_hw._timer, TIM_IT_Update));
-	_offset = 0;
+	while (TIM_GetITStatus(_hw._timer, TIM_IT_Update))
+		;
+
+	// Load second delay into ARR & CC1.
+	bool single = load_delay() == 0;
 
 	// Start pulse generation
-	TIM_SelectOnePulseMode(_hw._timer, TIM_OPMode_Repetitive);
+	TIM_SelectOnePulseMode(_hw._timer, single ? TIM_OPMode_Single : TIM_OPMode_Repetitive);
 	TIM_CtrlPWMOutputs(_hw._timer, ENABLE);
 	TIM_Cmd(_hw._timer, ENABLE);
 
 	return true;
 }
 
-void controller::step_completed()
+uint32_t controller::load_delay()
 {
-	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
-
-	if (_stop) {
-		_stepgen.stop();
-	}
-	_offset++;
 	uint32_t delay = _stepgen.next();
 	if (delay != 0)
 	{
@@ -116,7 +121,26 @@ void controller::step_completed()
 		_hw._timer->ARR = d;
 		_hw._timer->CCR1 = d - _delays._step_len;
 	}
-	else
+	return delay;
+}
+
+void controller::step_completed()
+{
+	TIM_ClearITPendingBit(_hw._timer, TIM_IT_Update);
+
+	if (!(_hw._timer->CR1 & TIM_CR1_CEN))
+	{
+		// If timer is stopped, do nothing!
+		return;
+	}
+
+	if (_stop)
+	{
+		_stepgen.stop();
+		_stop = false;
+	}
+
+	if (load_delay() == 0)
 	{
 		// Stop on the next update, one pulse mode
 		_hw._timer->CR1 |= TIM_CR1_OPM;

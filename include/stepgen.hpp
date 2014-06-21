@@ -5,13 +5,12 @@
 
 namespace stepgen
 {
-
 class stepgen
 {
 public:
 	stepgen(uint32_t frequency) :
 			_step(0), _speed(0), _delay(0), _slewing(false), _frequency(
-					frequency), _target_step(0), _target_delay(0), _first_delay(
+					frequency), _first_delay(0), _target_step(0), _target_delay(
 					0)
 	{
 	}
@@ -46,10 +45,12 @@ public:
 	inline bool set_target_speed(uint32_t speed)
 	{
 		uint64_t delay = (static_cast<uint64_t>(_frequency) << 16) / speed;
-		if (delay >> 24) {
+		if (delay >> 24)
+		{
 			return false; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
 		}
-		if (delay <= 10 * (1<<8)) {
+		if (delay <= 10 * (1 << 8))
+		{
 			// Too slow, less than 10 ticks of a timer. 10 is an arbitrary number,
 			// just to make sure we have enough time to calculate next delay.
 			return false;
@@ -80,7 +81,6 @@ public:
 		return true;
 	}
 
-
 	inline bool stopped() const
 	{
 		return _step >= _target_step && _speed <= 1;
@@ -95,6 +95,24 @@ public:
 	/// \param acceleration acceleration, in steps per second per second
 	/// \return first step delay (delay between the first and the second steps), in 24.8 format
 	static uint32_t first(uint32_t frequency, uint32_t acceleration);
+
+	// State commands
+
+	inline uint32_t step() const
+	{
+		return _step;
+	}
+
+	inline uint32_t target_step() const
+	{
+		return _target_step;
+	}
+
+	inline uint32_t speed() const
+	{
+		return _speed;
+	}
+
 private:
 	static uint64_t sqrt(uint64_t x);
 
@@ -124,10 +142,11 @@ private:
 
 	// Parameters
 	uint32_t _frequency; // Timer frequency
-	uint32_t _target_step; // Target step
-	uint32_t _target_delay; // Target speed delay
 	uint32_t _first_delay; // First step delay
 
+	// These two could be changed from outside
+	volatile uint32_t _target_step; // Target step
+	volatile uint32_t _target_delay; // Target speed delay
 };
 }
 

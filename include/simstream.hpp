@@ -4,6 +4,13 @@
 #include <limits>
 
 template<typename S>
+S const& operator<<(S const& sink, char c)
+{
+	sink.write(c);
+	return sink;
+}
+
+template<typename S>
 S const& operator<<(S const& sink, char const* str)
 {
 	while (*str)
