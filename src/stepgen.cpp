@@ -11,6 +11,12 @@ uint32_t stepgen::stepgen::next()
 		return 0;
 	}
 
+	// Stop slewing if target delay was changed
+	if (_slewing_delay && _slewing_delay != target_delay)
+	{
+		_slewing_delay = 0;
+	}
+
 	// Steps made so far
 	_step++;
 	if (_speed == 0)
@@ -35,28 +41,35 @@ uint32_t stepgen::stepgen::next()
 		slowdown();
 
 		// We are not slewing even though we could have slowed down below the slewing speed
-		_slewing = false;
+		_slewing_delay = 0;
 	}
-	else if (!_slewing && _delay < target_delay)
+	else if (!_slewing_delay && _delay < target_delay)
 	{
 		// Not slewing and running too fast, slow down
 		slowdown();
 
 		// Switch to slewing if we slowed down enough
-		_slewing = _delay >= target_delay;
+		if (_delay >= target_delay)
+		{
+			_slewing_delay = target_delay;
+		}
+
 	}
-	else if (!_slewing && _delay > target_delay)
+	else if (!_slewing_delay && _delay > target_delay)
 	{
 		// Not slewing and running too slow, speed up
 		speedup();
 
 		// Switch to slewing if we accelerated enough
-		_slewing = _delay <= target_delay;
+		if (_delay <= target_delay)
+		{
+			_slewing_delay = target_delay;
+		}
 	}
 
 	// If slewing, return slew delay. _delay should be close enough, but could
 	// be different due to the accumulated rounding errors
-	return _slewing ? target_delay : _delay;
+	return _slewing_delay ? _slewing_delay : _delay;
 
 }
 

@@ -9,7 +9,7 @@ class stepgen
 {
 public:
 	stepgen(uint32_t frequency) :
-			_step(0), _speed(0), _delay(0), _slewing(false), _frequency(
+			_step(0), _speed(0), _delay(0), _slewing_delay(0), _frequency(
 					frequency), _first_delay(0), _target_step(0), _target_delay(
 					0)
 	{
@@ -113,6 +113,11 @@ public:
 		return _speed;
 	}
 
+	inline uint32_t target_delay() const
+	{
+		return _target_delay;
+	}
+
 private:
 	static uint64_t sqrt(uint64_t x);
 
@@ -136,9 +141,9 @@ private:
 	uint32_t _speed; // Amount of acceleration steps we've taken so far
 	uint32_t _delay; // Previously calculated delay
 
-	// Slewing, do not accelerate or decelerate even if delay != slew_delay.
-	// Switched to this mode once we overshoot target speed.
-	bool _slewing;
+	// If slewing, this will be the slewing delay. Switched to this mode once
+	// we overshoot target speed.
+	uint32_t _slewing_delay;
 
 	// Parameters
 	uint32_t _frequency; // Timer frequency

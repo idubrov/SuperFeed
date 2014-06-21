@@ -76,13 +76,6 @@ bool controller::move(uint32_t steps)
 		return false;
 	}
 
-	uint32_t thread = 8; // TPI of the thread we are cutting
-	uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
-	uint32_t v = StepsPerInch * RPM / (60 * thread); // steps per sec
-	if (!_stepgen.set_target_speed(v))
-	{
-		return false;
-	}
 	_stepgen.set_target_step(steps);
 	_stop = false;
 

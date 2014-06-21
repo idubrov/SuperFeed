@@ -38,7 +38,9 @@ public:
 			// Stepper driver, PA8 should be connected to STEP, PA10 to DIR,
 			// PA11 to ENABLE and PA12 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			_stepper(stepper::hw(GPIOA, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_11, GPIO_Pin_12, TIM1),
+			_stepper(
+					stepper::hw(GPIOA, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_11,
+							GPIO_Pin_12, TIM1),
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
@@ -97,26 +99,32 @@ public:
 		bool pressed = false;
 		switch5::Position last = switch5::None;
 
-		while(1)
+		uint32_t thread = 8; // TPI of the thread we are cutting
+		uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
+		uint32_t fast = ::cfg::stepper::StepsPerInch * RPM / (60 * thread); // steps per sec
+		uint32_t slow = fast / 3;
+
+		while (1)
 		{
 			_lcd << lcd::position(0, 0) << _stepper;
 
 			switch5::Position pos = _switch5.position();
-			if (pos != last) {
-				if (pos == switch5::M) {
-					_stepper.stop();
-				} else if (pos == switch5::L) {
-					_stepper.move(0xffffffff); // Infinite move
-				}
+			if (pos != last)
+			{
+				_stepper.set_speed(pos == switch5::LL ? fast : slow);
 			}
 			last = pos;
 
-			if (_encoder.pressed()) {
-				if (!pressed) {
-					_stepper.move(20);
+			if (_encoder.pressed())
+			{
+				if (!pressed)
+				{
+					_stepper.move(1000);
 				}
 				pressed = true;
-			} else {
+			}
+			else
+			{
 				pressed = false;
 			}
 		}

@@ -77,14 +77,22 @@ public:
 		_stop = true;
 	}
 
+	/// Move to given position. Note that no new move commands will be accepted
+	/// while stepper is running. However, other target parameter, target speed,
+	/// could be changed any time.
 	bool move(uint32_t steps);
+
+	inline void set_speed(uint32_t speed)
+	{
+		_stepgen.set_target_speed(speed);
+	}
 
 	template<typename S>
 	S const& dump(S const& sink) const
 	{
 		sink << "S:" << _stepgen.step();
 		sink << " T:" << _stepgen.target_step();
-		sink << " Sp:" << _stepgen.speed() << "   ";
+		sink << " Sp:" << _stepgen.speed() << "TSp: " << _stepgen.target_delay();
 		return sink;
 	}
 private:
