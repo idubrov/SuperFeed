@@ -101,7 +101,8 @@ bool controller::move(uint32_t steps)
 	bool single = load_delay() == 0;
 
 	// Start pulse generation
-	TIM_SelectOnePulseMode(_hw._timer, single ? TIM_OPMode_Single : TIM_OPMode_Repetitive);
+	TIM_SelectOnePulseMode(_hw._timer,
+			single ? TIM_OPMode_Single : TIM_OPMode_Repetitive);
 	TIM_CtrlPWMOutputs(_hw._timer, ENABLE);
 	TIM_Cmd(_hw._timer, ENABLE);
 
@@ -117,6 +118,13 @@ uint32_t controller::load_delay()
 		uint32_t d = (delay + 128) >> 8; // Delay is in 16.8 format
 		_hw._timer->ARR = d;
 		_hw._timer->CCR1 = d - _delays._step_len;
+	}
+	else
+	{
+		// Load idle values. This is important to do on the last update
+		// when timer is switched into one-pulse mode.
+		_hw._timer->ARR = 0;
+		_hw._timer->CCR1 = 0;
 	}
 	return delay;
 }
@@ -140,6 +148,8 @@ void controller::step_completed()
 	if (load_delay() == 0)
 	{
 		// Stop on the next update, one pulse mode
+		// Note that load_delay() should have already loaded ARR and
+		// CCR1 with idle values.
 		_hw._timer->CR1 |= TIM_CR1_OPM;
 	}
 }
