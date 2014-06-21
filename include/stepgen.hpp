@@ -21,15 +21,11 @@ public:
 	// Otherwise, returns timer delay in 24.8 format
 	uint32_t next();
 
-	inline void stop()
-	{
-		_target_step = 0;
-	}
-
 	/// Set destination step for the stepper motor pulse generator. This is
 	/// the primary constraint used to determine necessary action to take.
 	/// If current step > target step, stepper motor would slow down until stop
 	/// if running or stay stopped if not running.
+	/// Setting target step to 0 will always force stepper to decelerate and stop.
 	/// \param step step to stop at
 	inline void set_target_step(uint32_t step)
 	{

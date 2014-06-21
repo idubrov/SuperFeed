@@ -70,7 +70,6 @@ uint32_t stepgen::stepgen::next()
 	// If slewing, return slew delay. _delay should be close enough, but could
 	// be different due to the accumulated rounding errors
 	return _slewing_delay ? _slewing_delay : _delay;
-
 }
 
 uint64_t stepgen::stepgen::sqrt(uint64_t x)

@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 		if (i == stopat)
 		{
 			cout << "Stopping" << endl;
-			gen.stop();
+			gen.set_target_step(0);
 		}
 		delay = (gen.next() + 128) >> 8;
 		if (delay == 0)

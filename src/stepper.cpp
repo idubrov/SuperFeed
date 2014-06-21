@@ -72,9 +72,13 @@ bool controller::move(uint32_t steps)
 {
 	// Timer is running already, we can't start new moves!
 	if (_hw._timer->CR1 & TIM_CR1_CEN)
-	{
 		return false;
-	}
+
+	// If interrupt is pending, wait until it is cleared.
+	// (for instance, we got move command just after last timer overflow
+	// and it wasn't processed yet.
+	while (TIM_GetITStatus(_hw._timer, TIM_IT_Update))
+		;
 
 	_stepgen.set_target_step(steps);
 	_stop = false;
@@ -129,7 +133,7 @@ void controller::step_completed()
 
 	if (_stop)
 	{
-		_stepgen.stop();
+		_stepgen.set_target_step(0);
 		_stop = false;
 	}
 
