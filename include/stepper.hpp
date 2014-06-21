@@ -66,7 +66,8 @@ public:
 	};
 public:
 	controller(hw&& hw, delays&& delays) :
-			_hw(hw), _delays(delays), _offset(0), _stepgen(), _stop(false)
+			_hw(hw), _delays(delays), _offset(0), _stepgen(
+					::cfg::stepper::TicksPerSec), _stop(false)
 	{
 	}
 
@@ -75,13 +76,15 @@ public:
 	// Step complete, should be called from the timer update IRQ
 	void step_completed();
 
-	void stop() {
+	void stop()
+	{
 		_stop = true;
 	}
 
 	bool move(uint32_t steps);
 
-	uint32_t offset() const {
+	uint32_t offset() const
+	{
 		return _offset;
 	}
 

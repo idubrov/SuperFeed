@@ -104,6 +104,7 @@ test: build/stepgen
 	while read CMD; do \
 		build/stepgen $$CMD > "build/testresult/$${CMD// /_}" ; \
 	done
+	diff -u test/expected build/testresult/
 	
 all: build/$(PROJ_NAME).elf build/$(PROJ_NAME).hex build/$(PROJ_NAME).bin build/$(PROJ_NAME).lst
 

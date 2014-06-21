@@ -1,13 +1,8 @@
 #include "stepper.hpp"
-#include "HD44780.hpp"
+#include "config.hpp"
 
 using namespace ::stepper;
-
-uint16_t Source[] =
-{ 20000, 2000, 20000 };
-constexpr int DataCount = sizeof(Source) / sizeof(Source[0]);
-
-extern lcd::HD44780* g_lcd;
+using namespace ::cfg::stepper;
 
 void controller::setup_port()
 {
@@ -23,9 +18,9 @@ void controller::setup_port()
 	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
-//
-//	// Start in reset mode
-	_hw._port->BSRR = _hw._dir_pin | _hw._enable_pin | _hw._reset_pin;
+
+	// Start in reset mode
+	_hw._port->BSRR = _hw._reset_pin;
 }
 
 void controller::setup_timer()
@@ -68,6 +63,9 @@ void controller::initialize()
 {
 	setup_timer();
 	setup_port();
+
+	// FIXME: check return value
+	_stepgen.set_acceleration((Acceleration * Microsteps) << 8);
 }
 
 bool controller::move(uint32_t steps)
@@ -77,20 +75,13 @@ bool controller::move(uint32_t steps)
 		return false;
 	}
 
-	int thread = 8;
-	int microsteps = 1;
-	int rpm = 120;
-	int leadscrew = 16; // 16 TPI
-	int spr = 200 * microsteps; // steps per revolution
-	int K = leadscrew * spr / thread; // steps per revolution
-	int F = 1000000;
-	int a = 10000 * microsteps;
-	int v = K * rpm / 60; // steps per sec
-	uint32_t c0 = stepgen::stepgen::first(F, a);
-	uint32_t cs = stepgen::stepgen::slew(F, v);
-
-	_stepgen = stepgen::stepgen(steps, c0, cs);
-
+	uint32_t thread = 8; // TPI of the thread we are cutting
+	uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
+	uint32_t v = StepsPerInch * RPM / (60 * thread); // steps per sec
+	if (!_stepgen.set_target_speed(v)) {
+		return false;
+	}
+	_stepgen.set_target_step(steps);
 
 	// Load first delay into ARR/CC1
 	step_completed();
@@ -117,12 +108,13 @@ void controller::step_completed()
 		_stepgen.stop();
 	}
 	_offset++;
-	uint32_t delay = _stepgen.next(); // FIXME:
+	uint32_t delay = _stepgen.next();
 	if (delay != 0)
 	{
 		// Load new step into ARR, start pulse at the end
-		_hw._timer->ARR = delay;
-		_hw._timer->CCR1 = delay - _delays._step_len;
+		uint32_t d = (delay + 128) >> 8; // Delay is in 16.8 format
+		_hw._timer->ARR = d;
+		_hw._timer->CCR1 = d - _delays._step_len;
 	}
 	else
 	{

@@ -12,9 +12,9 @@ uint32_t stepgen::stepgen::next()
 	if (_speed == 0)
 	{
 		// First step: load first delay
-		_delay = _start_delay;
+		_delay = _first_delay;
 		_speed = 1;
-		return (_delay + 128) >> 8;
+		return _delay;
 	}
 
 	// Calculate the projected step we would stop at if we start decelerating right now
@@ -33,47 +33,27 @@ uint32_t stepgen::stepgen::next()
 		// We are not slewing even though we could have slowed down below the slewing speed
 		_slewing = false;
 	}
-	else if (!_slewing && _delay < _slew_delay)
+	else if (!_slewing && _delay < _target_delay)
 	{
 		// Not slewing and running too fast, slow down
 		slowdown();
 
 		// Switch to slewing if we slowed down enough
-		_slewing = _delay >= _slew_delay;
+		_slewing = _delay >= _target_delay;
 	}
-	else if (!_slewing && _delay > _slew_delay)
+	else if (!_slewing && _delay > _target_delay)
 	{
 		// Not slewing and running too slow, speed up
 		speedup();
 
 		// Switch to slewing if we accelerated enough
-		_slewing = _delay <= _slew_delay;
+		_slewing = _delay <= _target_delay;
 	}
 
 	// If slewing, return slew delay. _delay should be close enough, but could
 	// be different due to the accumulated rounding errors
-	uint32_t delay = _slewing ? _slew_delay : _delay;
-	return (delay + 128) >> 8;
+	return _slewing ? _target_delay : _delay;
 
-}
-
-uint32_t stepgen::stepgen::slew(uint32_t frequency, uint32_t slew_speed)
-{
-	return (frequency << 8) / slew_speed;
-}
-
-uint32_t stepgen::stepgen::first(uint32_t frequency, uint32_t acceleration)
-{
-	// c0 = F * sqrt(2/a) * 0.676
-	// We bring as much as we can under square root, to increase accuracy of division
-	// sqrt(1 << 16) is (1 << 8), which is to convert to 24.8
-	uint64_t c0long = 2000000LL * 676 * 676 * (1 << 16) / acceleration;
-	uint64_t c0 = frequency * sqrt(c0long) / 1000000;
-	if (c0 >> 24)
-	{
-		return 0; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
-	}
-	return static_cast<uint32_t>(c0); // Cast to uint32_t
 }
 
 uint64_t stepgen::stepgen::sqrt(uint64_t x)

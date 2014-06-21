@@ -35,14 +35,13 @@ int main(int argc, char** argv)
 	int a = 1000 * microsteps;
 	int v = K * rpm / 60; // steps per sec
 
-	uint32_t c0 = stepgen::stepgen::first(F, a);
-	if (c0 == 0)
+	stepgen::stepgen gen(F);
+	if (!gen.set_acceleration(a << 8))
 	{
 		cout << "First step is too long!" << endl;
 	}
-	uint32_t cs = stepgen::stepgen::slew(F, v);
-
-	stepgen::stepgen gen(steps, c0, cs);
+	gen.set_target_speed(v << 8); // convert speed to 24.8
+	gen.set_target_step(steps);
 	uint32_t delay;
 	int i = 0;
 
@@ -53,7 +52,7 @@ int main(int argc, char** argv)
 			cout << "Stopping" << endl;
 			gen.stop();
 		}
-		delay = gen.next();
+		delay = (gen.next() + 128) >> 8;
 		if (delay == 0)
 		{
 			break;
