@@ -34,11 +34,11 @@
 // PA2 -- TIM15, indexing for spindle
 
 // Alternate resources:
-// LCD: DATA PA8-PA11, R/S PC8, E PC9
+// LCD: DATA PA8-PA11, R/S PC7, RW PC8, E PC9
 // Driver: STEP PB13 (N channel, TIM1, no remap), DIR PB12, ENABLE PB11, RESET PB10
 // Encoder: BUTTON PB5, ENC PB6-PB7, TIM4 (no remap)
-// Keypad: PC0-PC3, PA0-PA3
-// Spindle: PC6-PC7 (quad/index), TIM3 (full remap)
+// Keypad: PA0-PA7
+// Spindle: PC6 index, TIM3 (full remap)
 // Spindle: PB14-PB15 (quad/index), TIM15 (remap)
 // Switch: PC10-PC12
 

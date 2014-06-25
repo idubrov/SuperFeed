@@ -85,16 +85,16 @@ public:
 
 		_encoder.limit(20);
 		_lcd.clear();
-//		while (1)
-//		{
-//			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
-//					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
-//			_lcd << lcd::position(0, 1) << "Encoder: "
-//					<< (_encoder.pressed() ? 'P' : 'N') << ' '
-//					<< _encoder.position() << "  ";
-//			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
-//			util::delay_ms(100);
-//		}
+		while (1)
+		{
+			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
+					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
+			_lcd << lcd::position(0, 1) << "Encoder: "
+					<< (_encoder.pressed() ? 'P' : 'N') << ' '
+					<< _encoder.position() << "  ";
+			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
+			util::delay_ms(100);
+		}
 
 		bool pressed = false;
 		switch5::Position last = switch5::None;
