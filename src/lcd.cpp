@@ -61,8 +61,8 @@ void lcd::HD44780::wait_busy_flag() const {
 	// First, set 8 data ports to input
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = 0xff << _data_shift;
-	// LCD will pull-up to 5v, but it driving capability is poor, so we set pull-up to 3v here
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	// LCD will pull-up to 5v
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(_data_port, &GPIO_InitStructure);
 
 	// Set R/W to '1', RS to '0'
