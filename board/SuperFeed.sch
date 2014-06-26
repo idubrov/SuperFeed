@@ -2041,9 +2041,9 @@ Cermet, abgedichtet nach IP67</description>
 <wire x1="-2.55" y1="-4.75" x2="2.15" y2="-4.75" width="0.254" layer="21"/>
 <wire x1="-0.75" y1="2.6" x2="-0.3" y2="3.3" width="0.1524" layer="21" curve="-311.390901"/>
 <wire x1="-0.75" y1="2.6" x2="-0.3" y2="3.3" width="0.1524" layer="51" curve="48.609099"/>
-<pad name="1" x="0" y="-2.54" drill="0.6096"/>
-<pad name="2" x="0" y="0" drill="0.6096"/>
-<pad name="3" x="0" y="2.54" drill="0.6096"/>
+<pad name="1" x="0" y="-2.54" drill="1.016"/>
+<pad name="2" x="0" y="0" drill="1.016"/>
+<pad name="3" x="0" y="2.54" drill="1.016"/>
 <text x="-3.04" y="-4.89" size="1.27" layer="25" rot="R90">&gt;NAME</text>
 <text x="4.01" y="-4.89" size="1.27" layer="27" rot="R90">&gt;VALUE</text>
 <rectangle x1="-1.45" y1="2.5" x2="-1.15" y2="4.4" layer="21"/>
