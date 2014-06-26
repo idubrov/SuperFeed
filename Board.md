@@ -15,8 +15,8 @@
 |Encoder        |PB6  |yes |TIM4_CH1 |
 |Encoder        |PB7  |yes |TIM4_CH2 |
 |LCD (RS)       |PB15 |yes |         |
-|LCD (R/W)      |PC8  |yes |         |
-|LCD (E)        |PC9  |yes |         |
+|LCD (R/W)      |PB8  |yes |         |
+|LCD (E)        |PB9  |yes |         |
 |LCD (DB4)      |PA8  |yes |         |
 |LCD (DB5)      |PA9  |yes |         |
 |LCD (DB6)      |PA10 |yes |         |
@@ -28,6 +28,10 @@
 |Spindle (quad) |PC6  |yes |TIM3_CH1 |
 |Spindle (quad) |PC7  |yes |TIM3_CH2 |
 |Spindle (index)|PB14 |yes |TIM15_CH1|
+|Button 1       |PC0  |no  |         |
+|Button 2       |PC1  |no  |         |
+|Button 3       |PC2  |no  |         |
+|Button 4       |PC3  |no  |         |
 
 
 Wires color coding
@@ -72,3 +76,14 @@ Encoder
 |White     |Button  |PB5 |
 |Brown     |QUAD    |PB6 |
 |Gray      |QUAD    |PB7 |
+
+Extra Buttons
+
+|Wire color|Function|Pin |
+|----------|--------|----|
+|Black     |GND     |    |
+|White     |Button 1|PC0 |
+|Green     |Button 2|PC1 |
+|Brown     |Button 3|PC2 |
+|Gray      |Button 4|PC3 |
+
