@@ -1014,12 +1014,12 @@
 <wire x1="-2.54" y1="6.35" x2="-2.54" y2="11.049" width="0.6604" layer="21"/>
 <wire x1="0" y1="6.35" x2="0" y2="11.049" width="0.6604" layer="21"/>
 <wire x1="2.54" y1="6.35" x2="2.54" y2="11.049" width="0.6604" layer="21"/>
-<pad name="6" x="2.54" y="1.27" drill="1.016" shape="octagon"/>
-<pad name="4" x="0" y="1.27" drill="1.016" shape="octagon"/>
-<pad name="2" x="-2.54" y="1.27" drill="1.016" shape="octagon"/>
-<pad name="1" x="-2.54" y="-1.27" drill="1.016" shape="octagon"/>
-<pad name="3" x="0" y="-1.27" drill="1.016" shape="octagon"/>
-<pad name="5" x="2.54" y="-1.27" drill="1.016" shape="octagon"/>
+<pad name="6" x="2.54" y="1.27" drill="1.016"/>
+<pad name="4" x="0" y="1.27" drill="1.016"/>
+<pad name="2" x="-2.54" y="1.27" drill="1.016"/>
+<pad name="1" x="-2.54" y="-1.27" drill="1.016"/>
+<pad name="3" x="0" y="-1.27" drill="1.016"/>
+<pad name="5" x="2.54" y="-1.27" drill="1.016"/>
 <text x="-2.54" y="-3.81" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 <text x="3.175" y="3.556" size="1.27" layer="21" ratio="10" rot="R90">6</text>
 <text x="0.635" y="3.556" size="1.27" layer="21" ratio="10" rot="R90">4</text>
