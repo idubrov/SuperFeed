@@ -15,6 +15,7 @@ SOURCES := $(wildcard src/*.c) \
 		   system/src/stm32f1-stdperiph/stm32f10x_gpio.c \
 		   system/src/stm32f1-stdperiph/stm32f10x_rcc.c \
 		   system/src/stm32f1-stdperiph/stm32f10x_tim.c \
+		   system/src/stm32f1-stdperiph/stm32f10x_flash.c \
 		   system/src/stm32f1-stdperiph/stm32f10x_dma.c
 
 # These are the dependency files, which make will clean up after it creates them

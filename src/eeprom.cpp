@@ -122,6 +122,8 @@ eeprom::Status eeprom::read(uint16_t tag, uint16_t& data)
 
 eeprom::Status eeprom::write(uint16_t tag, uint16_t data)
 {
+	FlashUnlock unlock;
+
 	int16_t current = find_current();
 	if (current < 0)
 		return NoPage;
