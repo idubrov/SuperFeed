@@ -66,7 +66,8 @@ FLASH_Status eeprom::rescue_if_full(int16_t page)
 		tgt_page -= _page_count;
 
 	// Destination address
-	uint32_t tgt_first = _base + tgt_page * PageSize + 4;
+	uint32_t tgt_base = _base + tgt_page * PageSize ;
+	uint32_t tgt_first = tgt_base + 4;
 	uint32_t tgt_addr = tgt_first;
 
 	// Start scanning source page from the end (to get the latest value)
@@ -88,7 +89,7 @@ FLASH_Status eeprom::rescue_if_full(int16_t page)
 	}
 
 	// Mark target page as current
-	if ((status = FLASH_ProgramHalfWord(src_base, CurrentPage))
+	if ((status = FLASH_ProgramHalfWord(tgt_base, CurrentPage))
 			!= FLASH_COMPLETE)
 		return status;
 

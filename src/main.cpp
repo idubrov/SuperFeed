@@ -111,11 +111,13 @@ public:
 			uint16_t saved = 0;
 			eeprom::Status st = _eeprom.read(0x123, saved);
 			if (st == eeprom::Ok) {
-				_lcd << lcd::position(0, 3) << "Saved position: " << saved;
+				_lcd << lcd::position(0, 3) << "Saved position: " << saved << "   ";
 			} else if (st == eeprom::NotFound) {
 				_lcd << lcd::position(0, 3) << "Saved position: NONE";
+			} else if (st == eeprom::NoPage) {
+				_lcd << lcd::position(0, 3) << "Saved position: PAGE";
 			} else {
-				_lcd << lcd::position(0, 3) << "Saved position: ERROR";
+				_lcd << lcd::position(0, 3) << "Saved position:  ERR";
 			}
 
 			util::delay_ms(100);
