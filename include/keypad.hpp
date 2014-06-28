@@ -37,7 +37,7 @@ public:
 
 	void initialize();
 
-	Key key() const {
+	char key() const {
 		return _pressed;
 	}
 private:

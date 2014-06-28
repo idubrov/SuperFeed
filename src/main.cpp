@@ -8,6 +8,8 @@
 #include "simstream.hpp"
 #include "stepper.hpp"
 #include "eeprom.hpp"
+#include "input.hpp"
+#include "settings.hpp"
 
 #include "stm32f10x_gpio.h"
 
@@ -46,7 +48,8 @@ public:
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
 			// Use page 126 and 127
-			_eeprom(FLASH_BASE + 126 * 0x400, 2)
+			_eeprom(FLASH_BASE + 126 * 0x400, 2), _input(_encoder, _keypad,
+					_switch5), _settings(_input, _lcd)
 	{
 	}
 
@@ -80,47 +83,49 @@ public:
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_stepper.initialize();
-		if (_eeprom.initialize() != eeprom::Ok)
-		{
-			util::led3_on();
-		}
+		_eeprom.initialize();
 	}
 
 	void run()
 	{
 		_encoder.limit(20);
 		_lcd.clear();
-		bool last = false;
+
+		_settings.run();
+
+		while(1);
 		while (1)
 		{
-			bool current = _encoder.pressed();
-			if (current && !last)
+			auto ev = _input.read();
+			if (ev.kind == input::Nothing)
 			{
-				_eeprom.write(0x123, _encoder.position());
-			}
-			last = current;
-
-			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
-					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
-			_lcd << lcd::position(0, 1) << "Encoder: "
-					<< (_encoder.pressed() ? 'P' : 'N') << ' '
-					<< _encoder.position() << "  ";
-			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
-
-			uint16_t saved = 0;
-			eeprom::Status st = _eeprom.read(0x123, saved);
-			if (st == eeprom::Ok) {
-				_lcd << lcd::position(0, 3) << "Saved position:     ";
-				_lcd << lcd::position(0, 3) << "Saved position: " << saved;
-			} else if (st == eeprom::NotFound) {
-				_lcd << lcd::position(0, 3) << "Saved position: NONE";
-			} else if (st == eeprom::NoPage) {
-				_lcd << lcd::position(0, 3) << "Saved position: PAGE";
-			} else {
-				_lcd << lcd::position(0, 3) << "Saved position:  ERR";
+				util::delay_ms(100);
+				continue;
 			}
 
-			util::delay_ms(100);
+			if (ev.kind == input::EncoderMove)
+			{
+				_lcd << "M";
+			}
+			else if (ev.kind == input::EncoderButton)
+			{
+				_lcd << "B";
+			}
+			else if (ev.kind == input::Keypad)
+			{
+				_lcd << "K";
+			}
+			else if (ev.kind == input::Switch5)
+			{
+				_lcd << "S";
+			}
+//			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
+//					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
+//			_lcd << lcd::position(0, 1) << "Encoder: "
+//					<< (_encoder.pressed() ? 'P' : 'N') << ' '
+//					<< _encoder.position() << "  ";
+//			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
+
 		}
 
 //		// STEPPER.....
@@ -169,6 +174,8 @@ private:
 	lcd::HD44780 _lcd;
 	stepper::controller _stepper;
 	eeprom _eeprom;
+	input _input;
+	settings _settings;
 private:
 	static application g_app;
 };
