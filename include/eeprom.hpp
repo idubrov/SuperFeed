@@ -45,16 +45,7 @@ private:
 	}
 
 	bool dirty(int16_t page);
-
-	bool search(uint32_t start, uint32_t end, uint16_t tag)
-	{
-		for (uint32_t offset = start; offset < end; offset += 4)
-		{
-			if (*(__I uint16_t*) offset == tag)
-				return true;
-		}
-		return false;
-	}
+	bool search(uint32_t start, uint32_t end, uint16_t tag);
 
 private:
 	uint32_t const _base;

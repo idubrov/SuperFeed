@@ -88,7 +88,6 @@ public:
 
 	void run()
 	{
-
 		_encoder.limit(20);
 		_lcd.clear();
 		bool last = false;
@@ -111,7 +110,8 @@ public:
 			uint16_t saved = 0;
 			eeprom::Status st = _eeprom.read(0x123, saved);
 			if (st == eeprom::Ok) {
-				_lcd << lcd::position(0, 3) << "Saved position: " << saved << "   ";
+				_lcd << lcd::position(0, 3) << "Saved position:     ";
+				_lcd << lcd::position(0, 3) << "Saved position: " << saved;
 			} else if (st == eeprom::NotFound) {
 				_lcd << lcd::position(0, 3) << "Saved position: NONE";
 			} else if (st == eeprom::NoPage) {

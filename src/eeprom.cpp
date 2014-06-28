@@ -49,6 +49,16 @@ bool eeprom::dirty(int16_t page)
 	return false;
 }
 
+bool eeprom::search(uint32_t start, uint32_t end, uint16_t tag)
+{
+	for (uint32_t offset = start; offset < end; offset += 4)
+	{
+		if (*(__I uint16_t*) offset == tag)
+			return true;
+	}
+	return false;
+}
+
 FLASH_Status eeprom::rescue_if_full(int16_t page)
 {
 	// Check if last word of the page was written or not
@@ -66,7 +76,7 @@ FLASH_Status eeprom::rescue_if_full(int16_t page)
 		tgt_page -= _page_count;
 
 	// Destination address
-	uint32_t tgt_base = _base + tgt_page * PageSize ;
+	uint32_t tgt_base = _base + tgt_page * PageSize;
 	uint32_t tgt_first = tgt_base + 4;
 	uint32_t tgt_addr = tgt_first;
 
@@ -131,12 +141,13 @@ eeprom::Status eeprom::write(uint16_t tag, uint16_t data)
 
 	uint32_t base = _base + current * PageSize;
 	uint32_t last = base + PageSize - 4;
-	// Start scanning source page from the end (to get the latest value)
 	for (uint32_t offset = base + 4; offset <= last; offset += 4)
 	{
-		uint16_t t = *(__I uint16_t*) offset;
-		if (t == 0xffff)
+		// Note: check both tag and data, in some cases only data could be written
+		uint32_t t = *(__I uint32_t*) offset;
+		if (t == 0xffffffff)
 		{
+			// Write data first, so in case of power lost we are safe
 			if (FLASH_ProgramHalfWord(offset + 2, data) != FLASH_COMPLETE)
 				return Error;
 			if (FLASH_ProgramHalfWord(offset, tag) != FLASH_COMPLETE)
