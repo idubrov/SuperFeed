@@ -9,7 +9,7 @@
 #include "stepper.hpp"
 #include "eeprom.hpp"
 #include "input.hpp"
-#include "settings.hpp"
+#include "tui/menu/settings.hpp"
 
 #include "stm32f10x_gpio.h"
 

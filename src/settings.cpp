@@ -1,4 +1,6 @@
-#include "settings.hpp"
+#include "tui/menu/settings.hpp"
+#include "tui/inputs.hpp"
+#include <cstring>
 
 using namespace lcd;
 
@@ -28,6 +30,11 @@ void settings::run()
 		{
 			_selected = ev.position % OptionsCount;
 			redraw();
+		}
+		if (ev.kind == input::EncoderButton && ev.pressed)
+		{
+			uint8_t x = strlen(Options[_selected].title) + 3;
+			tui::spinner(_lcd, _input, x, _selected - _scroll);
 		}
 	}
 }

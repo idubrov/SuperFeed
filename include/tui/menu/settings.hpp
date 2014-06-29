@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "input.hpp"
 #include "HD44780.hpp"
+#include "tui/inputs.hpp"
 
 struct setting
 {

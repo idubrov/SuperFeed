@@ -11,11 +11,7 @@ class input
 public:
 	enum Kind
 	{
-		Nothing,
-		Keypad,
-		EncoderMove,
-		EncoderButton,
-		Switch5
+		Nothing, Keypad, EncoderMove, EncoderButton, Switch5
 	};
 	struct Event
 	{
@@ -30,19 +26,32 @@ public:
 	};
 
 public:
-	input(encoder const& encoder, keypad const& keypad, switch5 const& switch5) :
-			_encoder(encoder), _keypad(keypad), _switch5(switch5),
-			_last_position(0), _last_pressed(false), _last_key(keypad::None),
-			_last_switch(switch5::None)
+	input(encoder& encoder, keypad& keypad, switch5& switch5) :
+			_encoder(encoder), _keypad(keypad), _switch5(switch5), _last_position(
+					0), _last_pressed(false), _last_key(keypad::None), _last_switch(
+					switch5::None)
 	{
+	}
+
+	void reset()
+	{
+		_last_position = _encoder.position();
+		_last_pressed = _encoder.pressed();
+		_last_key = _keypad.key();
+		_last_switch = _switch5.position();
+	}
+
+	encoder& get_encoder()
+	{
+		return _encoder;
 	}
 
 	Event read();
 
 private:
-	encoder const& _encoder;
-	keypad const& _keypad;
-	switch5 const& _switch5;
+	encoder& _encoder;
+	keypad& _keypad;
+	switch5& _switch5;
 
 	// Last state
 	uint16_t _last_position;
