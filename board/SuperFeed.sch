@@ -2036,12 +2036,8 @@ type 0207, grid 7.5 mm</description>
 <segment>
 <pinref part="PWR" gate="G$1" pin="3"/>
 <wire x1="48.26" y1="121.92" x2="55.88" y2="121.92" width="0.1524" layer="91"/>
-<wire x1="55.88" y1="121.92" x2="55.88" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="55.88" y1="121.92" x2="55.88" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="GND4" gate="1" pin="GND"/>
-<pinref part="PWR" gate="G$1" pin="1"/>
-<wire x1="55.88" y1="116.84" x2="55.88" y2="114.3" width="0.1524" layer="91"/>
-<wire x1="48.26" y1="116.84" x2="55.88" y2="116.84" width="0.1524" layer="91"/>
-<junction x="55.88" y="116.84"/>
 </segment>
 <segment>
 <pinref part="SW5" gate="1" pin="4"/>
