@@ -1,35 +1,12 @@
 #ifndef __STEPPER_HPP
 #define __STEPPER_HPP
 
-#include "config.hpp"
-#include "util.hpp"
+#include "hw/driver.hpp"
 #include "stepgen.hpp"
+#include "util.hpp"
 
 namespace stepper
 {
-// Stepper hardware configuration (pins and their timers)
-class hw
-{
-public:
-	constexpr hw(GPIO_TypeDef* port, uint16_t step_pin, uint16_t dir_pin,
-			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* timer) :
-			_port(port), _step_pin(step_pin), _dir_pin(dir_pin), _enable_pin(
-					enable_pin), _reset_pin(reset_pin), _timer(timer)
-	{
-	}
-	hw(hw const&) = default;
-
-	// Port and pins
-	GPIO_TypeDef* const _port;
-	uint16_t const _step_pin;
-	uint16_t const _dir_pin;
-	uint16_t const _enable_pin;
-	uint16_t const _reset_pin;
-
-	// Timers
-	TIM_TypeDef* const _timer;
-};
-
 // Stepper delays configuration
 // All delays are in nanoseconds
 class delays
@@ -61,13 +38,13 @@ public:
 		Stopped, Accelerating, Slewing, Decelerating
 	};
 public:
-	controller(hw&& hw, delays&& delays) :
-			_hw(hw), _delays(delays), _stepgen(::cfg::stepper::TicksPerSec), _stop(
+	controller(hw::driver const& driver, delays&& delays) :
+			_driver(driver), _delays(delays), _stepgen(::cfg::stepper::TicksPerSec), _stop(
 					false)
 	{
 	}
 
-	void initialize();
+	void reset();
 
 	// Step complete, should be called from the timer update IRQ
 	void step_completed();
@@ -97,14 +74,10 @@ public:
 		return sink;
 	}
 private:
-	// Hardware setup
-	void setup_port();
-	void setup_timer();
-
 	uint32_t load_delay();
 
 private:
-	hw const _hw; // Hardware configuration
+	hw::driver const& _driver; // Low-level driver control
 	delays const _delays; // Delays required by the stepper driver
 
 	// Current state

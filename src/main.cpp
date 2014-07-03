@@ -31,12 +31,12 @@ public:
 			// LCD display, RS pin should be connected to PB15, R/W to PB8 and E to PB9
 			// D4-D7 should be connected to PB8-PB15
 			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA,
-					GPIO_PinSource8, lcd::Bit4),
+			GPIO_PinSource8, lcd::Bit4),
 			// Stepper driver, PB13 should be connected to STEP, PB12 to DIR,
 			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			_stepper(stepper::hw(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
-			GPIO_Pin_10, TIM1),
+			_driver(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
+			GPIO_Pin_10, TIM1, ::cfg::stepper::StepLen), _stepper(_driver,
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
@@ -75,8 +75,10 @@ public:
 		_encoder.initialize();
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
-		_stepper.initialize();
+		_driver.initialize();
 		_eeprom.initialize();
+
+		_stepper.reset();
 	}
 
 	void run()
@@ -155,7 +157,8 @@ public:
 				pressed = false;
 			}
 		}
-		while(1);
+		while (1)
+			;
 	}
 
 	static application& instance()
@@ -167,6 +170,7 @@ private:
 	switch5 _switch5;
 	encoder _encoder;
 	lcd::HD44780 _lcd;
+	hw::driver _driver;
 	stepper::controller _stepper;
 	eeprom _eeprom;
 	input _input;
@@ -199,5 +203,6 @@ SysTick_Handler()
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_UP_TIM16_IRQHandler()
 {
+	TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 	application::instance()._stepper.step_completed();
 }
