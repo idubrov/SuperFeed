@@ -9,18 +9,18 @@ void controller::setup_port()
 	// Control port, STEP pin (timer controlled)
 	GPIO_InitTypeDef gpio;
 	gpio.GPIO_Pin = _hw._step_pin;
-	gpio.GPIO_Mode = GPIO_Mode_AF_PP;
+	gpio.GPIO_Mode = GPIO_Mode_AF_OD;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
 
 	// Control port (manually controlled)
 	gpio.GPIO_Pin = _hw._dir_pin | _hw._enable_pin | _hw._reset_pin;
-	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
+	gpio.GPIO_Mode = GPIO_Mode_Out_OD;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_hw._port, &gpio);
 
 	// Start in reset mode
-	_hw._port->BSRR = _hw._reset_pin;
+	_hw._port->BRR = _hw._reset_pin;
 }
 
 void controller::setup_timer()
@@ -43,14 +43,12 @@ void controller::setup_timer()
 
 	// Configure PWM
 	TIM_OCInitTypeDef ocInit;
+	TIM_OCStructInit(&ocInit);
 	ocInit.TIM_OCMode = TIM_OCMode_PWM2; // inactive till CCR1, then active
-	ocInit.TIM_OutputState = TIM_OutputState_Enable;
-	ocInit.TIM_OutputNState = TIM_OutputNState_Disable;
-	ocInit.TIM_Pulse = 0; // Configured later
-	ocInit.TIM_OCPolarity = TIM_OCPolarity_Low; // Step pulse on IM483 is '0'
-	ocInit.TIM_OCNPolarity = TIM_OCNPolarity_High;
-	ocInit.TIM_OCIdleState = TIM_OCIdleState_Set; // Set STEP to '1' when idle
-	ocInit.TIM_OCNIdleState = TIM_OCNIdleState_Reset;
+	ocInit.TIM_OutputNState = TIM_OutputNState_Enable; // We use CH1N
+	ocInit.TIM_Pulse = 0; // Will be configured later
+	ocInit.TIM_OCNPolarity = TIM_OCNPolarity_Low; // Step pulse is '0'
+	ocInit.TIM_OCNIdleState = TIM_OCNIdleState_Set; // Set STEP to '1' when idle
 	TIM_OC1Init(_hw._timer, &ocInit);
 	TIM_CtrlPWMOutputs(_hw._timer, DISABLE);
 
