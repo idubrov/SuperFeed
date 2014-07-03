@@ -9,8 +9,7 @@ namespace lcd
 // Constants
 enum FunctionMode
 {
-	Bit4 = 0x00, //???
-	Bit8 = 0x10
+	Bit4 = 0x00, Bit8 = 0x10
 };
 enum FunctionDots
 {
@@ -68,10 +67,10 @@ public:
 public:
 	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin,
 			uint16_t rw_pin, uint16_t e_pin, GPIO_TypeDef* data_port,
-			uint8_t data_shift, bool use_busy = false) :
+			uint8_t data_shift, FunctionMode mode, bool use_busy = false) :
 			_control_port(control_port), _rs_pin(rs_pin), _rw_pin(rw_pin), _e_pin(
-					e_pin), _data_port(data_port), _data_shift(data_shift), _use_busy(
-					use_busy)
+					e_pin), _data_port(data_port), _data_shift(data_shift), _mode(
+					mode), _use_busy(use_busy)
 	{
 	}
 	HD44780(HD44780 const&) = delete;
@@ -166,8 +165,26 @@ private:
 
 	inline void send(uint8_t data) const
 	{
+		if (_mode == Bit8)
+			send8bits(data);
+		else
+		{
+			send4bits(data >> 4);
+			send4bits(data & 0xf);
+		}
+	}
+
+	inline void send8bits(uint8_t data) const
+	{
 		_data_port->BSRR = ((uint16_t) data) << _data_shift; // Set '1's
 		_data_port->BRR = ((uint16_t) (~data)) << _data_shift; // Clear '0's
+		pulse_enable();
+	}
+
+	inline void send4bits(uint8_t data) const
+	{
+		_data_port->BSRR = ((uint16_t) (data & 0xf)) << _data_shift; // Set '1's
+		_data_port->BRR = ((uint16_t) ((~data) & 0xf)) << _data_shift; // Clear '0's
 		pulse_enable();
 	}
 private:
@@ -177,6 +194,7 @@ private:
 	uint16_t const _e_pin;
 	GPIO_TypeDef* const _data_port;
 	uint8_t const _data_shift;
+	FunctionMode const _mode;
 	bool const _use_busy;
 };
 

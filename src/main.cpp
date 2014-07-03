@@ -19,8 +19,6 @@ void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
 }
 
-lcd::HD44780* g_lcd;
-
 // First, enable clocks for utilized subsystems
 class application
 {
@@ -74,7 +72,10 @@ public:
 		systick::setup();
 		util::setup();
 
-		g_lcd = &_lcd;
+
+		util::led3_on();
+		while(1);
+
 		// Setup all used hardware
 		_switch5.initialize();
 		_encoder.initialize();
@@ -87,46 +88,49 @@ public:
 
 	void run()
 	{
-		_encoder.limit(20);
-		_lcd.clear();
+		while(1) {
 
-		_settings.run();
-
-		while (1)
-			;
-		while (1)
-		{
-			auto ev = _input.read();
-			if (ev.kind == input::Nothing)
-			{
-				util::delay_ms(100);
-				continue;
-			}
-
-			if (ev.kind == input::EncoderMove)
-			{
-				_lcd << "M";
-			}
-			else if (ev.kind == input::EncoderButton)
-			{
-				_lcd << "B";
-			}
-			else if (ev.kind == input::Keypad)
-			{
-				_lcd << "K";
-			}
-			else if (ev.kind == input::Switch5)
-			{
-				_lcd << "S";
-			}
+		}
+//		_encoder.limit(20);
+//		_lcd.clear();
+//
+//		_settings.run();
+//
+//		while (1)
+//			;
+//		while (1)
+//		{
+//			auto ev = _input.read();
+//			if (ev.kind == input::Nothing)
+//			{
+//				util::delay_ms(100);
+//				continue;
+//			}
+//
+//			if (ev.kind == input::EncoderMove)
+//			{
+//				_lcd << "M";
+//			}
+//			else if (ev.kind == input::EncoderButton)
+//			{
+//				_lcd << "B";
+//			}
+//			else if (ev.kind == input::Keypad)
+//			{
+//				_lcd << "K";
+//			}
+//			else if (ev.kind == input::Switch5)
+//			{
+//				_lcd << "S";
+//			}
 //			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
 //					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
 //			_lcd << lcd::position(0, 1) << "Encoder: "
 //					<< (_encoder.pressed() ? 'P' : 'N') << ' '
 //					<< _encoder.position() << "  ";
 //			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
-
-		}
+//
+//		}
 
 //		// STEPPER.....
 //		bool pressed = false;
@@ -168,9 +172,9 @@ public:
 		return g_app;
 	}
 private:
+	keypad _keypad;
 	switch5 _switch5;
 	encoder _encoder;
-	keypad _keypad;
 	lcd::HD44780 _lcd;
 	stepper::controller _stepper;
 	eeprom _eeprom;
