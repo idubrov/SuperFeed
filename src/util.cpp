@@ -5,10 +5,6 @@ using namespace ::cfg::util;
 // Configuration
 void util::setup()
 {
-	// Enable clocks for LED port and timer
-	RCC_APB2PeriphClockCmd(LedPortClock, ENABLE);
-	RCC_APB1PeriphClockCmd(DelayTimerClock, ENABLE);
-
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;
 	RCC_GetClocksFreq(&RCC_Clocks);

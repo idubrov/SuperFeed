@@ -3,56 +3,14 @@
 
 #include "stm32f10x.h"
 
-//
-// Global resources definitions. All other modules use these constants
-// to access peripherals. These constants are internal and should only
-// be used by corresponding module.
-//
-// Resources table
-//   0123456789ABCDEF
-// A +++++EEED+DDDXXX
-// B +++XXLLLLLLLLLLL
-// C KKKKKKKK##SSSXXX
-// D +++
-//
-// XX STLINK connection, low current ports, etc
-// ## on-board LEDs
-// L LCD display
-// E rotary encoder
-// D stepper motor driver
-// K keypad
-//
-// Timers:
-// TIM1 -- step signal generator
-// TIM2 -- quadrature encoder for spindle (not used yet)
-// TIM3 -- rotary encoder
-// TIM6 -- delay timer
-// TIM15 -- indexing for spindle
-//
-// TODO:
-// PA0, PA1 -- TIM2, quadrature encoder for spindle
-// PA2 -- TIM15, indexing for spindle
-
-// Alternate resources:
-// LCD: DATA PA8-PA11, R/S PC7, RW PC8, E PC9
-// Driver: STEP PB13 (N channel, TIM1, no remap), DIR PB12, ENABLE PB11, RESET PB10
-// Encoder: BUTTON PB5, ENC PB6-PB7, TIM4 (no remap)
-// Keypad: PA0-PA7
-// Spindle: PC6 index, TIM3 (full remap)
-// Spindle: PB14-PB15 (quad/index), TIM15 (remap)
-// Switch: PC10-PC12
-
-//
 namespace cfg
 {
 // Utility module timer and LEDs
 namespace util
 {
 // Timer used for delays
-constexpr uint32_t DelayTimerClock = RCC_APB1Periph_TIM6;
 constexpr TIM_TypeDef* DelayTimer = TIM6;
-
-constexpr uint32_t LedPortClock = RCC_APB2Periph_GPIOC;
+// On-board LEDs port
 constexpr GPIO_TypeDef* LedPort = GPIOC;
 constexpr uint16_t Led3Pin = GPIO_Pin_9;
 constexpr uint16_t Led4Pin = GPIO_Pin_8;

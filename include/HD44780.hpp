@@ -8,67 +8,67 @@ namespace lcd
 {
 // Constants
 enum FunctionMode
-	{
-		Bit8 = 0x10
-	};
-	enum FunctionDots
-	{
-		Dots5x8 = 0x00, Dots5x10 = 0x04
-	};
-	enum FunctionLine
-	{
-		Line1 = 0x00, Line2 = 0x08
-	};
-	enum DisplayBlink
-	{
-		BlinkOff = 0x00, BlinkOn = 0x01
-	};
-	enum DisplayCursor
-	{
-		CursorOff = 0x00, CursorOn = 0x02
-	};
-	enum DisplayMode
-	{
-		DisplayOff = 0x00, DisplayOn = 0x04
-	};
-	enum Direction
-	{
-		Left = 0x00, Right = 0x04
-	};
-	enum Scroll
-	{
-		CursorMove = 0x00, DisplayMove = 0x08
-	};
-	enum EntryModeDirection
-	{
-		EntryLeft = 0x00, EntryRight = 0x02
-	};
-	enum EntryModeShift
-	{
-		NoShift = 0x00, Shift = 0x01
-	};
+{
+	Bit4 = 0x00, //???
+	Bit8 = 0x10
+};
+enum FunctionDots
+{
+	Dots5x8 = 0x00, Dots5x10 = 0x04
+};
+enum FunctionLine
+{
+	Line1 = 0x00, Line2 = 0x08
+};
+enum DisplayBlink
+{
+	BlinkOff = 0x00, BlinkOn = 0x01
+};
+enum DisplayCursor
+{
+	CursorOff = 0x00, CursorOn = 0x02
+};
+enum DisplayMode
+{
+	DisplayOff = 0x00, DisplayOn = 0x04
+};
+enum Direction
+{
+	Left = 0x00, Right = 0x04
+};
+enum Scroll
+{
+	CursorMove = 0x00, DisplayMove = 0x08
+};
+enum EntryModeDirection
+{
+	EntryLeft = 0x00, EntryRight = 0x02
+};
+enum EntryModeShift
+{
+	NoShift = 0x00, Shift = 0x01
+};
 
-	enum Command
-	{
-		ClearDisplay = 0x01,
-		ReturnHome = 0x02,
-		EntryModeSet = 0x04,
-		DisplayControl = 0x08,
-		CursorShift = 0x10,
-		FunctionSet = 0x20,
-		SetCGRamAddr = 0x40,
-		SetDDRamAddr = 0x80
-	};
-
+enum Command
+{
+	ClearDisplay = 0x01,
+	ReturnHome = 0x02,
+	EntryModeSet = 0x04,
+	DisplayControl = 0x08,
+	CursorShift = 0x10,
+	FunctionSet = 0x20,
+	SetCGRamAddr = 0x40,
+	SetDDRamAddr = 0x80
+};
 
 // HD44780 LCD screen controller
 class HD44780
 {
 public:
-	public:
-	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin, uint16_t rw_pin,
-			uint16_t e_pin, GPIO_TypeDef* data_port, uint8_t data_shift,
-			bool use_busy = false) :
+public:
+	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin,
+			uint16_t rw_pin, uint16_t e_pin, GPIO_TypeDef* data_port,
+			uint8_t data_shift, bool use_busy = false) :
 			_control_port(control_port), _rs_pin(rs_pin), _rw_pin(rw_pin), _e_pin(
 					e_pin), _data_port(data_port), _data_shift(data_shift), _use_busy(
 					use_busy)
@@ -190,7 +190,7 @@ inline __clear clear()
 	return __clear();
 }
 
-inline HD44780 const& operator<<(HD44780 const& l, __clear )
+inline HD44780 const& operator<<(HD44780 const& l, __clear)
 {
 	l.clear();
 	return l;
@@ -203,7 +203,8 @@ struct __position
 };
 inline __position position(uint8_t col, uint8_t row)
 {
-	return { col, row };
+	return
+	{	col, row};
 }
 
 inline HD44780 const& operator<<(HD44780 const& l, __position p)

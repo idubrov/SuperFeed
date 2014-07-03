@@ -27,27 +27,26 @@ class application
 	friend void ::TIM1_UP_TIM16_IRQHandler();
 public:
 	application() :
+			// Columns start with pin PA0, rows start with PA4
+			_keypad(GPIOA, GPIO_PinSource0, GPIO_PinSource4),
 			// PC10-PC12 should be connected to the first three output of the switch.
 			// 4th lead of the switch should be connected to GND.
 			_switch5(GPIOC, GPIO_PinSource10),
-			// PA5 should be connected to encoder button, PA6 and PA7 to rotary encoder.
-			_encoder(GPIOA, TIM3, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
-			// Columns start with pin PC0, rows start with PC4
-			_keypad(GPIOC, GPIO_PinSource0, GPIO_PinSource4),
-			// LCD display, RS pin should be connected to PB5, R/W to PB6 and E to PB7
-			// D0-D7 should be connected to PB8-PB15
-			_lcd(GPIOB, GPIO_Pin_5, GPIO_Pin_6, GPIO_Pin_7, GPIOB,
-			GPIO_PinSource8),
-			// Stepper driver, PA8 should be connected to STEP, PA10 to DIR,
-			// PA11 to ENABLE and PA12 to RESET.
+			// PB5 should be connected to encoder button, PB6 and PB7 to rotary encoder.
+			_encoder(GPIOB, TIM4, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
+			// LCD display, RS pin should be connected to PB15, R/W to PB8 and E to PB9
+			// D4-D7 should be connected to PB8-PB15
+			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA, GPIO_PinSource8, lcd::Bit4),
+			// Stepper driver, PB8 should be connected to STEP, PB12 to DIR,
+			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			_stepper(stepper::hw(GPIOA, GPIO_Pin_8, GPIO_Pin_10, GPIO_Pin_11,
-			GPIO_Pin_12, TIM1),
+			_stepper(stepper::hw(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
+			GPIO_Pin_10, TIM1),
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
-			// Use page 126 and 127
+			// Use page 126 and 127 for persistent storage
 			_eeprom(FLASH_BASE + 126 * 0x400, 2), _input(_encoder, _keypad,
 					_switch5), _settings(_input, _lcd)
 	{
@@ -58,12 +57,12 @@ public:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); // Stepper
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); // Encoder
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE); // Utility timer
 
-		// Setup interrupt for pulse timer
+		// Setup interrupt for pulse timer (TIM1)
 		NVIC_InitTypeDef timerIT;
 		timerIT.NVIC_IRQChannel = TIM1_UP_TIM16_IRQn;
 		timerIT.NVIC_IRQChannelPreemptionPriority = 0;
@@ -93,7 +92,8 @@ public:
 
 		_settings.run();
 
-		while(1);
+		while (1)
+			;
 		while (1)
 		{
 			auto ev = _input.read();
