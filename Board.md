@@ -87,3 +87,16 @@ Extra Buttons
 |Brown     |Button 3|PC2 |
 |Gray      |Button 4|PC3 |
 
+
+Colors:
+Red
+Black
+Violet
+Orange
+White
+Brown
+Gray
+Green
+Blue
+Yellow
+
