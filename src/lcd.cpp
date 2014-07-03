@@ -11,7 +11,7 @@ void lcd::HD44780::initialize() const
 	GPIO_Init(_control_port, &GPIO_InitStructure);
 
 	// Set 8 data pins to output
-	GPIO_InitStructure.GPIO_Pin = 0xff << _data_shift;
+	GPIO_InitStructure.GPIO_Pin = (_mode == Bit8 ? 0xff : 0xf) << _data_shift;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_data_port, &GPIO_InitStructure);
