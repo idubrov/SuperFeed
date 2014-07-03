@@ -4,6 +4,8 @@
 #include "util.hpp"
 #include "simstream.hpp"
 
+namespace hw
+{
 namespace lcd
 {
 // Constants
@@ -231,6 +233,7 @@ inline HD44780 const& operator<<(HD44780 const& l, __position p)
 	return l;
 }
 
+}
 }
 
 #endif /* __LCD_HPP */

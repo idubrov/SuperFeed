@@ -1,7 +1,9 @@
 #ifndef __ENCODER_HPP
 #define __ENCODER_HPP
 
-#include "config.hpp"
+#include "stm32f10x.h"
+
+namespace hw {
 
 class encoder {
 public:
@@ -45,5 +47,6 @@ private:
 	uint32_t _state; // Current debounce status
 	volatile bool _pressed; // Current button state
 };
+}
 
 #endif /* __ENCODER_HPP */

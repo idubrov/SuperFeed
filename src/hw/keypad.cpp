@@ -3,9 +3,9 @@
 
 using namespace ::delegate;
 
-constexpr keypad::Key keypad::c_mappings[];
+constexpr hw::keypad::Key hw::keypad::c_mappings[];
 
-void keypad::initialize()
+void hw::keypad::initialize()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -25,10 +25,10 @@ void keypad::initialize()
 	// Set all rows to zero
 	GPIO_ResetBits(_port, 0x0f << _rows);
 
-	systick::bind(Delegate<void()>::from<keypad, &keypad::scan>(this));
+	systick::bind(Delegate<void()>::from<hw::keypad, &hw::keypad::scan>(this));
 }
 
-void keypad::scan() {
+void hw::keypad::scan() {
 	// Only change current pressed key if last four keys match.
 	_state <<= 8;
 	_state |= raw_key();
@@ -41,7 +41,7 @@ void keypad::scan() {
 	}
 }
 
-uint8_t keypad::from_state(uint8_t offset, uint8_t xstate) const {
+uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 	switch (xstate) {
 	case 14: // 1110
 		return offset + 4;
@@ -57,7 +57,7 @@ uint8_t keypad::from_state(uint8_t offset, uint8_t xstate) const {
 
 }
 
-uint8_t keypad::raw_key() const {
+uint8_t hw::keypad::raw_key() const {
 	uint8_t xstate = column_state();
 	if (xstate == 0xf) {
 		// All '1', no buttons are pressed

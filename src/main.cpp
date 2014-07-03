@@ -9,6 +9,8 @@
 
 #include "stm32f10x_gpio.h"
 
+using namespace ::hw;
+
 extern "C"
 {
 void SysTick_Handler();
@@ -170,7 +172,7 @@ private:
 	switch5 _switch5;
 	encoder _encoder;
 	lcd::HD44780 _lcd;
-	hw::driver _driver;
+	driver _driver;
 	stepper::controller _stepper;
 	eeprom _eeprom;
 	input _input;

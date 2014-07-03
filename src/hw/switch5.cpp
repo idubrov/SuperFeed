@@ -3,7 +3,7 @@
 
 using namespace ::delegate;
 
-void switch5::initialize()
+void hw::switch5::initialize()
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
@@ -15,7 +15,7 @@ void switch5::initialize()
 }
 
 // Should be called from SysTick interrupt handler.
-void switch5::scan()
+void hw::switch5::scan()
 {
 	// Software debouncing for 5 position switch. Shift state 3 bits and merge new
 	// bits. Only if bits are the same for 10 last scans, change current position.

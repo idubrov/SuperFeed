@@ -3,7 +3,7 @@
 
 using namespace ::delegate;
 
-void encoder::initialize()
+void hw::encoder::initialize()
 {
 	// Button
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -35,7 +35,7 @@ void encoder::initialize()
 	systick::bind(Delegate<void()>::from<encoder, &encoder::scan>(this));
 }
 
-void encoder::scan()
+void hw::encoder::scan()
 {
 	bool unpressed = _port->IDR & _button_pin;
 	_state = (_state << 1) | (unpressed ? 0 : 1);

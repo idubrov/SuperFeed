@@ -1,11 +1,16 @@
 #ifndef __KEYPAD_HPP
 #define __KEYPAD_HPP
 
-#include "config.hpp"
+#include "stm32f10x.h"
 
-class keypad {
+namespace hw
+{
+
+class keypad
+{
 public:
-	enum Key {
+	enum Key
+	{
 		None = ' ',	// no button pressed
 		Star = '*',
 		N0 = '0',
@@ -26,25 +31,27 @@ public:
 	};
 
 	static constexpr Key c_mappings[] =
-		{ None, Star, N0, Hash, D, N7, N8, N9, C, N4, N5, N6, B, N1, N2, N3, A, };
+	{ None, Star, N0, Hash, D, N7, N8, N9, C, N4, N5, N6, B, N1, N2, N3, A, };
 public:
 	constexpr keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
-			_port(port), _columns(columns), _rows(rows), _state(0),
-			_pressed(None)
+			_port(port), _columns(columns), _rows(rows), _state(0), _pressed(
+					None)
 	{
 	}
 	keypad(keypad const&) = delete;
 
 	void initialize();
 
-	char key() const {
+	char key() const
+	{
 		return _pressed;
 	}
 private:
 	void scan();
 	uint8_t raw_key() const;
 
-	inline uint8_t column_state() const {
+	inline uint8_t column_state() const
+	{
 		return (_port->IDR >> _columns) & 0x0f;
 	}
 	uint8_t from_state(uint8_t y, uint8_t xstate) const;
@@ -57,5 +64,7 @@ private:
 	uint32_t _state; // Current debounce status
 	volatile Key _pressed; // Current button state
 };
+
+}
 
 #endif /* __KEYPAD_HPP */

@@ -2,7 +2,7 @@
 #include "tui/inputs.hpp"
 #include <cstring>
 
-using namespace lcd;
+using namespace ::hw;
 
 const uint16_t settings::Microsteps[] =
 { 1, 2, 4, 8, 10, 16, 32 };
@@ -15,7 +15,7 @@ const uint16_t settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 
 void settings::run()
 {
-	_lcd << clear();
+	_lcd << lcd::clear();
 	redraw();
 
 	while (true)
@@ -43,7 +43,7 @@ void settings::redraw()
 {
 	for (uint16_t y = 0; y < 4; y++)
 	{
-		_lcd << position(0, y);
+		_lcd << lcd::position(0, y);
 		uint16_t option = _scroll + y;
 		if (option >= OptionsCount)
 			break;

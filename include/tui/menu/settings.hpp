@@ -17,7 +17,7 @@ struct setting
 class settings
 {
 public:
-	settings(input& input, lcd::HD44780& lcd) :
+	settings(input& input, hw::lcd::HD44780& lcd) :
 			_input(input), _lcd(lcd), _scroll(0), _selected(0)
 	{
 	}
@@ -27,7 +27,7 @@ private:
 	void redraw();
 private:
 	input& _input;
-	lcd::HD44780& _lcd;
+	hw::lcd::HD44780& _lcd;
 
 	uint16_t _scroll;
 	uint16_t _selected;

@@ -3,6 +3,9 @@
 
 #include "stm32f10x.h"
 
+namespace hw
+{
+
 class switch5
 {
 public:
@@ -18,7 +21,7 @@ public:
 
 public:
 	constexpr switch5(GPIO_TypeDef* port, uint8_t first_pin) :
-		_port(port), _first_pin(first_pin), _state(0), _position(None)
+			_port(port), _first_pin(first_pin), _state(0), _position(None)
 	{
 	}
 	switch5(switch5 const&) = delete;
@@ -39,5 +42,6 @@ private:
 	volatile Position _position; // Current position
 };
 
+}
 
 #endif /* __SWITCH5_HPP */
