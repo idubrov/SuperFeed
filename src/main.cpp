@@ -34,8 +34,9 @@ public:
 			_encoder(GPIOB, TIM4, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
 			// LCD display, RS pin should be connected to PB15, R/W to PB8 and E to PB9
 			// D4-D7 should be connected to PB8-PB15
-			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA, GPIO_PinSource8, lcd::Bit4),
-			// Stepper driver, PB8 should be connected to STEP, PB12 to DIR,
+			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA,
+					GPIO_PinSource8, lcd::Bit4),
+			// Stepper driver, PB13 should be connected to STEP, PB12 to DIR,
 			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
 			_stepper(stepper::hw(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
@@ -72,25 +73,18 @@ public:
 		systick::setup();
 		util::setup();
 
-
-		util::led3_on();
-		while(1);
-
 		// Setup all used hardware
+		_keypad.initialize();
 		_switch5.initialize();
 		_encoder.initialize();
-		_keypad.initialize();
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_stepper.initialize();
-		_eeprom.initialize();
+//		_eeprom.initialize();
 	}
 
 	void run()
 	{
-		while(1) {
-
-		}
 //		_encoder.limit(20);
 //		_lcd.clear();
 //
@@ -133,38 +127,39 @@ public:
 //		}
 
 //		// STEPPER.....
-//		bool pressed = false;
-//		switch5::Position last = switch5::None;
-//
-//		uint32_t thread = 8; // TPI of the thread we are cutting
-//		uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
-//		uint32_t fast = ::cfg::stepper::StepsPerInch * RPM / (60 * thread); // steps per sec
-//		uint32_t slow = fast / 3;
-//
-//		while (1)
-//		{
-//			_lcd << lcd::position(0, 0) << _stepper;
-//
-//			switch5::Position pos = _switch5.position();
-//			if (pos != last)
-//			{
-//				_stepper.set_speed(pos == switch5::LL ? fast : slow);
-//			}
-//			last = pos;
-//
-//			if (_encoder.pressed())
-//			{
-//				if (!pressed)
-//				{
-//					_stepper.move(1000);
-//				}
-//				pressed = true;
-//			}
-//			else
-//			{
-//				pressed = false;
-//			}
-//		}
+		bool pressed = false;
+		switch5::Position last = switch5::None;
+
+		uint32_t thread = 8; // TPI of the thread we are cutting
+		uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
+		uint32_t fast = ::cfg::stepper::StepsPerInch * RPM / (60 * thread); // steps per sec
+		uint32_t slow = fast / 3;
+
+		while (1)
+		{
+			_lcd << lcd::position(0, 0) << _stepper;
+
+			switch5::Position pos = _switch5.position();
+			if (pos != last)
+			{
+				_stepper.set_speed(pos == switch5::LL ? fast : slow);
+			}
+			last = pos;
+
+			if (_encoder.pressed())
+			{
+				if (!pressed)
+				{
+					_stepper.move(1000);
+				}
+				pressed = true;
+			}
+			else
+			{
+				pressed = false;
+			}
+		}
+		while(1);
 	}
 
 	static application& instance()
