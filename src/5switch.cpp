@@ -24,11 +24,11 @@ void switch5::scan()
 	_state |= (_port->IDR >> _first_pin) & 7;
 	_state &= 0x3FFFFFFF;
 	switch (_state) {
-	case 0x1B6DB6DB: _position = LL; break; // 0b00011011011011011011011011011011
-	case 0x9249249: _position = L; break;   // 0b00001001001001001001001001001001
+	case 0x1B6DB6DB: _position = RR; break; // 0b00011011011011011011011011011011
+	case 0x9249249: _position = R; break;   // 0b00001001001001001001001001001001
 	case 0x2DB6DB6D: _position = M; break;  // 0b00101101101101101101101101101101
-	case 0x24924924: _position = R; break;  // 0b00100100100100100100100100100100
-	case 0x36DB6DB6: _position = RR; break; // 0b00110110110110110110110110110110
+	case 0x24924924: _position = L; break;  // 0b00100100100100100100100100100100
+	case 0x36DB6DB6: _position = LL; break; // 0b00110110110110110110110110110110
 	// Otherwise, transition or noise, ignore
 	}
 }
