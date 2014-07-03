@@ -31,18 +31,4 @@ void hw::encoder::initialize()
 	TIM_TimeBaseInit(_timer, &TIM_TimeBaseStructure);
 	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_Cmd(_timer, ENABLE);
-
-	systick::bind(Delegate<void()>::from<encoder, &encoder::scan>(this));
 }
-
-void hw::encoder::scan()
-{
-	bool unpressed = _port->IDR & _button_pin;
-	_state = (_state << 1) | (unpressed ? 0 : 1);
-	if (_state == UINT32_MAX) {
-		_pressed = true;
-	} else if (_state == 0) {
-		_pressed = false;
-	}
-}
-

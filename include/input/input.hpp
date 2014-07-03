@@ -35,10 +35,10 @@ public:
 
 	void reset()
 	{
-		_last_position = _encoder.position();
-		_last_pressed = _encoder.pressed();
-		_last_key = _keypad.key();
-		_last_switch = _switch5.position();
+		_last_position = _encoder.raw_position();
+		_last_pressed = _encoder.raw_pressed();
+		_last_key = _keypad.raw_key();
+		_last_switch = _switch5.raw_position();
 	}
 
 	hw::encoder& get_encoder()
@@ -47,6 +47,8 @@ public:
 	}
 
 	Event read();
+
+	void debounce();
 
 private:
 	hw::encoder& _encoder;

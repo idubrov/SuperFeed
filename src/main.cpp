@@ -1,5 +1,5 @@
 #include "main.hpp"
-#include "input.hpp"
+#include "input/input.hpp"
 #include "util.hpp"
 #include "simstream.hpp"
 #include "stepper.hpp"
@@ -85,6 +85,14 @@ public:
 
 	void run()
 	{
+
+
+		_encoder.limit(30);
+		while(1) {
+			_lcd << lcd::position(0, 0) << _encoder;
+			_lcd << lcd::position(0, 1) << _switch5 << ' ' << _keypad;
+			util::delay_ms(50);
+		}
 //		_encoder.limit(20);
 //		_lcd.clear();
 //
@@ -139,14 +147,14 @@ public:
 		{
 			_lcd << lcd::position(0, 0) << _stepper;
 
-			switch5::Position pos = _switch5.position();
+			switch5::Position pos = _switch5.raw_position();
 			if (pos != last)
 			{
 				_stepper.set_speed(pos == switch5::LL ? fast : slow);
 			}
 			last = pos;
 
-			if (_encoder.pressed())
+			if (_encoder.raw_pressed())
 			{
 				if (!pressed)
 				{

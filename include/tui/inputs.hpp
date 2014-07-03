@@ -1,7 +1,7 @@
 #ifndef __INPUTS_HPP
 #define __INPUTS_HPP
 
-#include "input.hpp"
+#include "input/input.hpp"
 #include "hw/lcd.hpp"
 
 namespace tui

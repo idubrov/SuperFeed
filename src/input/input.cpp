@@ -1,4 +1,4 @@
-#include "input.hpp"
+#include "input/input.hpp"
 
 input::Event input::read()
 {
@@ -6,7 +6,7 @@ input::Event input::read()
 	event.kind = Nothing;
 
 	// Encoder
-	uint16_t enc = _encoder.position();
+	uint16_t enc = _encoder.raw_position();
 	if (_last_position != enc)
 	{
 		_last_position = enc;
@@ -15,7 +15,7 @@ input::Event input::read()
 		return event;
 	}
 
-	bool pressed = _encoder.pressed();
+	bool pressed = _encoder.raw_pressed();
 	if (_last_pressed != pressed)
 	{
 		_last_pressed = pressed;
@@ -25,7 +25,7 @@ input::Event input::read()
 	}
 
 	// Keypad
-	auto key = _keypad.key();
+	auto key = _keypad.raw_key();
 	if (key != _last_key)
 	{
 		_last_key = key;
@@ -35,7 +35,7 @@ input::Event input::read()
 	}
 
 	// Switch5
-	auto sw = _switch5.position();
+	auto sw = _switch5.raw_position();
 	if (_last_switch != sw)
 	{
 		_last_switch = sw;

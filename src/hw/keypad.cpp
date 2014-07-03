@@ -24,22 +24,20 @@ void hw::keypad::initialize()
 
 	// Set all rows to zero
 	GPIO_ResetBits(_port, 0x0f << _rows);
-
-	systick::bind(Delegate<void()>::from<hw::keypad, &hw::keypad::scan>(this));
 }
 
-void hw::keypad::scan() {
-	// Only change current pressed key if last four keys match.
-	_state <<= 8;
-	_state |= raw_key();
-	uint16_t low = _state & 0xffff;
-	if ((_state >> 16) == low) {
-		uint8_t lowlow = low & 0xff;
-		if ((low >> 8) == lowlow) {
-			_pressed = c_mappings[lowlow];
-		}
-	}
-}
+//void hw::keypad::scan() {
+//	// Only change current pressed key if last four keys match.
+//	_state <<= 8;
+//	_state |= raw_key();
+//	uint16_t low = _state & 0xffff;
+//	if ((_state >> 16) == low) {
+//		uint8_t lowlow = low & 0xff;
+//		if ((low >> 8) == lowlow) {
+//			_pressed = c_mappings[lowlow];
+//		}
+//	}
+//}
 
 uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 	switch (xstate) {
@@ -57,11 +55,11 @@ uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 
 }
 
-uint8_t hw::keypad::raw_key() const {
+char hw::keypad::raw_key() const {
 	uint8_t xstate = column_state();
 	if (xstate == 0xf) {
 		// All '1', no buttons are pressed
-		return 0;
+		return None;
 	}
 
 	// Let's find row by scanning
@@ -76,12 +74,13 @@ uint8_t hw::keypad::raw_key() const {
 			if (column_state() == xstate) {
 				// Now we are sure we found matching row
 				int offset = y << 2;
-				return from_state(offset, xstate);
+				uint8_t key = from_state(offset, xstate);
+				return c_mappings[key];
 			}
 
 			// Key was depressed or another key was pressed while we were scanning
-			return 0;
+			return None;
 		}
 	}
-	return 0;
+	return None;
 }
