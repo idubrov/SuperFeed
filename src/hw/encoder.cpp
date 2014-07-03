@@ -1,5 +1,4 @@
-#include "encoder.hpp"
-#include "util.hpp"
+#include "hw/encoder.hpp"
 #include "systick.hpp"
 
 using namespace ::delegate;

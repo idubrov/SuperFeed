@@ -2,9 +2,9 @@
 #define __INPUT_HPP
 
 #include "config.hpp"
-#include "5switch.hpp"
-#include "encoder.hpp"
-#include "keypad.hpp"
+#include "hw/switch5.hpp"
+#include "hw/encoder.hpp"
+#include "hw/keypad.hpp"
 
 class input
 {

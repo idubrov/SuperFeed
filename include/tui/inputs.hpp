@@ -2,7 +2,7 @@
 #define __INPUTS_HPP
 
 #include "input.hpp"
-#include "HD44780.hpp"
+#include "hw/lcd.hpp"
 
 namespace tui
 {

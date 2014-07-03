@@ -1,14 +1,10 @@
 #include "main.hpp"
-#include "encoder.hpp"
-#include "5switch.hpp"
-#include "keypad.hpp"
-#include "systick.hpp"
+#include "input.hpp"
 #include "util.hpp"
-#include "HD44780.hpp"
 #include "simstream.hpp"
 #include "stepper.hpp"
 #include "eeprom.hpp"
-#include "input.hpp"
+#include "systick.hpp"
 #include "tui/menu/settings.hpp"
 
 #include "stm32f10x_gpio.h"
@@ -80,7 +76,7 @@ public:
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_stepper.initialize();
-//		_eeprom.initialize();
+		_eeprom.initialize();
 	}
 
 	void run()

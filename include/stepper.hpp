@@ -87,6 +87,7 @@ public:
 		_stepgen.set_target_speed(speed);
 	}
 
+	/// Print state for debugging purposes
 	template<typename S>
 	S const& dump(S const& sink) const
 	{

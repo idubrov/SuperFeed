@@ -1,5 +1,4 @@
-#include "5switch.hpp"
-#include "util.hpp"
+#include "hw/switch5.hpp"
 #include "systick.hpp"
 
 using namespace ::delegate;

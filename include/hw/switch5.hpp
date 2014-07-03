@@ -1,7 +1,7 @@
-#ifndef __5SWITCH_HPP
-#define __5SWITCH_HPP
+#ifndef __SWITCH5_HPP
+#define __SWITCH5_HPP
 
-#include "config.hpp"
+#include "stm32f10x.h"
 
 class switch5
 {
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif /* __5SWITCH_HPP */
+#endif /* __SWITCH5_HPP */

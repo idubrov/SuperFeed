@@ -1,4 +1,4 @@
-#include "HD44780.hpp"
+#include "hw/lcd.hpp"
 
 void lcd::HD44780::initialize() const
 {
