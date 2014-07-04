@@ -88,6 +88,9 @@ Extra Buttons
 |Gray      |Button 4|PC3 |
 
 
+TIM6: utility timer
+TIM7: debounce timer
+
 Colors:
 Red
 Black

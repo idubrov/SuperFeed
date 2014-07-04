@@ -1,5 +1,28 @@
 #include "input/input.hpp"
 
+void input::initialize()
+{
+	// Get system frequency
+	RCC_ClocksTypeDef RCC_Clocks;
+	RCC_GetClocksFreq(&RCC_Clocks);
+
+	// Setup timer for delays
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+	TIM_DeInit (_debounce_timer);
+
+	// Increment timer every 1ms
+	TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.HCLK_Frequency / 1000) - 1;
+	TIM_TimeBaseStructure.TIM_Period = 5; // Overflow every 5ms
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+	TIM_TimeBaseInit(_debounce_timer, &TIM_TimeBaseStructure);
+
+	TIM_ClearITPendingBit(_debounce_timer, TIM_IT_Update);
+	TIM_ITConfig(_debounce_timer, TIM_IT_Update, ENABLE);
+	TIM_Cmd(_debounce_timer, ENABLE);
+}
+
 void input::debounce()
 {
 	// Query all hardware inputs and apply debouncing to them
@@ -36,13 +59,26 @@ void input::debounce()
 	// 5 position switch debouncing
 	_switch_debounce <<= 4;
 	_switch_debounce |= (_switch5.raw_position() & 0xf);
-	switch (_switch_debounce) {
-	case 0: _current._switch5 = 0; break;
-	case 0x1111: _current._switch5 = 1; break;
-	case 0x2222: _current._switch5 = 2; break;
-	case 0x3333: _current._switch5 = 3; break;
-	case 0x4444: _current._switch5 = 4; break;
-	case 0x5555: _current._switch5 = 5; break;
+	switch (_switch_debounce)
+	{
+	case 0:
+		_current._switch5 = 0;
+		break;
+	case 0x1111:
+		_current._switch5 = 1;
+		break;
+	case 0x2222:
+		_current._switch5 = 2;
+		break;
+	case 0x3333:
+		_current._switch5 = 3;
+		break;
+	case 0x4444:
+		_current._switch5 = 4;
+		break;
+	case 0x5555:
+		_current._switch5 = 5;
+		break;
 	}
 }
 

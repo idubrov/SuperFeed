@@ -70,8 +70,8 @@ public:
 	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin,
 			uint16_t rw_pin, uint16_t e_pin, GPIO_TypeDef* data_port,
 			uint8_t data_shift, FunctionMode mode, bool use_busy = false) :
-			_control_port(control_port), _rs_pin(rs_pin), _rw_pin(rw_pin), _e_pin(
-					e_pin), _data_port(data_port), _data_shift(data_shift), _mode(
+			_control_port(control_port), _data_port(data_port), _rs_pin(rs_pin), _rw_pin(
+					rw_pin), _e_pin(e_pin), _data_shift(data_shift), _mode(
 					mode), _use_busy(use_busy)
 	{
 	}
@@ -191,10 +191,10 @@ private:
 	}
 private:
 	GPIO_TypeDef* const _control_port;
+	GPIO_TypeDef* const _data_port;
 	uint16_t const _rs_pin;
 	uint16_t const _rw_pin;
 	uint16_t const _e_pin;
-	GPIO_TypeDef* const _data_port;
 	uint8_t const _data_shift;
 	FunctionMode const _mode;
 	bool const _use_busy;

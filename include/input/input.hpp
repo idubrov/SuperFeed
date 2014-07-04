@@ -1,7 +1,8 @@
 #ifndef __INPUT_HPP
 #define __INPUT_HPP
 
-#include "config.hpp"
+#include "stm32f10x.h"
+
 #include "hw/switch5.hpp"
 #include "hw/encoder.hpp"
 #include "hw/keypad.hpp"
@@ -52,11 +53,15 @@ private:
 		uint8_t _switch5;
 	};
 public:
-	input(hw::encoder& encoder, hw::keypad& keypad, hw::switch5& switch5) :
-			_encoder(encoder), _keypad(keypad), _switch5(switch5), _current(), _last(),
-			_enc_debounce(0)
+	input(TIM_TypeDef* debounce_timer, hw::encoder& encoder, hw::keypad& keypad,
+			hw::switch5& switch5) :
+			_debounce_timer(debounce_timer), _encoder(encoder), _keypad(keypad), _switch5(
+					switch5), _current(), _last(), _keypad_debounce(0), _switch_debounce(
+					0), _enc_debounce(0)
 	{
 	}
+
+	void initialize();
 
 	void reset()
 	{
@@ -91,6 +96,7 @@ public:
 	}
 
 private:
+	TIM_TypeDef* _debounce_timer;
 	hw::encoder& _encoder;
 	hw::keypad& _keypad;
 	hw::switch5& _switch5;
@@ -100,9 +106,9 @@ private:
 	State _last;
 
 	// Debouncing state (only used in IRQ handler)
-	uint8_t _enc_debounce;
 	uint32_t _keypad_debounce;
 	uint16_t _switch_debounce;
+	uint8_t _enc_debounce;
 };
 
 #endif /* __INPUT_HPP */

@@ -15,12 +15,14 @@ extern "C"
 {
 void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
+void TIM7_IRQHandler(); // Input debouncing
 }
 
 // First, enable clocks for utilized subsystems
 class application
 {
 	friend void ::TIM1_UP_TIM16_IRQHandler();
+	friend void ::TIM7_IRQHandler();
 public:
 	application() :
 			// Columns start with pin PA0, rows start with PA4
@@ -44,7 +46,7 @@ public:
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
 			// Use page 126 and 127 for persistent storage
-			_eeprom(FLASH_BASE + 126 * 0x400, 2), _input(_encoder, _keypad,
+			_eeprom(FLASH_BASE + 126 * 0x400, 2), _input(TIM7, _encoder, _keypad,
 					_switch5), _settings(_input, _lcd)
 	{
 	}
@@ -58,12 +60,20 @@ public:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); // Encoder
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE); // Utility timer
+		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE); // Debouncing timer
 
 		// Setup interrupt for pulse timer (TIM1)
 		NVIC_InitTypeDef timerIT;
 		timerIT.NVIC_IRQChannel = TIM1_UP_TIM16_IRQn;
 		timerIT.NVIC_IRQChannelPreemptionPriority = 0;
 		timerIT.NVIC_IRQChannelSubPriority = 1;
+		timerIT.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&timerIT);
+
+		// Setup interrupt for debounce timer (TIM7)
+		timerIT.NVIC_IRQChannel = TIM7_IRQn;
+		timerIT.NVIC_IRQChannelPreemptionPriority = 3; // lowest priority
+		timerIT.NVIC_IRQChannelSubPriority = 3; // lowest priority
 		timerIT.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&timerIT);
 
@@ -75,15 +85,13 @@ public:
 		_keypad.initialize();
 		_switch5.initialize();
 		_encoder.initialize();
+		_input.initialize();
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_driver.initialize();
 		_eeprom.initialize();
 
 		_stepper.reset();
-
-		// Debouncing
-		systick::bind(delegate::Delegate<void()>::from<input, &input::debounce>(&_input));
 	}
 
 	void run()
@@ -218,4 +226,11 @@ TIM1_UP_TIM16_IRQHandler()
 {
 	TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
 	application::instance()._stepper.step_completed();
+}
+
+extern "C" void __attribute__ ((section(".after_vectors")))
+TIM7_IRQHandler()
+{
+	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+	application::instance()._input.debounce();
 }
