@@ -4,7 +4,6 @@
 #include "simstream.hpp"
 #include "stepper.hpp"
 #include "eeprom.hpp"
-#include "systick.hpp"
 #include "tui/menu/settings.hpp"
 
 #include "stm32f10x_gpio.h"
@@ -77,8 +76,7 @@ public:
 		timerIT.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&timerIT);
 
-		// Setup SysTick handler and util module
-		systick::setup();
+		// Setup util module
 		util::setup();
 
 		// Setup all used hardware
@@ -214,13 +212,7 @@ int main()
 	return 0;
 }
 
-// IRQ
-extern "C" void __attribute__ ((section(".after_vectors")))
-SysTick_Handler()
-{
-	systick::tick();
-}
-
+// IRQ handlers
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_UP_TIM16_IRQHandler()
 {

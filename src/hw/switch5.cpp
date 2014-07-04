@@ -1,7 +1,4 @@
 #include "hw/switch5.hpp"
-#include "systick.hpp"
-
-using namespace ::delegate;
 
 void hw::switch5::initialize()
 {

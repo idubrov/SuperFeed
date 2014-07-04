@@ -1,7 +1,4 @@
 #include "hw/keypad.hpp"
-#include "systick.hpp"
-
-using namespace ::delegate;
 
 constexpr hw::keypad::Key hw::keypad::c_mappings[];
 

@@ -1,7 +1,4 @@
 #include "hw/encoder.hpp"
-#include "systick.hpp"
-
-using namespace ::delegate;
 
 void hw::encoder::initialize()
 {
