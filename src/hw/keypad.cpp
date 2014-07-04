@@ -26,19 +26,6 @@ void hw::keypad::initialize()
 	GPIO_ResetBits(_port, 0x0f << _rows);
 }
 
-//void hw::keypad::scan() {
-//	// Only change current pressed key if last four keys match.
-//	_state <<= 8;
-//	_state |= raw_key();
-//	uint16_t low = _state & 0xffff;
-//	if ((_state >> 16) == low) {
-//		uint8_t lowlow = low & 0xff;
-//		if ((low >> 8) == lowlow) {
-//			_pressed = c_mappings[lowlow];
-//		}
-//	}
-//}
-
 uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 	switch (xstate) {
 	case 14: // 1110

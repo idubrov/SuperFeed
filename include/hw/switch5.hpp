@@ -26,7 +26,7 @@ public:
 	}
 	switch5(switch5 const&) = delete;
 
-	Position raw_position() const;
+	uint8_t raw_position() const;
 
 	void initialize();
 private:

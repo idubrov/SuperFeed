@@ -12,8 +12,7 @@ void hw::switch5::initialize()
 	GPIO_Init(_port, &GPIO_InitStructure);
 }
 
-// Should be called from SysTick interrupt handler.
-hw::switch5::Position hw::switch5::raw_position() const
+uint8_t hw::switch5::raw_position() const
 {
 	switch ((_port->IDR >> _first_pin) & 7)
 	{

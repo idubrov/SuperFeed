@@ -9,6 +9,7 @@ SOURCES := $(wildcard src/*.c) \
 		   $(wildcard src/*.cpp) \
 		   $(wildcard src/tui/*.cpp) \
 		   $(wildcard src/hw/*.cpp) \
+		   $(wildcard src/input/*.cpp) \
 		   $(wildcard system/src/cmsis/*.c) \
 		   $(wildcard system/src/cortexm/*.c) \
 		   $(wildcard system/src/diag/*.c) \

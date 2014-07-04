@@ -81,16 +81,19 @@ public:
 		_eeprom.initialize();
 
 		_stepper.reset();
+
+		// Debouncing
+		systick::bind(delegate::Delegate<void()>::from<input, &input::debounce>(&_input));
 	}
 
 	void run()
 	{
 
-
 		_encoder.limit(30);
 		while(1) {
-			_lcd << lcd::position(0, 0) << _encoder;
-			_lcd << lcd::position(0, 1) << _switch5 << ' ' << _keypad;
+			_lcd << lcd::position(0, 0) << "E: " << _input.enc_position() << ' ' <<
+					(_input.enc_pressed() ? 'P' : 'N');
+			_lcd << lcd::position(0, 1) << "S: " << _input.switch5() << " K: " << _input.keypad();
 			util::delay_ms(50);
 		}
 //		_encoder.limit(20);
@@ -136,7 +139,7 @@ public:
 
 //		// STEPPER.....
 		bool pressed = false;
-		switch5::Position last = switch5::None;
+		uint8_t last = switch5::None;
 
 		uint32_t thread = 8; // TPI of the thread we are cutting
 		uint32_t RPM = 120 << 8; // Spindle speed in 24.8 format
@@ -147,7 +150,7 @@ public:
 		{
 			_lcd << lcd::position(0, 0) << _stepper;
 
-			switch5::Position pos = _switch5.raw_position();
+			uint8_t pos = _switch5.raw_position();
 			if (pos != last)
 			{
 				_stepper.set_speed(pos == switch5::LL ? fast : slow);

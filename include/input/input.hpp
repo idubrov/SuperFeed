@@ -21,24 +21,46 @@ public:
 			uint16_t position;
 			bool pressed;
 			char key;
-			hw::switch5::Position sw5;
+			uint8_t switch5;
 		};
 	};
+private:
+	struct State
+	{
+		constexpr State() :
+				_enc_position(0), _enc_pressed(false), _keypad(' '), _switch5(0)
+		{
+		}
 
+		State(State const volatile& state) :
+				_enc_position(state._enc_position), _enc_pressed(
+						state._enc_pressed), _keypad(state._keypad), _switch5(
+						state._switch5)
+		{
+		}
+
+		State& operator=(State const volatile & state)
+		{
+			*this = State(state);
+			return *this;
+		}
+		State& operator=(const State&) = default;
+
+		uint16_t _enc_position;
+		bool _enc_pressed;
+		char _keypad;
+		uint8_t _switch5;
+	};
 public:
 	input(hw::encoder& encoder, hw::keypad& keypad, hw::switch5& switch5) :
-			_encoder(encoder), _keypad(keypad), _switch5(switch5), _last_position(
-					0), _last_pressed(false), _last_key(hw::keypad::None), _last_switch(
-					hw::switch5::None)
+			_encoder(encoder), _keypad(keypad), _switch5(switch5), _current(), _last(),
+			_enc_debounce(0)
 	{
 	}
 
 	void reset()
 	{
-		_last_position = _encoder.raw_position();
-		_last_pressed = _encoder.raw_pressed();
-		_last_key = _keypad.raw_key();
-		_last_switch = _switch5.raw_position();
+		_last = _current;
 	}
 
 	hw::encoder& get_encoder()
@@ -50,16 +72,37 @@ public:
 
 	void debounce();
 
+	// All supported inputs
+	inline uint16_t enc_position()
+	{
+		return _current._enc_position;
+	}
+	inline bool enc_pressed()
+	{
+		return _current._enc_pressed;
+	}
+	inline char keypad()
+	{
+		return _current._keypad;
+	}
+	inline uint8_t switch5()
+	{
+		return _current._switch5;
+	}
+
 private:
 	hw::encoder& _encoder;
 	hw::keypad& _keypad;
 	hw::switch5& _switch5;
 
-	// Last state
-	uint16_t _last_position;
-	bool _last_pressed;
-	char _last_key;
-	hw::switch5::Position _last_switch;
+	// State
+	State volatile _current;
+	State _last;
+
+	// Debouncing state (only used in IRQ handler)
+	uint8_t _enc_debounce;
+	uint32_t _keypad_debounce;
+	uint16_t _switch_debounce;
 };
 
 #endif /* __INPUT_HPP */
