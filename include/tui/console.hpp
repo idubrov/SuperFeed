@@ -1,13 +1,14 @@
-#ifndef __INPUT_HPP
-#define __INPUT_HPP
+#ifndef __CONSOLE_HPP
+#define __CONSOLE_HPP
 
 #include "stm32f10x.h"
 
 #include "hw/switch5.hpp"
 #include "hw/encoder.hpp"
 #include "hw/keypad.hpp"
+#include "hw/lcd.hpp"
 
-class input
+class console
 {
 public:
 	enum Kind
@@ -24,31 +25,6 @@ public:
 			char key;
 			uint8_t switch5;
 		};
-	};
-public:
-	class Limit
-	{
-	public:
-		Limit(hw::encoder const& encoder, uint16_t limit) :
-				_encoder(encoder), _old_limit(encoder.get_limit())
-		{
-			_encoder.set_limit(limit);
-		}
-		~Limit()
-		{
-			if (_old_limit != 0)
-			{
-				_encoder.set_limit(_old_limit);
-			}
-		}
-
-		Limit(Limit&& other) : _encoder(other._encoder), _old_limit(other._old_limit)
-		{
-			other._old_limit = 0;
-		}
-	private:
-		hw::encoder const& _encoder;
-		uint16_t _old_limit;
 	};
 private:
 	struct State
@@ -78,11 +54,11 @@ private:
 		uint8_t _switch5;
 	};
 public:
-	input(TIM_TypeDef* debounce_timer, hw::encoder& encoder, hw::keypad& keypad,
-			hw::switch5& switch5) :
-			_debounce_timer(debounce_timer), _encoder(encoder), _keypad(keypad), _switch5(
-					switch5), _current(), _last(), _keypad_debounce(0), _switch_debounce(
-					0), _enc_debounce(0)
+	console(hw::lcd::HD44780& lcd, TIM_TypeDef* debounce_timer,
+			hw::encoder& encoder, hw::keypad& keypad, hw::switch5& switch5) :
+			_lcd(lcd), _debounce_timer(debounce_timer), _encoder(encoder), _keypad(
+					keypad), _switch5(switch5), _current(), _last(), _keypad_debounce(
+					0), _switch_debounce(0), _enc_debounce(0)
 	{
 	}
 
@@ -118,19 +94,26 @@ public:
 	{
 		_encoder.set_limit(limit);
 	}
-	inline uint16_t get_encoder_limit()
+	inline void set_encoder_state(uint32_t state)
 	{
-		return _encoder.get_limit();
+		_encoder.set_state(state);
 	}
-
-	inline Limit encoder_limit(uint16_t limit)
+	inline uint32_t get_encoder_state()
 	{
-		return
-		{	_encoder, limit};
+		return _encoder.get_state();
+	}
+	inline hw::lcd::HD44780 const& lcd() const
+	{
+		return _lcd;
 	}
 
 private:
+	// Outputs
+	hw::lcd::HD44780& _lcd;
+
+	// Inputs
 	TIM_TypeDef* _debounce_timer;
+
 	hw::encoder& _encoder;
 	hw::keypad& _keypad;
 	hw::switch5& _switch5;
@@ -145,4 +128,4 @@ private:
 	uint8_t _enc_debounce;
 };
 
-#endif /* __INPUT_HPP */
+#endif /* __CONSOLE_HPP */

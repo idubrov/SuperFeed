@@ -1,8 +1,7 @@
 #ifndef __SETTINGS_HPP
 #define __SETTINGS_HPP
 
-#include "config.hpp"
-#include "input/input.hpp"
+#include "tui/console.hpp"
 #include "tui/inputs.hpp"
 
 struct setting
@@ -17,8 +16,8 @@ struct setting
 class settings
 {
 public:
-	settings(input& input, hw::lcd::HD44780& lcd) :
-			_input(input), _lcd(lcd), _scroll(0), _selected(0)
+	settings(console& console) :
+			_console(console), _scroll(0), _selected(0)
 	{
 	}
 
@@ -26,8 +25,7 @@ public:
 private:
 	void redraw();
 private:
-	input& _input;
-	hw::lcd::HD44780& _lcd;
+	console& _console;
 
 	uint16_t _scroll;
 	uint16_t _selected;

@@ -15,45 +15,46 @@ const uint16_t settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 
 void settings::run()
 {
-	_lcd << lcd::clear();
-	_input.set_encoder_limit(2);
+	auto& lcd = _console.lcd();
+	lcd << lcd::clear();
+	_console.set_encoder_limit(2);
 	redraw();
 
 	while (true)
 	{
-		auto ev = _input.read();
-		if (ev.kind == input::Nothing)
+		auto ev = _console.read();
+		if (ev.kind == console::Nothing)
 		{
 			util::delay_ms(100);
 			continue;
 		}
-		if (ev.kind == input::EncoderMove)
+		if (ev.kind == console::EncoderMove)
 		{
 			_selected = ev.position;
-			_lcd << lcd::position(0, 3) << ev.position;
 			redraw();
 		}
-		if (ev.kind == input::EncoderButton && ev.pressed)
+		if (ev.kind == console::EncoderButton && ev.pressed)
 		{
 			uint8_t x = strlen(Options[_selected].title) + 3;
-			tui::spinner(_lcd, _input, x, _selected - _scroll);
+			tui::spinner(_console, x, _selected - _scroll);
 		}
 	}
 }
 
 void settings::redraw()
 {
+	auto& lcd = _console.lcd();
 	for (uint16_t y = 0; y < 4; y++)
 	{
-		_lcd << lcd::position(0, y);
+		lcd << lcd::position(0, y);
 		uint16_t option = _scroll + y;
 		if (option >= OptionsCount)
 			break;
 
 		if (_selected == option)
-			_lcd << '>';
+			lcd << '>';
 		else
-			_lcd << ' ';
-		_lcd << Options[option].title << ':';
+			lcd << ' ';
+		lcd << Options[option].title << ':';
 	}
 }

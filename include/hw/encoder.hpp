@@ -40,9 +40,14 @@ public:
 		_timer->ARR = (limit << 1) - 1;
 		_timer->CNT = 0;
 	}
-	inline uint16_t get_limit() const
+	uint32_t get_state() const
 	{
-		return (_timer->ARR + 1) >> 1;
+		return (_timer->ARR << 16) | _timer->CNT;
+	}
+	void set_state(uint32_t state) const
+	{
+		_timer->ARR = state >> 16;
+		_timer->CNT = state & 0xffff;
 	}
 private:
 	// Should be called from SysTick interrupt handler.

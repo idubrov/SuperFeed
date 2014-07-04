@@ -1,5 +1,5 @@
 #include "main.hpp"
-#include "input/input.hpp"
+#include "tui/console.hpp"
 #include "util.hpp"
 #include "simstream.hpp"
 #include "stepper.hpp"
@@ -48,8 +48,9 @@ public:
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
 			// Use page 126 and 127 for persistent storage
-			_eeprom((uint32_t)&__eeprom_start, (uint32_t)&__eeprom_pages), _input(TIM7, _encoder,
-					_keypad, _switch5), _settings(_input, _lcd)
+			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
+					_lcd, TIM7, _encoder, _keypad, _switch5), _settings(
+					_console)
 	{
 	}
 
@@ -86,7 +87,7 @@ public:
 		_keypad.initialize();
 		_switch5.initialize();
 		_encoder.initialize();
-		_input.initialize();
+		_console.initialize();
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_driver.initialize();
@@ -105,26 +106,26 @@ public:
 //			;
 		while (1)
 		{
-			auto ev = _input.read();
-			if (ev.kind == input::Nothing)
+			auto ev = _console.read();
+			if (ev.kind == console::Nothing)
 			{
 				util::delay_ms(100);
 				continue;
 			}
 
-			if (ev.kind == input::EncoderMove)
+			if (ev.kind == console::EncoderMove)
 			{
 				_lcd << "M";
 			}
-			else if (ev.kind == input::EncoderButton)
+			else if (ev.kind == console::EncoderButton)
 			{
 				_lcd << "B";
 			}
-			else if (ev.kind == input::Keypad)
+			else if (ev.kind == console::Keypad)
 			{
 				_lcd << "K";
 			}
-			else if (ev.kind == input::Switch5)
+			else if (ev.kind == console::Switch5)
 			{
 				_lcd << "S";
 			}
@@ -179,7 +180,7 @@ private:
 	driver _driver;
 	stepper::controller _stepper;
 	eeprom _eeprom;
-	input _input;
+	console _console;
 	settings _settings;
 private:
 	static application g_app;
@@ -211,5 +212,5 @@ extern "C" void __attribute__ ((section(".after_vectors")))
 TIM7_IRQHandler()
 {
 	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
-	application::instance()._input.debounce();
+	application::instance()._console.debounce();
 }

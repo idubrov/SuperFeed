@@ -1,6 +1,6 @@
-#include "input/input.hpp"
+#include "tui/console.hpp"
 
-void input::initialize()
+void console::initialize()
 {
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -23,7 +23,7 @@ void input::initialize()
 	TIM_Cmd(_debounce_timer, ENABLE);
 }
 
-void input::debounce()
+void console::debounce()
 {
 	// Query all hardware inputs and apply debouncing to them
 
@@ -82,7 +82,7 @@ void input::debounce()
 	}
 }
 
-input::Event input::read()
+console::Event console::read()
 {
 	Event event;
 	event.kind = Nothing;
