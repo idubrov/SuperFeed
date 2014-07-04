@@ -97,55 +97,38 @@ public:
 
 	void run()
 	{
-		_encoder.limit(30);
-		while (1)
-		{
-			_lcd << lcd::position(0, 0) << "E: " << _input.enc_position() << ' ' <<
-					(_input.enc_pressed() ? 'P' : 'N');
-			_lcd << lcd::position(0, 1) << "S: " << _input.switch5() << " K: " << _input.keypad();
+		_lcd.clear();
 
-			util::delay_ms(50);
-		}
-//		_encoder.limit(20);
-//		_lcd.clear();
-//
-//		_settings.run();
+		_settings.run();
 //
 //		while (1)
 //			;
-//		while (1)
-//		{
-//			auto ev = _input.read();
-//			if (ev.kind == input::Nothing)
-//			{
-//				util::delay_ms(100);
-//				continue;
-//			}
-//
-//			if (ev.kind == input::EncoderMove)
-//			{
-//				_lcd << "M";
-//			}
-//			else if (ev.kind == input::EncoderButton)
-//			{
-//				_lcd << "B";
-//			}
-//			else if (ev.kind == input::Keypad)
-//			{
-//				_lcd << "K";
-//			}
-//			else if (ev.kind == input::Switch5)
-//			{
-//				_lcd << "S";
-//			}
-//			_lcd << lcd::position(0, 0) << "Switch: " << _switch5.position()
-//					<< ' ' << radix<2>((GPIOC->IDR >> GPIO_PinSource10) & 7);
-//			_lcd << lcd::position(0, 1) << "Encoder: "
-//					<< (_encoder.pressed() ? 'P' : 'N') << ' '
-//					<< _encoder.position() << "  ";
-//			_lcd << lcd::position(0, 2) << "Keypad: " << (char) _keypad.key();
-//
-//		}
+		while (1)
+		{
+			auto ev = _input.read();
+			if (ev.kind == input::Nothing)
+			{
+				util::delay_ms(100);
+				continue;
+			}
+
+			if (ev.kind == input::EncoderMove)
+			{
+				_lcd << "M";
+			}
+			else if (ev.kind == input::EncoderButton)
+			{
+				_lcd << "B";
+			}
+			else if (ev.kind == input::Keypad)
+			{
+				_lcd << "K";
+			}
+			else if (ev.kind == input::Switch5)
+			{
+				_lcd << "S";
+			}
+		}
 
 //		// STEPPER.....
 		bool pressed = false;

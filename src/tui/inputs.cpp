@@ -4,8 +4,7 @@ using namespace ::hw;
 
 uint16_t tui::spinner(lcd::HD44780& lcd, input& input, uint8_t x, uint8_t y)
 {
-	input.get_encoder().limit(9);
-	input.get_encoder().position(0);
+	auto limit(input.encoder_limit(9));
 	input.reset();
 
 	lcd << lcd::position(x, y) << "1 ";

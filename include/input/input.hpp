@@ -25,6 +25,31 @@ public:
 			uint8_t switch5;
 		};
 	};
+public:
+	class Limit
+	{
+	public:
+		Limit(hw::encoder const& encoder, uint16_t limit) :
+				_encoder(encoder), _old_limit(encoder.get_limit())
+		{
+			_encoder.set_limit(limit);
+		}
+		~Limit()
+		{
+			if (_old_limit != 0)
+			{
+				_encoder.set_limit(_old_limit);
+			}
+		}
+
+		Limit(Limit&& other) : _encoder(other._encoder), _old_limit(other._old_limit)
+		{
+			other._old_limit = 0;
+		}
+	private:
+		hw::encoder const& _encoder;
+		uint16_t _old_limit;
+	};
 private:
 	struct State
 	{
@@ -68,11 +93,6 @@ public:
 		_last = _current;
 	}
 
-	hw::encoder& get_encoder()
-	{
-		return _encoder;
-	}
-
 	Event read();
 
 	void debounce();
@@ -93,6 +113,20 @@ public:
 	inline uint8_t switch5()
 	{
 		return _current._switch5;
+	}
+	inline void set_encoder_limit(uint16_t limit)
+	{
+		_encoder.set_limit(limit);
+	}
+	inline uint16_t get_encoder_limit()
+	{
+		return _encoder.get_limit();
+	}
+
+	inline Limit encoder_limit(uint16_t limit)
+	{
+		return
+		{	_encoder, limit};
 	}
 
 private:

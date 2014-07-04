@@ -16,6 +16,7 @@ const uint16_t settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 void settings::run()
 {
 	_lcd << lcd::clear();
+	_input.set_encoder_limit(2);
 	redraw();
 
 	while (true)
@@ -28,7 +29,8 @@ void settings::run()
 		}
 		if (ev.kind == input::EncoderMove)
 		{
-			_selected = ev.position % OptionsCount;
+			_selected = ev.position;
+			_lcd << lcd::position(0, 3) << ev.position;
 			redraw();
 		}
 		if (ev.kind == input::EncoderButton && ev.pressed)
