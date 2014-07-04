@@ -10,7 +10,8 @@ const uint16_t settings::Microsteps[] =
 const setting settings::Options[] =
 {
 { "Microsteps", 1, 1, Microsteps, sizeof(Microsteps) / sizeof(Microsteps[0]) },
-{ "Dummy", 1, 1, nullptr, 0 }
+{ "Dummy", 1, 1, nullptr, 0 },
+{ "Dummy2", 1, 1, nullptr, 0 }
 };
 const uint16_t settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 
@@ -18,7 +19,7 @@ void settings::run()
 {
 	auto& lcd = _console.lcd();
 	lcd << lcd::clear();
-	_console.set_encoder_limit(2);
+	_console.set_encoder_limit(sizeof(Options) / sizeof(Options[0]));
 	redraw();
 
 	while (true)
