@@ -1,6 +1,6 @@
 #include "tui/console.hpp"
 
-void console::initialize()
+void tui::console::initialize()
 {
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -23,7 +23,7 @@ void console::initialize()
 	TIM_Cmd(_debounce_timer, ENABLE);
 }
 
-void console::debounce()
+void tui::console::debounce()
 {
 	// Query all hardware inputs and apply debouncing to them
 
@@ -82,7 +82,7 @@ void console::debounce()
 	}
 }
 
-console::Event console::read()
+tui::console::Event tui::console::read()
 {
 	Event event;
 	event.kind = Nothing;

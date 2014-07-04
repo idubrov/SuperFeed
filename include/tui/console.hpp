@@ -3,10 +3,14 @@
 
 #include "stm32f10x.h"
 
+// Low-level input/output hardware
 #include "hw/switch5.hpp"
 #include "hw/encoder.hpp"
 #include "hw/keypad.hpp"
 #include "hw/lcd.hpp"
+
+namespace tui
+{
 
 class console
 {
@@ -127,5 +131,6 @@ private:
 	uint16_t _switch_debounce;
 	uint8_t _enc_debounce;
 };
+}
 
 #endif /* __CONSOLE_HPP */

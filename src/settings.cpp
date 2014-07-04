@@ -3,6 +3,7 @@
 #include <cstring>
 
 using namespace ::hw;
+using namespace ::tui;
 
 const uint16_t settings::Microsteps[] =
 { 1, 2, 4, 8, 10, 16, 32 };

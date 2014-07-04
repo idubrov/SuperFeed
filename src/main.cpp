@@ -9,6 +9,7 @@
 #include "stm32f10x_gpio.h"
 
 using namespace ::hw;
+using namespace ::tui;
 
 extern "C"
 {
