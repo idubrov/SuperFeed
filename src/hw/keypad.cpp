@@ -9,7 +9,7 @@ void hw::keypad::initialize()
 	// Columns, input
 	GPIO_StructInit(&GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = 0x0f << _columns;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_Init(_port, &GPIO_InitStructure);
 
 	// Rows, output
@@ -19,19 +19,19 @@ void hw::keypad::initialize()
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_port, &GPIO_InitStructure);
 
-	// Set all rows to zero
-	GPIO_ResetBits(_port, 0x0f << _rows);
+	// Set all rows to one
+	GPIO_SetBits(_port, 0x0f << _rows);
 }
 
 uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 	switch (xstate) {
-	case 14: // 1110
+	case 1: // 0001
 		return offset + 4;
-	case 13: // 1101
+	case 2: // 0010
 		return offset + 3;
-	case 11: // 1011
+	case 4: // 0100
 		return offset + 2;
-	case 7: // 0111
+	case 8: // 1000
 		return offset + 1;
 	}
 	// Multiple columns match, return nothing
@@ -41,19 +41,21 @@ uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 
 char hw::keypad::raw_key() const {
 	uint8_t xstate = column_state();
-	if (xstate == 0xf) {
-		// All '1', no buttons are pressed
+	if (xstate == 0) {
+		// All '0', no buttons are pressed
 		return None;
 	}
 
 	// Let's find row by scanning
 	for (int y = 0; y < 4; y++) {
-		_port->BSRR = (1 << (y + _rows)); // Set row to '1', to check if column state would change back to all '1's
+		// Set row to '0', to check if column state would change back to all '0's
+		_port->BRR = (1 << (y + _rows));
 		uint8_t xstate2 = column_state();
-		_port->BRR = (1 << (y + _rows)); // Set row back to '0'
+		// Set row back to '1'
+		_port->BSRR = (1 << (y + _rows));
 
 		// Either key was depressed or we found matching row
-		if (xstate2 == 0xf) {
+		if (xstate2 == 0) {
 			// Column state is the same (which means same key is still pressed)
 			if (column_state() == xstate) {
 				// Now we are sure we found matching row
