@@ -44,7 +44,6 @@ PROVIDE ( _Heap_Limit = __stack - __Main_Stack_Size ) ;
  */
 ENTRY(_start)
 
-
 /* Sections Definitions */
 
 SECTIONS
@@ -188,6 +187,14 @@ SECTIONS
     . = ALIGN(4);
     _etext = .;
     __etext = .;
+    
+    /* Check that EEPROM emulation area fits at the end of the flash */
+    .check_eeprom : 
+    {
+    	. = ALIGN(__page_size);
+    	. = . + __eeprom_pages * __page_size;
+    	. = ALIGN(__page_size);
+    } >FLASH
 
 	/* 
      * This address is used by the startup code to 

@@ -24,6 +24,11 @@ MEMORY
   MEMORY_ARRAY (xrw)  : ORIGIN = 0x00000000, LENGTH = 0
 }
 
+__page_size = 1K;		/* Flash page size */ 
+__eeprom_pages = 2; 	/* Use 2 pages for EEPROM emulation */
+__eeprom_start = ORIGIN(FLASH) + LENGTH(FLASH) - __eeprom_pages * __page_size;
+__eeprom_end = ORIGIN(FLASH) + LENGTH(FLASH);
+
 /*
  * For external ram use something like:
 

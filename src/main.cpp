@@ -15,6 +15,9 @@ extern "C"
 void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
 void TIM7_IRQHandler(); // Input debouncing
+
+extern unsigned int __eeprom_start;
+extern unsigned int __eeprom_pages;
 }
 
 // First, enable clocks for utilized subsystems
@@ -45,8 +48,8 @@ public:
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
 			// Use page 126 and 127 for persistent storage
-			_eeprom(FLASH_BASE + 126 * 0x400, 2), _input(TIM7, _encoder, _keypad,
-					_switch5), _settings(_input, _lcd)
+			_eeprom((uint32_t)&__eeprom_start, (uint32_t)&__eeprom_pages), _input(TIM7, _encoder,
+					_keypad, _switch5), _settings(_input, _lcd)
 	{
 	}
 
@@ -94,12 +97,13 @@ public:
 
 	void run()
 	{
-
 		_encoder.limit(30);
-		while(1) {
+		while (1)
+		{
 			_lcd << lcd::position(0, 0) << "E: " << _input.enc_position() << ' ' <<
 					(_input.enc_pressed() ? 'P' : 'N');
 			_lcd << lcd::position(0, 1) << "S: " << _input.switch5() << " K: " << _input.keypad();
+
 			util::delay_ms(50);
 		}
 //		_encoder.limit(20);
