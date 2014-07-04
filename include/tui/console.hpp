@@ -30,6 +30,36 @@ public:
 			uint8_t switch5;
 		};
 	};
+public:
+	class state
+	{
+	public:
+		state(console& console) :
+				_console(console), _moved(false), _encoder_state(console.get_encoder_state())
+		{
+		}
+		state(state const&) = delete;
+		state& operator=(state const&) = delete;
+		state& operator=(state&&) = delete;
+
+		state(state&& other) :
+				_console(other._console), _moved(false), _encoder_state(other._encoder_state)
+		{
+			other._moved = true;
+		}
+
+		~state()
+		{
+			if (!_moved)
+			{
+				_console.set_encoder_state(_encoder_state);
+			}
+		}
+	private:
+		console& _console;
+		bool _moved;
+		uint32_t _encoder_state;
+	};
 private:
 	struct State
 	{
@@ -98,6 +128,15 @@ public:
 	{
 		_encoder.set_limit(limit);
 	}
+	inline hw::lcd::HD44780 const& lcd() const
+	{
+		return _lcd;
+	}
+	inline state guard_state()
+	{
+		return state(*this);
+	}
+private:
 	inline void set_encoder_state(uint32_t state)
 	{
 		_encoder.set_state(state);
@@ -105,10 +144,6 @@ public:
 	inline uint32_t get_encoder_state()
 	{
 		return _encoder.get_state();
-	}
-	inline hw::lcd::HD44780 const& lcd() const
-	{
-		return _lcd;
 	}
 
 private:

@@ -5,7 +5,8 @@ using namespace ::hw;
 
 uint16_t tui::spinner(console& console, uint8_t x, uint8_t y)
 {
-	auto state = console.get_encoder_state();
+	auto state(console.guard_state());
+
 	console.set_encoder_limit(9);
 	auto& lcd = console.lcd();
 
@@ -30,11 +31,9 @@ uint16_t tui::spinner(console& console, uint8_t x, uint8_t y)
 		if (ev.kind == console::EncoderButton && ev.pressed)
 		{
 			lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
-			console.set_encoder_state(state);
 			return pos;
 		}
 	}
 
-	console.set_encoder_state(state);
 	return 0;
 }
