@@ -17,7 +17,12 @@ class console
 public:
 	enum Kind
 	{
-		Nothing, Keypad, EncoderMove, EncoderButton, Switch5
+		Nothing,
+		Keypad,
+		EncoderMove,
+		EncoderPressed,
+		EncoderUnpressed,
+		Switch5
 	};
 	struct Event
 	{
@@ -25,7 +30,6 @@ public:
 		union
 		{
 			uint16_t position;
-			bool pressed;
 			char key;
 			uint8_t switch5;
 		};

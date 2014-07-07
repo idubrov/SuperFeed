@@ -1,6 +1,7 @@
-#include "tui/menu/settings.hpp"
-#include "tui/inputs.hpp"
 #include <cstring>
+
+#include "tui/menu/settings.hpp"
+#include "tui/widgets.hpp"
 
 using namespace ::hw;
 using namespace ::tui;
@@ -35,10 +36,11 @@ void settings::run()
 			_selected = ev.position;
 			redraw();
 		}
-		if (ev.kind == console::EncoderButton && ev.pressed)
+		if (ev.kind == console::EncoderPressed)
 		{
 			uint8_t x = strlen(Options[_selected].title) + 3;
-			tui::spinner(_console, x, _selected - _scroll);
+			tui::spinner(_console, x, _selected - _scroll,
+					1, 10, 5);
 		}
 	}
 }

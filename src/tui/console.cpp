@@ -96,8 +96,7 @@ tui::console::Event tui::console::read()
 	}
 	else if (_last._enc_pressed != curr._enc_pressed)
 	{
-		event.kind = EncoderButton;
-		event.pressed = curr._enc_pressed;
+		event.kind = curr._enc_pressed ? EncoderPressed : EncoderUnpressed;
 	}
 	else if (_last._keypad != curr._keypad)
 	{

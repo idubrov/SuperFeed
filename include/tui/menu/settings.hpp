@@ -2,7 +2,7 @@
 #define __SETTINGS_HPP
 
 #include "tui/console.hpp"
-#include "tui/inputs.hpp"
+#include "tui/widgets.hpp"
 
 struct setting
 {

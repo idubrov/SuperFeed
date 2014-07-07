@@ -118,9 +118,13 @@ public:
 			{
 				_lcd << "M";
 			}
-			else if (ev.kind == console::EncoderButton)
+			else if (ev.kind == console::EncoderPressed)
 			{
 				_lcd << "B";
+			}
+			else if (ev.kind == console::EncoderUnpressed)
+			{
+				_lcd << "U";
 			}
 			else if (ev.kind == console::Keypad)
 			{
