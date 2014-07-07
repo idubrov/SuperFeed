@@ -117,21 +117,9 @@ public:
 			{
 				_lcd << "M";
 			}
-			else if (ev.kind == console::EncoderPressed)
+			else if (ev.kind == console::ButtonPressed)
 			{
-				_lcd << "B";
-			}
-			else if (ev.kind == console::EncoderUnpressed)
-			{
-				_lcd << "U";
-			}
-			else if (ev.kind == console::Keypad)
-			{
-				_lcd << "K";
-			}
-			else if (ev.kind == console::Switch5)
-			{
-				_lcd << "S";
+				_lcd << ev.key;
 			}
 		}
 

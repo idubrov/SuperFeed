@@ -96,17 +96,22 @@ tui::console::Event tui::console::read()
 	}
 	else if (_last._enc_pressed != curr._enc_pressed)
 	{
-		event.kind = curr._enc_pressed ? EncoderPressed : EncoderUnpressed;
+		event.kind = curr._enc_pressed ? ButtonPressed : ButtonUnpressed;
+		event.key = Encoder;
 	}
 	else if (_last._keypad != curr._keypad)
 	{
-		event.kind = Keypad;
-		event.key = curr._keypad;
-	}
-	else if (_last._switch5 != curr._switch5)
-	{
-		event.kind = Switch5;
-		event.switch5 = curr._switch5;
+		if (_last._keypad == hw::keypad::None) {
+			event.kind = ButtonPressed;
+			event.key = curr._keypad;
+		} else {
+			event.kind = ButtonUnpressed;
+			event.key = _last._keypad;
+
+			// If current is not 'None', make it as one to convert button change
+			// into two events (unpressed and then pressed).
+			curr._keypad == hw::keypad::None;
+		}
 	}
 	_last = curr;
 	return event;

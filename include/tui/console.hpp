@@ -15,14 +15,20 @@ namespace tui
 class console
 {
 public:
+	enum Button
+	{
+		// Note that these should not intersect with keypad buttons
+		Left = '<',
+		Right = '>',
+		Middle = '.',
+		Encoder = '@'
+	};
 	enum Kind
 	{
 		Nothing,
-		Keypad,
-		EncoderMove,
-		EncoderPressed,
-		EncoderUnpressed,
-		Switch5
+		ButtonPressed,
+		ButtonUnpressed,
+		EncoderMove
 	};
 	struct Event
 	{
@@ -31,7 +37,6 @@ public:
 		{
 			uint16_t position;
 			char key;
-			uint8_t switch5;
 		};
 	};
 public:
