@@ -1,6 +1,5 @@
 #include "main.hpp"
 #include "tui/console.hpp"
-#include "util.hpp"
 #include "simstream.hpp"
 #include "stepper.hpp"
 #include "eeprom.hpp"
@@ -81,8 +80,8 @@ public:
 		timerIT.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&timerIT);
 
-		// Setup util module
-		util::setup();
+		// Setup core hardware (on-board LEDs and delay timer)
+		core::setup();
 
 		// Setup all used hardware
 		_keypad.initialize();
@@ -110,7 +109,7 @@ public:
 			auto ev = _console.read();
 			if (ev.kind == console::Nothing)
 			{
-				util::delay_ms(100);
+				core::delay_ms(100);
 				continue;
 			}
 

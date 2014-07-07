@@ -28,7 +28,7 @@ void settings::run()
 		auto ev = _console.read();
 		if (ev.kind == console::Nothing)
 		{
-			util::delay_ms(100);
+			core::delay_ms(100);
 			continue;
 		}
 		if (ev.kind == console::EncoderMove)

@@ -1,6 +1,7 @@
 #ifndef __STEPPER_HPP
 #define __STEPPER_HPP
 
+#include "config.hpp"
 #include "hw/driver.hpp"
 #include "stepgen.hpp"
 #include "util.hpp"

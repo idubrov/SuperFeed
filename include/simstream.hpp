@@ -1,7 +1,7 @@
 #ifndef __SIMSTREAM_HPP
 #define __SIMSTREAM_HPP
 
-#include <limits>
+#include "util.hpp"
 
 template<typename S>
 S const& operator<<(S const& sink, char c)
@@ -20,40 +20,47 @@ S const& operator<<(S const& sink, char const* str)
 	return sink;
 }
 
-template<typename N, int Radix>
-struct __radix
+enum Alignment
 {
-	N value;
+	Left, Right
 };
 
-template<int Radix>
-__radix <int, Radix> radix(int value)
+template<typename N, int R, Alignment A>
+struct __format
+{
+	N value;
+	int padding;
+};
+
+template<int Radix = 10, Alignment Align = Left>
+__format <int, Radix, Align> format(int value, int padding = 0)
 {
 	return
-	{	value};
+	{	value, padding};
 }
 
 template<typename S, typename N>
 S const& operator<<(S const& sink, N n)
 {
-	sink << radix<10>(n);
+	sink << format<>(n);
 	return sink;
 }
 
-template<typename N, int Radix>
+template<typename N, int R>
 constexpr int buf_size(N value = std::numeric_limits<int>::max(),
 		int result = 0)
 {
-	return value == 0 ? result : buf_size<N, Radix>(value / Radix, result + 1);
+	return value == 0 ? result : buf_size<N, R>(value / R, result + 1);
 }
 
-template<typename S, typename N, int Radix = 10>
-S const& operator<<(S const& sink, __radix <N, Radix> nn)
+template<typename S, typename N, int R = 10, Alignment A>
+S const& operator<<(S const& sink, __format <N, R, A> nn)
 {
-	constexpr int size = buf_size<N, Radix>();
+	constexpr int size = util::digits<N, R>();
 	char buf[size];
 	int pos = size;
 	int n = nn.value;
+	int padding = nn.padding;
 
 	// FIXME: won't work for min_value
 	if (n < 0)
@@ -64,14 +71,25 @@ S const& operator<<(S const& sink, __radix <N, Radix> nn)
 	do
 	{
 		int m = n;
-		n /= Radix;
-		char c = m - Radix * n;
+		n /= R;
+		char c = m - R * n;
 		buf[--pos] = c < 10 ? c + '0' : c + 'a' - 10;
 	} while (n);
 
+	int printed = size - pos;
+	if (A == Right)
+	{
+		for (int i = printed; i < padding; i++)
+			sink << ' ';
+	}
 	while (pos < size)
 	{
 		sink << buf[pos++];
+	}
+	if (A == Left)
+	{
+		for (int i = printed; i < padding; i++)
+			sink << ' ';
 	}
 
 	return sink;

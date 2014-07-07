@@ -17,7 +17,7 @@ void hw::lcd::HD44780::initialize() const
 	GPIO_Init(_data_port, &GPIO_InitStructure);
 
 	// Need to wait at least 40ms after Vcc rises to 2.7V
-	util::delay_ms(50);
+	core::delay_ms(50);
 
 	_control_port->BRR = _rs_pin;
 	wait_address();
@@ -28,10 +28,10 @@ void hw::lcd::HD44780::initialize() const
 		// Set to 8-bit mode, 2 line, 5x10 font
 		// Display off, clear, entry mode set
 		send8bits(FunctionSet | Bit8 | Line2 | Dots5x10); // Send command for the first time
-		util::delay_us(4500); // Wait for more than 4.1ms
+		core::delay_us(4500); // Wait for more than 4.1ms
 
 		pulse_enable(); // Repeat for the second time
-		util::delay_us(150); // Wait for more than 100us
+		core::delay_us(150); // Wait for more than 100us
 
 		pulse_enable(); // Repeat for the third time
 		wait_ready();
@@ -40,10 +40,10 @@ void hw::lcd::HD44780::initialize() const
 	{
 		// Run initialization procedure for the display. We use 8-bit mode here
 		send4bits((FunctionSet | Bit8) >> 4);
-		util::delay_us(4500); // Wait for more than 4.1ms
+		core::delay_us(4500); // Wait for more than 4.1ms
 
 		pulse_enable(); // Repeat for the second time
-		util::delay_us(150); // Wait for more than 100us
+		core::delay_us(150); // Wait for more than 100us
 
 		pulse_enable(); // Repeat for the third time
 		wait_ready(); // Wait fo FunctionSet to finish
@@ -70,7 +70,7 @@ void hw::lcd::HD44780::write(char data) const
 	send(data);
 	wait_ready();
 	// It takes 4us more (tADD) to update address counter
-	util::delay_us(5);
+	core::delay_us(5);
 }
 
 void hw::lcd::HD44780::command(uint8_t cmd) const
@@ -101,9 +101,9 @@ void hw::lcd::HD44780::wait_busy_flag() const
 	do
 	{
 		_control_port->BSRR = _e_pin;
-		util::delay_us(1); // minimum delay is 360+25 ns (tDDR + tER)
+		core::delay_us(1); // minimum delay is 360+25 ns (tDDR + tER)
 		busy = (_data_port->IDR & (0x80 << _data_shift)) != 0;
-		util::delay_us(1); // minimum delay is 450ns (PWen)
+		core::delay_us(1); // minimum delay is 450ns (PWen)
 		_control_port->BRR = _e_pin;
 	} while (busy);
 	// tAH is 10ns, which is less than one cycle. So we don't have to wait.

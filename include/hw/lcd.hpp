@@ -1,7 +1,7 @@
 #ifndef __LCD_HPP
 #define __LCD_HPP
 
-#include "util.hpp"
+#include "hw/core.hpp"
 #include "simstream.hpp"
 
 namespace hw
@@ -146,14 +146,14 @@ private:
 		}
 		else
 		{
-			util::delay_us(delay);
+			core::delay_us(delay);
 		}
 	}
 
 	inline void pulse_enable() const
 	{
 		_control_port->BSRR = _e_pin;
-		util::delay_us(1); // minimum delay is 450 ns
+		core::delay_us(1); // minimum delay is 450 ns
 		_control_port->BRR = _e_pin;
 	}
 

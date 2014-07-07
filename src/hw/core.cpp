@@ -1,9 +1,9 @@
-#include "util.hpp"
+#include "hw/core.hpp"
 
 using namespace ::cfg::util;
 
 // Configuration
-void util::setup()
+void hw::core::setup()
 {
 	// Get system frequency
 	RCC_ClocksTypeDef RCC_Clocks;
@@ -33,7 +33,7 @@ void util::setup()
 	GPIO_Init(LedPort, &GPIO_InitStructure);
 }
 
-void util::delay_us(uint16_t usec)
+void hw::core::delay_us(uint16_t usec)
 {
 	DelayTimer->ARR = usec;
 	DelayTimer->SR = ~TIM_FLAG_Update;
@@ -42,10 +42,10 @@ void util::delay_us(uint16_t usec)
 		;
 }
 
-void util::delay_ms(uint16_t msec)
+void hw::core::delay_ms(uint16_t msec)
 {
 	while (msec--)
 	{
-		util::delay_us(1000);
+		core::delay_us(1000);
 	}
 }
