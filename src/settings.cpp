@@ -36,7 +36,7 @@ void settings::run()
 			_selected = ev.position;
 			redraw();
 		}
-		if (ev.kind == console::EncoderPressed)
+		if (ev.kind == console::ButtonPressed)
 		{
 			uint8_t x = strlen(Options[_selected].title) + 3;
 			tui::spinner(_console, x, _selected - _scroll,

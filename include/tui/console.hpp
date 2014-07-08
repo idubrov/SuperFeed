@@ -4,7 +4,7 @@
 #include "stm32f10x.h"
 
 // Low-level input/output hardware
-#include "hw/switch5.hpp"
+#include "hw/buttons.hpp"
 #include "hw/encoder.hpp"
 #include "hw/keypad.hpp"
 #include "hw/lcd.hpp"
@@ -18,17 +18,14 @@ public:
 	enum Button
 	{
 		// Note that these should not intersect with keypad buttons
-		Left = '<',
-		Right = '>',
-		Middle = '.',
-		Encoder = '@'
+		LeftButton = '<',
+		RightButton = '>',
+		SelectButton = '.',
+		EncoderButton = '@'
 	};
 	enum Kind
 	{
-		Nothing,
-		ButtonPressed,
-		ButtonUnpressed,
-		EncoderMove
+		Nothing, ButtonPressed, ButtonUnpressed, EncoderMove
 	};
 	struct Event
 	{
@@ -39,12 +36,12 @@ public:
 			char key;
 		};
 	};
-public:
-	class state
+private:
+	struct state
 	{
-	public:
 		state(console& console) :
-				_console(console), _moved(false), _encoder_state(console.get_encoder_state())
+				_console(console), _moved(false), _encoder_state(
+						console.get_encoder_state())
 		{
 		}
 		state(state const&) = delete;
@@ -52,7 +49,8 @@ public:
 		state& operator=(state&&) = delete;
 
 		state(state&& other) :
-				_console(other._console), _moved(false), _encoder_state(other._encoder_state)
+				_console(other._console), _moved(false), _encoder_state(
+						other._encoder_state)
 		{
 			other._moved = true;
 		}
@@ -70,38 +68,45 @@ public:
 		uint32_t _encoder_state;
 	};
 private:
-	struct State
+	struct InputState
 	{
-		constexpr State() :
-				_enc_position(0), _enc_pressed(false), _keypad(' '), _switch5(0)
+		// Bit to button key
+		constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, EncoderButton};
+		enum ButtonBits {
+			LeftBit = 1,
+			SelectBit = 2,
+			RightBit = 4,
+			EncoderBit = 8
+		};
+
+		constexpr InputState() :
+				_enc_position(0), _keypad(' '), _buttons(0)
 		{
 		}
 
-		State(State const volatile& state) :
-				_enc_position(state._enc_position), _enc_pressed(
-						state._enc_pressed), _keypad(state._keypad), _switch5(
-						state._switch5)
+		InputState(InputState const volatile& state) :
+				_enc_position(state._enc_position), _keypad(state._keypad), _buttons(
+						state._buttons)
 		{
 		}
 
-		State& operator=(State const volatile & state)
+		InputState& operator=(InputState const volatile & state)
 		{
-			*this = State(state);
+			*this = InputState(state);
 			return *this;
 		}
-		State& operator=(const State&) = default;
+		InputState& operator=(const InputState&) = default;
 
 		uint16_t _enc_position;
-		bool _enc_pressed;
 		char _keypad;
-		uint8_t _switch5;
+		uint8_t _buttons; // Buttons & encoder button
 	};
 public:
 	console(hw::lcd::HD44780& lcd, TIM_TypeDef* debounce_timer,
-			hw::encoder& encoder, hw::keypad& keypad, hw::switch5& switch5) :
+			hw::encoder& encoder, hw::keypad& keypad, hw::buttons& buttons) :
 			_lcd(lcd), _debounce_timer(debounce_timer), _encoder(encoder), _keypad(
-					keypad), _switch5(switch5), _current(), _last(), _keypad_debounce(
-					0), _switch_debounce(0), _enc_debounce(0)
+					keypad), _buttons(buttons), _current(), _last(), _keypad_debounce(
+					0), _buttons_debounce(0), _enc_debounce(0)
 	{
 	}
 
@@ -123,15 +128,23 @@ public:
 	}
 	inline bool enc_pressed()
 	{
-		return _current._enc_pressed;
+		return _current._buttons & InputState::EncoderBit;
 	}
 	inline char keypad()
 	{
 		return _current._keypad;
 	}
-	inline uint8_t switch5()
+	inline bool left_pressed()
 	{
-		return _current._switch5;
+		return _current._buttons & InputState::LeftBit;
+	}
+	inline bool select_pressed()
+	{
+		return _current._buttons & InputState::SelectBit;
+	}
+	inline bool right_pressed()
+	{
+		return _current._buttons & InputState::RightBit;
 	}
 	inline void set_encoder_limit(uint16_t limit)
 	{
@@ -164,15 +177,15 @@ private:
 
 	hw::encoder& _encoder;
 	hw::keypad& _keypad;
-	hw::switch5& _switch5;
+	hw::buttons& _buttons;
 
 	// State
-	State volatile _current;
-	State _last;
+	InputState volatile _current;
+	InputState _last;
 
 	// Debouncing state (only used in IRQ handler)
 	uint32_t _keypad_debounce;
-	uint16_t _switch_debounce;
+	uint16_t _buttons_debounce;
 	uint8_t _enc_debounce;
 };
 }

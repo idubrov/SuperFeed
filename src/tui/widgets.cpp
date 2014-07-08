@@ -17,7 +17,7 @@ uint16_t tui::spinner(console& console, uint8_t x, uint8_t y, uint16_t min,
 	while (true)
 	{
 		auto ev = console.read();
-		if (ev.kind == console::ButtonPressed && ev.key == console::Encoder)
+		if (ev.kind == console::ButtonPressed && ev.key == console::EncoderButton)
 			break;
 
 		if (ev.kind == console::EncoderMove)
