@@ -188,14 +188,6 @@ SECTIONS
     _etext = .;
     __etext = .;
     
-    /* Check that EEPROM emulation area fits at the end of the flash */
-    .check_eeprom : 
-    {
-    	. = ALIGN(__page_size);
-    	. = . + __eeprom_pages * __page_size;
-    	. = ALIGN(__page_size);
-    } >FLASH
-
 	/* 
      * This address is used by the startup code to 
      * initialise the .data section.
