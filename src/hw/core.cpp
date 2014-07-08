@@ -13,7 +13,7 @@ void hw::core::setup()
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_DeInit(DelayTimer);
 
-	// Both timers tick every 1us
+	// Tick every 1us
 	TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.HCLK_Frequency / 1000000)
 			- 1;
 	TIM_TimeBaseStructure.TIM_Period = 0;

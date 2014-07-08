@@ -18,7 +18,7 @@ public:
 
 	uint8_t raw_buttons() const
 	{
-		return (_port->IDR >> _first_pin) & 7;
+		return (~(_port->IDR >> _first_pin)) & 7;
 	}
 
 	void initialize();

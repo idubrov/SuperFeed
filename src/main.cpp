@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "hw/spindle.hpp"
 #include "tui/console.hpp"
 #include "simstream.hpp"
 #include "stepper.hpp"
@@ -46,6 +47,7 @@ public:
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)),
+			_spindle(TIM15, GPIOB, GPIO_Pin_14),
 			// Use page 126 and 127 for persistent storage
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
@@ -59,10 +61,17 @@ public:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE); // Stepper
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM15, ENABLE); // Spindle index timer
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE); // Encoder
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE); // Utility timer
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE); // Debouncing timer
+
+		// Remap TIM15 to use PB14 as CH1
+		AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
+		// XXX: The following line doesn't work
+		//GPIO_PinRemapConfig(GPIO_Remap_TIM15, ENABLE);
+
 
 		// Setup interrupt for pulse timer (TIM1)
 		NVIC_InitTypeDef timerIT;
@@ -90,6 +99,7 @@ public:
 		_lcd.initialize();
 		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 		_driver.initialize();
+		_spindle.initialize();
 		_eeprom.initialize();
 
 		_stepper.reset();
@@ -99,10 +109,15 @@ public:
 	{
 		_lcd.clear();
 
-		_settings.run();
-//
-//		while (1)
-//			;
+		//		_settings.run();
+		while(1) {
+			_lcd << lcd::position(0, 0);
+			_lcd << TIM_GetCapture1(TIM15) << "           ";
+			_lcd << lcd::position(0, 1);
+			_lcd << TIM_GetCounter(TIM15) << "           ";
+			_lcd << lcd::position(0, 2);
+			_lcd << (_spindle.raw_index() ? 'T' : 'F');
+		}
 		while (1)
 		{
 			auto ev = _console.read();
@@ -118,7 +133,11 @@ public:
 			}
 			else if (ev.kind == console::ButtonPressed)
 			{
-				_lcd << ev.key;
+				_lcd << '?' << ev.key;
+			}
+			else if (ev.kind == console::ButtonUnpressed)
+			{
+				_lcd << '!' << ev.key;
 			}
 		}
 
@@ -170,6 +189,7 @@ private:
 	lcd::HD44780 _lcd;
 	driver _driver;
 	stepper::controller _stepper;
+	spindle _spindle;
 	eeprom _eeprom;
 	console _console;
 	settings _settings;
