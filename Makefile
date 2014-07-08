@@ -49,8 +49,8 @@ OBJCOPY := arm-none-eabi-objcopy
 OBJDUMP := arm-none-eabi-objdump
 SIZE := arm-none-eabi-size
 
-CFLAGS := -std=gnu11
-CXXFLAGS := -std=c++11  -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics
+CFLAGS := -std=c11
+CXXFLAGS := -std=c++11 -fno-exceptions -fno-rtti -fno-use-cxa-atexit -fno-threadsafe-statics
 
 CPPFLAGS := -I include -I system/include -I system/include/cmsis -I system/include/stm32f1-stdperiph
 CPPFLAGS += -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD_VL -DHSE_VALUE=8000000

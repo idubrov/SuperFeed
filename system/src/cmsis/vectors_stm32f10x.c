@@ -8,7 +8,7 @@ Default_Handler(void);
 
 void __attribute__ ((weak, alias ("Default_Handler")))
 Reset_Handler(void) {
-asm volatile
+__asm volatile
   (
       " b _start \n"
       :
