@@ -37,25 +37,26 @@ public:
 		};
 	};
 private:
-	struct state
+	// Console state (like encoder position and limit)
+	struct console_state
 	{
-		state(console& console) :
+		console_state(console& console) :
 				_console(console), _moved(false), _encoder_state(
 						console.get_encoder_state())
 		{
 		}
-		state(state const&) = delete;
-		state& operator=(state const&) = delete;
-		state& operator=(state&&) = delete;
+		console_state(console_state const&) = delete;
+		console_state& operator=(console_state const&) = delete;
+		console_state& operator=(console_state&&) = delete;
 
-		state(state&& other) :
+		console_state(console_state&& other) :
 				_console(other._console), _moved(false), _encoder_state(
 						other._encoder_state)
 		{
 			other._moved = true;
 		}
 
-		~state()
+		~console_state()
 		{
 			if (!_moved)
 			{
@@ -68,7 +69,8 @@ private:
 		uint32_t _encoder_state;
 	};
 private:
-	struct InputState
+	// Current inputs state
+	struct inputs_state
 	{
 		// Bit to button key
 		constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, EncoderButton};
@@ -79,23 +81,23 @@ private:
 			EncoderBit = 8
 		};
 
-		constexpr InputState() :
+		constexpr inputs_state() :
 				_enc_position(0), _keypad(' '), _buttons(0)
 		{
 		}
 
-		InputState(InputState const volatile& state) :
+		inputs_state(inputs_state const volatile& state) :
 				_enc_position(state._enc_position), _keypad(state._keypad), _buttons(
 						state._buttons)
 		{
 		}
 
-		InputState& operator=(InputState const volatile & state)
+		inputs_state& operator=(inputs_state const volatile & state)
 		{
-			*this = InputState(state);
+			*this = inputs_state(state);
 			return *this;
 		}
-		InputState& operator=(const InputState&) = default;
+		inputs_state& operator=(const inputs_state&) = default;
 
 		uint16_t _enc_position;
 		char _keypad;
@@ -128,7 +130,7 @@ public:
 	}
 	inline bool enc_pressed()
 	{
-		return _current._buttons & InputState::EncoderBit;
+		return _current._buttons & inputs_state::EncoderBit;
 	}
 	inline char keypad()
 	{
@@ -136,15 +138,15 @@ public:
 	}
 	inline bool left_pressed()
 	{
-		return _current._buttons & InputState::LeftBit;
+		return _current._buttons & inputs_state::LeftBit;
 	}
 	inline bool select_pressed()
 	{
-		return _current._buttons & InputState::SelectBit;
+		return _current._buttons & inputs_state::SelectBit;
 	}
 	inline bool right_pressed()
 	{
-		return _current._buttons & InputState::RightBit;
+		return _current._buttons & inputs_state::RightBit;
 	}
 	inline void set_encoder_limit(uint16_t limit)
 	{
@@ -154,9 +156,9 @@ public:
 	{
 		return _lcd;
 	}
-	inline state guard_state()
+	inline console_state guard_state()
 	{
-		return state(*this);
+		return console_state(*this);
 	}
 private:
 	inline void set_encoder_state(uint32_t state)
@@ -180,8 +182,8 @@ private:
 	hw::buttons& _buttons;
 
 	// State
-	InputState volatile _current;
-	InputState _last;
+	inputs_state volatile _current;
+	inputs_state _last;
 
 	// Debouncing state (only used in IRQ handler)
 	uint32_t _keypad_debounce;

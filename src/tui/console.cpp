@@ -1,6 +1,6 @@
 #include "tui/console.hpp"
 
-constexpr char tui::console::InputState::ButtonsMap[];
+constexpr char tui::console::inputs_state::ButtonsMap[];
 
 void tui::console::initialize()
 {
@@ -51,7 +51,7 @@ void tui::console::debounce()
 	_buttons_debounce <<= 4;
 	_buttons_debounce |= (_buttons.raw_buttons() & 7);
 	if (_encoder.raw_pressed())
-		_buttons_debounce |= InputState::EncoderBit;
+		_buttons_debounce |= inputs_state::EncoderBit;
 
 	uint16_t bd = _buttons_debounce;
 	// Set bits which are '1' in last four samples
@@ -67,7 +67,7 @@ tui::console::Event tui::console::read()
 	Event event;
 	event.kind = Nothing;
 
-	InputState curr = _current;
+	inputs_state curr = _current;
 	// Encoder
 	if (_last._enc_position != curr._enc_position)
 	{
@@ -105,14 +105,14 @@ tui::console::Event tui::console::read()
 			if (c && !l)
 			{
 				event.kind = ButtonPressed;
-				event.key = InputState::ButtonsMap[i];
+				event.key = inputs_state::ButtonsMap[i];
 				_last._buttons |= mask;
 				break;
 			}
 			else if (!c && l)
 			{
 				event.kind = ButtonUnpressed;
-				event.key = InputState::ButtonsMap[i];
+				event.key = inputs_state::ButtonsMap[i];
 				_last._buttons &= ~mask;
 				break;
 			}
