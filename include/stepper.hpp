@@ -1,6 +1,8 @@
 #ifndef __STEPPER_HPP
 #define __STEPPER_HPP
 
+#include <atomic>
+
 #include "config.hpp"
 #include "hw/driver.hpp"
 #include "stepgen.hpp"
@@ -85,7 +87,7 @@ private:
 	stepgen::stepgen _stepgen;
 
 	// Stop signal
-	volatile bool _stop;
+	std::atomic_bool _stop;
 };
 }
 

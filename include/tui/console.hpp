@@ -78,28 +78,6 @@ private:
 		RightBit = 4,
 		EncoderBit = 8
 	};
-
-//	// Current inputs state
-//	struct inputs_state
-//	{
-
-//
-//		constexpr inputs_state() :
-//				_enc_position(0), _keypad(' '), _buttons(0)
-//		{
-//		}
-//
-//		inputs_state& operator=(inputs_state const volatile & state)
-//		{
-//			*this = inputs_state(state);
-//			return *this;
-//		}
-//		inputs_state& operator=(const inputs_state&) = default;
-//
-//		uint_fast16_t _enc_position; // Encoder position
-//		char _keypad; // Keypad key
-//		uint_fast8_t _buttons; // Buttons & encoder button
-//	};
 public:
 	console(hw::lcd::HD44780& lcd, TIM_TypeDef* debounce_timer,
 			hw::encoder& encoder, hw::keypad& keypad, hw::buttons& buttons) :
