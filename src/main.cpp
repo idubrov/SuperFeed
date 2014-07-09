@@ -16,6 +16,7 @@ extern "C"
 void SysTick_Handler();
 void TIM1_UP_TIM16_IRQHandler(); // STEP pulse generation
 void TIM7_IRQHandler(); // Input debouncing
+void TIM1_BRK_TIM15_IRQHandler(); // Spindle index
 
 extern unsigned int __eeprom_start;
 extern unsigned int __eeprom_pages;
@@ -26,6 +27,7 @@ class application
 {
 	friend void ::TIM1_UP_TIM16_IRQHandler();
 	friend void ::TIM7_IRQHandler();
+	friend void ::TIM1_BRK_TIM15_IRQHandler();
 public:
 	application() :
 			// Columns start with pin PA0, rows start with PA4
@@ -69,7 +71,7 @@ public:
 
 		// Remap TIM15 to use PB14 as CH1
 		AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
-		// XXX: The following line doesn't work
+		// XXX: The following line doesn't work with gcc optimizations
 		//GPIO_PinRemapConfig(GPIO_Remap_TIM15, ENABLE);
 
 
@@ -85,6 +87,13 @@ public:
 		timerIT.NVIC_IRQChannel = TIM7_IRQn;
 		timerIT.NVIC_IRQChannelPreemptionPriority = 3; // lowest priority
 		timerIT.NVIC_IRQChannelSubPriority = 3; // lowest priority
+		timerIT.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&timerIT);
+
+		// Setup interrupt for spindle index timer (TIM15)
+		timerIT.NVIC_IRQChannel = TIM1_BRK_TIM15_IRQn;
+		timerIT.NVIC_IRQChannelPreemptionPriority = 3;
+		timerIT.NVIC_IRQChannelSubPriority = 2;
 		timerIT.NVIC_IRQChannelCmd = ENABLE;
 		NVIC_Init(&timerIT);
 
@@ -224,4 +233,17 @@ TIM7_IRQHandler()
 {
 	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
 	application::instance()._console.debounce();
+}
+
+extern "C" void __attribute__ ((section(".after_vectors")))
+TIM1_BRK_TIM15_IRQHandler()
+{
+	if (TIM_GetITStatus(TIM15, TIM_IT_Update)) {
+		TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
+		application::instance()._spindle.overflow_handler();
+	}
+	if (TIM_GetITStatus(TIM15, TIM_IT_CC1)) {
+		TIM_ClearITPendingBit(TIM15, TIM_IT_CC1);
+		application::instance()._spindle.index_pulse_hanlder();
+	}
 }

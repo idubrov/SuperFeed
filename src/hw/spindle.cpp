@@ -17,10 +17,10 @@ void hw::spindle::initialize()
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 	TIM_DeInit(_index_timer);
 
-	// Tick every 1us
-	TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.HCLK_Frequency / 1000000)
+	// Tick every 0.1ms
+	TIM_TimeBaseStructure.TIM_Prescaler = (RCC_Clocks.HCLK_Frequency / 10000)
 			- 1;
-	TIM_TimeBaseStructure.TIM_Period = 10000;
+	TIM_TimeBaseStructure.TIM_Period = 0xffff;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -37,5 +37,36 @@ void hw::spindle::initialize()
 	TIM_ICInitStructure.TIM_ICFilter = 0;
 	TIM_ICInit(_index_timer, &TIM_ICInitStructure);
 
+	// Configure slave mode, reset on capture
+	TIM_SelectSlaveMode(_index_timer, TIM_SlaveMode_Reset);
+	TIM_SelectInputTrigger(_index_timer, TIM_TS_TI1FP1);
+
+	// Configure interrupts
+	TIM_ClearITPendingBit(_index_timer, TIM_IT_Update | TIM_IT_CC1);
+	TIM_ITConfig(_index_timer, TIM_IT_Update | TIM_IT_CC1, ENABLE);
+
 	TIM_Cmd(_index_timer, ENABLE);
+}
+
+void hw::spindle::overflow_handler()
+{
+	// Ignore next reading: timer overflowed!
+	_overflowed = true;
+	_captured = 0; // No data
+
+	// FIXME: increase ARR if it is not 0xffff already?
+}
+
+void hw::spindle::index_pulse_hanlder()
+{
+	if (_overflowed)
+	{
+		_overflowed = false;
+	}
+	else
+	{
+		_captured = TIM_GetCapture1(_index_timer);
+		// FIXME: we probably want to set ARR to something like _captured * 1.2, so
+		// we catch fast spindle speed changes early
+	}
 }
