@@ -11,11 +11,11 @@ class spindle
 public:
 public:
 	constexpr spindle(TIM_TypeDef* index_timer, GPIO_TypeDef* index_port, uint16_t index_pin) :
-			_index_timer(index_timer), _index_port(index_port), _index_pin(index_pin),
-			_captured(0), _overflowed(true)
+			_index_timer(index_timer), _index_port(index_port), _index_pin(index_pin)
 	{
 	}
 	spindle(spindle const&) = delete;
+	void initialize();
 
 	bool raw_index() const
 	{
@@ -26,7 +26,6 @@ public:
 	{
 		return _captured;
 	}
-	void initialize();
 
 	void overflow_handler();
 	void index_pulse_hanlder();
@@ -35,8 +34,9 @@ private:
 	GPIO_TypeDef* const _index_port;
 	uint16_t const _index_pin;
 
-	uint16_t volatile _captured;
-	bool _overflowed;
+	// Updated from IRQ handlers
+	uint16_t volatile _captured = 0;
+	bool volatile _overflowed = false;
 
 };
 }

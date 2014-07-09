@@ -7,54 +7,48 @@ using namespace ::tui::menu;
 
 void sampler::run()
 {
+	auto state = _console.guard_state();
+
+	_console.set_encoder_limit(BufferCapacity - 1);
 	auto& lcd = _console.lcd();
-	constexpr char const* SpindleSpeed = "Spindle speed: ";
-	constexpr unsigned SpindleSpeedLen = util::c_strlen(SpindleSpeed);
 	lcd.clear();
-
-	// Draw text
-	lcd << lcd::position(0, 0) << SpindleSpeed;
-
 	while (true)
 	{
 		auto ev = _console.read();
-		lcd << lcd::position(SpindleSpeedLen, 0)
-				<< format<10>(_spindle.raw_speed(), 5);
-		lcd << lcd::position(0, 1);
-		if (_capturing)
+		lcd << lcd::position(0, 0) << "Spindle speed: " << format<10>(_spindle.raw_speed(), 5);
+
+		if (_captured < _buffer_size)
 		{
-			lcd << _captured << " of " << _buffer_size;
-
-			if (_captured == _buffer_size)
-			{
-				_capturing = false;
-				lcd << lcd::position(0, 1);
-				lcd << "Writing to flash... ";
-				FLASH_Status status = write_flash();
-				if (status != FLASH_COMPLETE)
-				{
-					lcd << lcd::position(0, 1);
-					lcd << "                    ";
-					lcd << lcd::position(0, 1);
-					lcd << "Error: " << status;
-					while (1)
-						;
-				}
-
-				_captured = 0;
-			}
+			lcd << lcd::position(0, 1) << _captured << " of " << _buffer_size;
 		}
-		else
+		else if (_captured == _buffer_size)
 		{
-			lcd << "Press to capture";
-			if (ev.kind == console::ButtonPressed
-					&& ev.key == console::EncoderButton)
+			lcd << lcd::position(0, 1) << "Writing to flash... ";
+			FLASH_Status status = write_flash();
+			if (status != FLASH_COMPLETE)
 			{
 				lcd << lcd::position(0, 1);
 				lcd << "                    ";
-
-				_captured = 0;
-				_capturing = true;
+				lcd << lcd::position(0, 1);
+				lcd << "Error: " << status;
+				while (1)
+					;
+			}
+			_captured = 0xffff;
+			lcd.clear();
+		}
+		else if (_captured == 0xffff)
+		{
+			lcd << lcd::position(0, 1) << "Capture size: " << format<10>(_buffer_size, 3);
+			lcd << lcd::position(0, 2) << "Press to capture";
+			if (ev.kind == console::ButtonPressed
+					&& ev.key == console::EncoderButton)
+			{
+				_captured = 0; // Start capturing
+				lcd.clear();
+			} else if (ev.kind == console::EncoderMove)
+			{
+				_buffer_size = ev.position + 1;
 			}
 		}
 	}
@@ -68,7 +62,8 @@ FLASH_Status sampler::write_flash()
 	{
 		return status;
 	}
-	for (uint16_t i = 0; i < _buffer_size; i++)
+	uint16_t cnt = _buffer_size;
+	for (uint16_t i = 0; i < cnt; i++)
 	{
 		uint32_t offset = _flash_start + i * sizeof(uint16_t);
 		if ((status = FLASH_ProgramHalfWord(offset, _buffer[i]))
@@ -83,8 +78,10 @@ FLASH_Status sampler::write_flash()
 
 void sampler::index_pulse_handler()
 {
-	if (_capturing && _captured < _buffer_size)
+	if (_captured < _buffer_size)
 	{
-		_buffer[_captured++] = _spindle.raw_speed();
+		uint16_t pos = _captured;
+		_buffer[pos] = _spindle.raw_speed();
+		_captured = pos + 1; // Make sure we update _captured after writing to buffer
 	}
 }

@@ -13,14 +13,12 @@ namespace menu
 class sampler
 {
 public:
-	sampler(tui::console& console, hw::spindle& spindle, uint32_t start,
-			uint16_t buffer_size) :
-			_console(console), _spindle(spindle), _flash_start(start), _buffer_size(
-					buffer_size), _captured(0), _capturing(false)
+	sampler(tui::console& console, hw::spindle& spindle, uint32_t flash_start) :
+			_console(console), _spindle(spindle), _flash_start(flash_start)
 	{
-		constexpr unsigned BufferSize = sizeof(_buffer) / sizeof(_buffer[0]);
-		assert_param(_buffer_size < BufferSize);
-		std::fill_n(_buffer, BufferSize, 0);
+		static_assert(BufferCapacity * sizeof(_buffer[0]) <= 1024,
+				"Buffer must fit into one flash page");
+		std::fill_n(_buffer, BufferCapacity, 0);
 	}
 
 	void run();
@@ -31,12 +29,11 @@ private:
 	tui::console& _console;
 	hw::spindle& _spindle;
 	uint32_t const _flash_start;
-	uint16_t const _buffer_size;
 
-	uint16_t volatile _captured;
-	bool volatile _capturing;
-
-	uint16_t volatile _buffer[512];
+	constexpr static unsigned BufferCapacity = 512;
+	uint16_t volatile _captured = 0xffff; // Capturing is stopped
+	uint16_t volatile _buffer_size = BufferCapacity;
+	uint16_t volatile _buffer[BufferCapacity]; // Buffer for temporary storage
 };
 }
 }

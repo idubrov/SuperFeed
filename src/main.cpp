@@ -55,7 +55,7 @@ public:
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
 					_console),
-			_sampler(_console, _spindle, FLASH_BASE + 125 * 0x400, 10)
+			_sampler(_console, _spindle, FLASH_BASE + 125 * 0x400)
 	{
 	}
 
