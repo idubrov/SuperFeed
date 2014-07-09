@@ -5,6 +5,7 @@
 #include "stepper.hpp"
 #include "eeprom.hpp"
 #include "tui/menu/settings.hpp"
+#include "tui/menu/sampler.hpp"
 
 #include "stm32f10x_gpio.h"
 
@@ -53,7 +54,8 @@ public:
 			// Use page 126 and 127 for persistent storage
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
-					_console)
+					_console),
+			_sampler(_console, _spindle, FLASH_BASE + 125 * 0x400, 10)
 	{
 	}
 
@@ -117,6 +119,7 @@ public:
 	void run()
 	{
 		_lcd.clear();
+		_sampler.run();
 
 		//		_settings.run();
 		while(1) {
@@ -200,6 +203,7 @@ private:
 	eeprom _eeprom;
 	console _console;
 	settings _settings;
+	menu::sampler _sampler;
 private:
 	static application g_app;
 };
@@ -245,5 +249,6 @@ TIM1_BRK_TIM15_IRQHandler()
 		application::instance()._spindle.index_pulse_hanlder();
 
 		// Spindle sampling
+		application::instance()._sampler.index_pulse_handler();
 	}
 }

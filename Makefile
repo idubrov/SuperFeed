@@ -8,6 +8,7 @@ NODEPS := clean
 SOURCES := $(wildcard src/*.c) \
 		   $(wildcard src/*.cpp) \
 		   $(wildcard src/tui/*.cpp) \
+           $(wildcard src/tui/menu/*.cpp) \
 		   $(wildcard src/hw/*.cpp) \
 		   $(wildcard system/src/cmsis/*.c) \
 		   $(wildcard system/src/cortexm/*.c) \
