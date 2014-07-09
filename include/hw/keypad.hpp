@@ -33,7 +33,7 @@ public:
 	static constexpr Key c_mappings[] =
 	{ None, Star, N0, Hash, D, N7, N8, N9, C, N4, N5, N6, B, N1, N2, N3, A, };
 public:
-	constexpr keypad(GPIO_TypeDef* port, uint8_t columns, uint8_t rows) :
+	constexpr keypad(GPIO_TypeDef* port, unsigned columns, unsigned rows) :
 			_port(port), _columns(columns), _rows(rows)
 	{
 	}
@@ -43,16 +43,16 @@ public:
 
 	char raw_key() const;
 private:
-	inline uint8_t column_state() const
+	inline unsigned column_state() const
 	{
 		return (_port->IDR >> _columns) & 0x0f;
 	}
-	uint8_t from_state(uint8_t y, uint8_t xstate) const;
+	unsigned from_state(unsigned y, unsigned xstate) const;
 
 private:
 	GPIO_TypeDef* const _port;
-	uint8_t const _columns;
-	uint8_t const _rows;
+	unsigned const _columns;
+	unsigned const _rows;
 };
 }
 

@@ -126,7 +126,7 @@ public:
 			_lcd << lcd::position(0, 0);
 			_lcd << TIM_GetCounter(TIM15) << "           ";
 			_lcd << lcd::position(0, 1);
-			_lcd << _spindle.raw_speed() << "       ";
+			_lcd << _spindle.raw_delay() << "       ";
 		}
 		while (1)
 		{

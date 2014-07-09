@@ -15,13 +15,14 @@ void sampler::run()
 	while (true)
 	{
 		auto ev = _console.read();
-		lcd << lcd::position(0, 0) << "Spindle speed: " << format<10>(_spindle.raw_speed(), 5);
+		lcd << lcd::position(0, 0) << "Spindle delay: " << format<10>(_spindle.raw_delay(), 5);
 
-		if (_captured < _buffer_size)
+		unsigned captured = _captured;
+		if (captured < _buffer_size)
 		{
-			lcd << lcd::position(0, 1) << _captured << " of " << _buffer_size;
+			lcd << lcd::position(0, 1) << captured << " of " << _buffer_size;
 		}
-		else if (_captured == _buffer_size)
+		else if (captured == _buffer_size)
 		{
 			lcd << lcd::position(0, 1) << "Writing to flash... ";
 			FLASH_Status status = write_flash();
@@ -37,7 +38,7 @@ void sampler::run()
 			_captured = 0xffff;
 			lcd.clear();
 		}
-		else if (_captured == 0xffff)
+		else if (captured == 0xffff)
 		{
 			lcd << lcd::position(0, 1) << "Capture size: " << format<10>(_buffer_size, 3);
 			lcd << lcd::position(0, 2) << "Press to capture";
@@ -62,8 +63,8 @@ FLASH_Status sampler::write_flash()
 	{
 		return status;
 	}
-	uint16_t cnt = _buffer_size;
-	for (uint16_t i = 0; i < cnt; i++)
+	unsigned cnt = _buffer_size;
+	for (unsigned i = 0; i < cnt; i++)
 	{
 		uint32_t offset = _flash_start + i * sizeof(uint16_t);
 		if ((status = FLASH_ProgramHalfWord(offset, _buffer[i]))
@@ -78,10 +79,12 @@ FLASH_Status sampler::write_flash()
 
 void sampler::index_pulse_handler()
 {
-	if (_captured < _buffer_size)
+	unsigned pos = _captured;
+	if (pos < _buffer_size)
 	{
-		uint16_t pos = _captured;
-		_buffer[pos] = _spindle.raw_speed();
-		_captured = pos + 1; // Make sure we update _captured after writing to buffer
+		_buffer[pos] = _spindle.raw_delay();
+
+		// Make sure we update _captured after writing to buffer
+		_captured.store(pos + 1);
 	}
 }

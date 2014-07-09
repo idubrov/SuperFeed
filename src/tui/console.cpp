@@ -1,6 +1,6 @@
 #include "tui/console.hpp"
 
-constexpr char tui::console::inputs_state::ButtonsMap[];
+constexpr char tui::console::ButtonsMap[];
 
 void tui::console::initialize()
 {
@@ -30,8 +30,11 @@ void tui::console::debounce()
 {
 	// Query all hardware inputs and apply debouncing to them
 
+	uint_fast32_t current = _current.load(std::memory_order_relaxed);
+
 	// No debouncing for encoder position -- should be handled by the timer itself.
-	_current._enc_position = _encoder.raw_position();
+	current &= ~EncoderMask;
+	current |= (_encoder.raw_position() << EncoderShift) & EncoderMask;
 
 	// Keypad
 	_keypad_debounce <<= 8;
@@ -42,7 +45,8 @@ void tui::console::debounce()
 		uint8_t lowlow = low & 0xff;
 		if ((low >> 8) == lowlow)
 		{
-			_current._keypad = lowlow;
+			current &= ~KeypadMask;
+			current |= (lowlow << KeypadShift) & KeypadMask;
 		}
 	}
 
@@ -51,15 +55,18 @@ void tui::console::debounce()
 	_buttons_debounce <<= 4;
 	_buttons_debounce |= (_buttons.raw_buttons() & 7);
 	if (_encoder.raw_pressed())
-		_buttons_debounce |= inputs_state::EncoderBit;
+		_buttons_debounce |= EncoderBit;
 
 	uint16_t bd = _buttons_debounce;
+	uint_fast8_t buttons = (current & ButtonsMask) >> ButtonsShift;
 	// Set bits which are '1' in last four samples
-	uint8_t set = (bd >> 12) & (bd >> 8) & (bd >> 4) & bd & 0xf;
-	_current._buttons |= set;
+	uint_fast8_t set = (bd >> 12) & (bd >> 8) & (bd >> 4) & bd & 0xf;
+	current |= set << ButtonsShift;
 	// Reset bits which are '0' in last four samples
-	uint8_t reset = (bd >> 12) | (bd >> 8) | (bd >> 4) | bd;
-	_current._buttons &= reset;
+	uint_fast8_t reset = (bd >> 12) | (bd >> 8) | (bd >> 4) | bd;
+	buttons &= ~ButtonsMask | (reset << ButtonsShift);
+
+	_current.store(std::memory_order_relaxed);
 }
 
 tui::console::Event tui::console::read()
@@ -67,53 +74,63 @@ tui::console::Event tui::console::read()
 	Event event;
 	event.kind = Nothing;
 
-	inputs_state curr = _current;
+	uint_fast32_t curr = _current;
+	uint_fast16_t last_enc = (_last & EncoderMask) >> EncoderShift;
+	uint_fast16_t curr_enc = (curr & EncoderMask) >> EncoderShift;
+	uint_fast8_t last_buttons = (_last & ButtonsMask) >> ButtonsShift;
+	uint_fast8_t curr_buttons = (curr & ButtonsMask) >> ButtonsShift;
+	uint_fast8_t last_keypad = (_last & KeypadMask) >> KeypadShift;
+	uint_fast8_t curr_keypad = (curr & KeypadMask) >> KeypadShift;
+
 	// Encoder
-	if (_last._enc_position != curr._enc_position)
+	if (last_enc != curr_enc)
 	{
 		event.kind = EncoderMove;
-		event.position = curr._enc_position;
+		event.position = curr_enc;
 
-		_last._enc_position = curr._enc_position;
+		_last &= ~EncoderMask;
+		_last |= curr & EncoderMask;
 	}
-	else if (_last._keypad != curr._keypad)
+	else if (last_keypad != curr_keypad)
 	{
-		if (_last._keypad == hw::keypad::None)
+		if (last_keypad == hw::keypad::None)
 		{
 			event.kind = ButtonPressed;
-			event.key = curr._keypad;
-			_last._keypad = curr._keypad;
+			event.key = curr_keypad;
+			_last &= ~KeypadMask;
+			_last |= curr & KeypadMask;
 		}
 		else
 		{
 			event.kind = ButtonUnpressed;
-			event.key = _last._keypad;
+			event.key = last_keypad;
 
 			// If current is not 'None', make it as one to convert button change
 			// into two events (unpressed and then pressed).
-			_last._keypad = hw::keypad::None;
+			_last &= ~KeypadMask;
+			_last |= (static_cast<uint8_t>(hw::keypad::None) << KeypadShift) & KeypadMask;
 		}
 	}
-	else if (_last._buttons != curr._buttons)
+	else if ((_last & ButtonsMask) != (curr & ButtonsMask))
 	{
 		// Scan all button bits, report one button at a time
 		for (int i = 0; i < 4; i++)
 		{
-			uint8_t mask = (1 << i);
-			bool l = _last._buttons & mask;
-			bool c = curr._buttons & mask;
+			uint_fast8_t mask = (1 << i);
+			bool l = last_buttons & mask;
+			bool c = curr_buttons & mask;
 			if (c && !l)
 			{
 				event.kind = ButtonPressed;
-				event.key = inputs_state::ButtonsMap[i];
-				_last._buttons |= mask;
+				event.key = ButtonsMap[i];
+				_last |= mask << ButtonsShift;
 				break;
 			}
 			else if (!c && l)
 			{
 				event.kind = ButtonUnpressed;
-				event.key = inputs_state::ButtonsMap[i];
-				_last._buttons &= ~mask;
+				event.key = ButtonsMap[i];
+				_last &= ~ButtonsMask | ((~mask) << ButtonsShift);
 				break;
 			}
 		}

@@ -73,7 +73,7 @@ void hw::lcd::HD44780::write(char data) const
 	core::delay_us(5);
 }
 
-void hw::lcd::HD44780::command(uint8_t cmd) const
+void hw::lcd::HD44780::command(uint_fast8_t cmd) const
 {
 	_control_port->BRR = _rs_pin;
 	wait_address(); // tAS

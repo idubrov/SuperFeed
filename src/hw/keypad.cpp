@@ -23,7 +23,7 @@ void hw::keypad::initialize()
 	GPIO_SetBits(_port, 0x0f << _rows);
 }
 
-uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
+unsigned hw::keypad::from_state(unsigned offset, unsigned xstate) const {
 	switch (xstate) {
 	case 1: // 0001
 		return offset + 4;
@@ -40,14 +40,14 @@ uint8_t hw::keypad::from_state(uint8_t offset, uint8_t xstate) const {
 }
 
 char hw::keypad::raw_key() const {
-	uint8_t xstate = column_state();
+	uint_fast8_t xstate = column_state();
 	if (xstate == 0) {
 		// All '0', no buttons are pressed
 		return None;
 	}
 
 	// Let's find row by scanning
-	for (int y = 0; y < 4; y++) {
+	for (unsigned y = 0; y < 4; y++) {
 		// Set row to '0', to check if column state would change back to all '0's
 		_port->BRR = (1 << (y + _rows));
 		uint8_t xstate2 = column_state();

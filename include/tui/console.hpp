@@ -3,6 +3,8 @@
 
 #include "stm32f10x.h"
 
+#include <atomic>
+
 // Low-level input/output hardware
 #include "hw/buttons.hpp"
 #include "hw/encoder.hpp"
@@ -64,50 +66,45 @@ private:
 			}
 		}
 	private:
-		console& _console;
-		bool _moved;
+		console& _console;bool _moved;
 		uint32_t _encoder_state;
 	};
 private:
-	// Current inputs state
-	struct inputs_state
-	{
-		// Bit to button key
-		constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, EncoderButton};
-		enum ButtonBits {
-			LeftBit = 1,
-			SelectBit = 2,
-			RightBit = 4,
-			EncoderBit = 8
-		};
-
-		constexpr inputs_state() :
-				_enc_position(0), _keypad(' '), _buttons(0)
-		{
-		}
-
-		inputs_state(inputs_state const volatile& state) :
-				_enc_position(state._enc_position), _keypad(state._keypad), _buttons(
-						state._buttons)
-		{
-		}
-
-		inputs_state& operator=(inputs_state const volatile & state)
-		{
-			*this = inputs_state(state);
-			return *this;
-		}
-		inputs_state& operator=(const inputs_state&) = default;
-
-		uint16_t _enc_position;
-		char _keypad;
-		uint8_t _buttons; // Buttons & encoder button
+	// Bit to button key mapping
+	constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, EncoderButton};
+	enum ButtonBits {
+		LeftBit = 1,
+		SelectBit = 2,
+		RightBit = 4,
+		EncoderBit = 8
 	};
+
+//	// Current inputs state
+//	struct inputs_state
+//	{
+
+//
+//		constexpr inputs_state() :
+//				_enc_position(0), _keypad(' '), _buttons(0)
+//		{
+//		}
+//
+//		inputs_state& operator=(inputs_state const volatile & state)
+//		{
+//			*this = inputs_state(state);
+//			return *this;
+//		}
+//		inputs_state& operator=(const inputs_state&) = default;
+//
+//		uint_fast16_t _enc_position; // Encoder position
+//		char _keypad; // Keypad key
+//		uint_fast8_t _buttons; // Buttons & encoder button
+//	};
 public:
 	console(hw::lcd::HD44780& lcd, TIM_TypeDef* debounce_timer,
 			hw::encoder& encoder, hw::keypad& keypad, hw::buttons& buttons) :
 			_lcd(lcd), _debounce_timer(debounce_timer), _encoder(encoder), _keypad(
-					keypad), _buttons(buttons), _current(), _last(), _keypad_debounce(
+					keypad), _buttons(buttons), _current(0), _last(0), _keypad_debounce(
 					0), _buttons_debounce(0), _enc_debounce(0)
 	{
 	}
@@ -124,29 +121,29 @@ public:
 	void debounce();
 
 	// All supported inputs
-	inline uint16_t enc_position()
+	inline uint_fast16_t enc_position()
 	{
-		return _current._enc_position;
-	}
-	inline bool enc_pressed()
-	{
-		return _current._buttons & inputs_state::EncoderBit;
+		return (current() & EncoderMask) >> EncoderShift;
 	}
 	inline char keypad()
 	{
-		return _current._keypad;
+		return (current() & KeypadMask) >> KeypadShift;
+	}
+	inline bool enc_pressed()
+	{
+		return buttons() & EncoderBit;
 	}
 	inline bool left_pressed()
 	{
-		return _current._buttons & inputs_state::LeftBit;
+		return buttons() & LeftBit;
 	}
 	inline bool select_pressed()
 	{
-		return _current._buttons & inputs_state::SelectBit;
+		return buttons() & SelectBit;
 	}
 	inline bool right_pressed()
 	{
-		return _current._buttons & inputs_state::RightBit;
+		return buttons() & RightBit;
 	}
 	inline void set_encoder_limit(uint16_t limit)
 	{
@@ -169,6 +166,14 @@ private:
 	{
 		return _encoder.get_state();
 	}
+	inline uint_fast32_t current() const
+	{
+		return _current.load(std::memory_order_relaxed);
+	}
+	inline uint_fast8_t buttons() const
+	{
+		return (current() & ButtonsMask) >> ButtonsShift;
+	}
 
 private:
 	// Outputs
@@ -181,9 +186,19 @@ private:
 	hw::keypad& _keypad;
 	hw::buttons& _buttons;
 
-	// State
-	inputs_state volatile _current;
-	inputs_state _last;
+	constexpr static unsigned EncoderMask = 0x0000ffff;
+	constexpr static unsigned EncoderShift = 0;
+	constexpr static unsigned ButtonsMask = 0x00ff0000;
+	constexpr static unsigned ButtonsShift = 16;
+	constexpr static unsigned KeypadMask = 0xff000000;
+	constexpr static unsigned KeypadShift = 24;
+	// Current inputs state
+	// The layout is the following (lowest to highest):
+	// 16 bits: encoder
+	// 8 bits: buttons
+	// 8 bits: keypad
+	std::atomic_uint_fast32_t _current; // Updated in IRQ
+	uint_fast32_t _last; // Only used in main loop
 
 	// Debouncing state (only used in IRQ handler)
 	uint32_t _keypad_debounce;

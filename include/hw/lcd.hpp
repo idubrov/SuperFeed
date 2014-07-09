@@ -67,9 +67,9 @@ class HD44780
 {
 public:
 public:
-	constexpr HD44780(GPIO_TypeDef* control_port, uint16_t rs_pin,
-			uint16_t rw_pin, uint16_t e_pin, GPIO_TypeDef* data_port,
-			uint8_t data_shift, FunctionMode mode, bool use_busy = false) :
+	constexpr HD44780(GPIO_TypeDef* control_port, uint_fast16_t rs_pin,
+			uint_fast16_t rw_pin, uint_fast16_t e_pin, GPIO_TypeDef* data_port,
+			unsigned data_shift, FunctionMode mode, bool use_busy = false) :
 			_control_port(control_port), _data_port(data_port), _rs_pin(rs_pin), _rw_pin(
 					rw_pin), _e_pin(e_pin), _data_shift(data_shift), _mode(
 					mode), _use_busy(use_busy)
@@ -134,11 +134,11 @@ public:
 
 	void write(char data) const;
 private:
-	void command(uint8_t cmd) const;
+	void command(uint_fast8_t cmd) const;
 	void wait_busy_flag() const;
 
 	// Typical command wait time is 37us
-	void wait_ready(uint16_t delay = 50) const
+	void wait_ready(uint_fast16_t delay = 50) const
 	{
 		if (_use_busy)
 		{
@@ -165,7 +165,7 @@ private:
 		__NOP();
 	}
 
-	inline void send(uint8_t data) const
+	inline void send(uint_fast8_t data) const
 	{
 		if (_mode == Bit8)
 			send8bits(data);
@@ -176,26 +176,26 @@ private:
 		}
 	}
 
-	inline void send8bits(uint8_t data) const
+	inline void send8bits(uint_fast8_t data) const
 	{
-		_data_port->BSRR = ((uint16_t) data) << _data_shift; // Set '1's
-		_data_port->BRR = ((uint16_t) (~data)) << _data_shift; // Clear '0's
+		_data_port->BSRR = (data & 0xff) << _data_shift; // Set '1's
+		_data_port->BRR = ((~data) & 0xff) << _data_shift; // Clear '0's
 		pulse_enable();
 	}
 
-	inline void send4bits(uint8_t data) const
+	inline void send4bits(uint_fast8_t data) const
 	{
-		_data_port->BSRR = ((uint16_t) (data & 0xf)) << _data_shift; // Set '1's
-		_data_port->BRR = ((uint16_t) ((~data) & 0xf)) << _data_shift; // Clear '0's
+		_data_port->BSRR = (data & 0xf) << _data_shift; // Set '1's
+		_data_port->BRR = ((~data) & 0xf) << _data_shift; // Clear '0's
 		pulse_enable();
 	}
 private:
 	GPIO_TypeDef* const _control_port;
 	GPIO_TypeDef* const _data_port;
-	uint16_t const _rs_pin;
-	uint16_t const _rw_pin;
-	uint16_t const _e_pin;
-	uint8_t const _data_shift;
+	uint_fast16_t const _rs_pin;
+	uint_fast16_t const _rw_pin;
+	uint_fast16_t const _e_pin;
+	unsigned const _data_shift;
 	FunctionMode const _mode;
 	bool const _use_busy;
 };

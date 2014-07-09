@@ -57,21 +57,23 @@ void hw::spindle::overflow_handler()
 {
 	// Ignore next reading: timer overflowed!
 	_overflowed = true;
-	_captured = 0; // No data, spindle speed is unstable
 	_index_timer->ARR = 0xffff;
+	_delay.store(0, std::memory_order_relaxed); // No data, spindle speed is unstable
 }
 
 void hw::spindle::index_pulse_hanlder()
 {
+	uint_fast16_t delay = TIM_GetCapture1(_index_timer);
 	if (_overflowed)
 	{
+		// Delay timer overflowed last time, ignore the delay reading
 		_overflowed = false;
 	}
 	else
 	{
-		_captured = TIM_GetCapture1(_index_timer);
 		// Allow spindle to slow down by 25% (delay is 1.25 the current one)
-		uint32_t top = _captured + (_captured / 4);
-		_index_timer->ARR = _captured < 0xffff ? top : 0xffff;
+		uint_fast32_t top = delay + (delay / 4);
+		_index_timer->ARR = top < 0xffff ? top : 0xffff;
+		_delay.store(delay, std::memory_order_relaxed);
 	}
 }

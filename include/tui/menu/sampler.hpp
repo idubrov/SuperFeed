@@ -3,7 +3,9 @@
 
 #include "tui/console.hpp"
 #include "hw/spindle.hpp"
+#include <cstdint>
 #include <algorithm>
+#include <atomic>
 
 namespace tui
 {
@@ -14,11 +16,15 @@ class sampler
 {
 public:
 	sampler(tui::console& console, hw::spindle& spindle, uint32_t flash_start) :
-			_console(console), _spindle(spindle), _flash_start(flash_start)
+			_console(console), _spindle(spindle), _flash_start(flash_start),
+			_captured(), _buffer_size(BufferCapacity)
 	{
 		static_assert(BufferCapacity * sizeof(_buffer[0]) <= 1024,
 				"Buffer must fit into one flash page");
 		std::fill_n(_buffer, BufferCapacity, 0);
+
+		// Capturing is stopped
+		_captured = 0xffff;
 	}
 
 	void run();
@@ -31,9 +37,9 @@ private:
 	uint32_t const _flash_start;
 
 	constexpr static unsigned BufferCapacity = 512;
-	uint16_t volatile _captured = 0xffff; // Capturing is stopped
-	uint16_t volatile _buffer_size = BufferCapacity;
-	uint16_t volatile _buffer[BufferCapacity]; // Buffer for temporary storage
+	std::atomic_uint_fast16_t _captured;
+	unsigned _buffer_size;
+	uint16_t _buffer[BufferCapacity]; // Buffer for temporary storage
 };
 }
 }

@@ -10,7 +10,7 @@ class encoder
 {
 public:
 	constexpr encoder(GPIO_TypeDef* port, TIM_TypeDef* timer,
-			uint16_t button_pin, uint16_t encoder_pins) :
+			uint_fast16_t button_pin, uint_fast16_t encoder_pins) :
 			_port(port), _timer(timer), _button_pin(button_pin), _encoder_pins(
 					encoder_pins)
 	{
@@ -25,17 +25,17 @@ public:
 		return !(_port->IDR & _button_pin);
 	}
 
-	inline uint16_t raw_position() const
+	inline uint_fast16_t raw_position() const
 	{
 		return _timer->CNT >> 1;
 	}
 
-	inline void set_position(uint16_t pos) const
+	inline void set_position(uint_fast16_t pos) const
 	{
 		_timer->CNT = (pos << 1);
 	}
 
-	inline void set_limit(uint16_t limit) const
+	inline void set_limit(uint_fast16_t limit) const
 	{
 		_timer->ARR = (limit << 1) - 1;
 		_timer->CNT = 0;
@@ -56,8 +56,8 @@ private:
 private:
 	GPIO_TypeDef* const _port;
 	TIM_TypeDef* const _timer;
-	uint16_t const _button_pin;
-	uint16_t const _encoder_pins;
+	uint_fast16_t const _button_pin;
+	uint_fast16_t const _encoder_pins;
 };
 }
 
