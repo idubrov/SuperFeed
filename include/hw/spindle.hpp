@@ -12,7 +12,7 @@ public:
 public:
 	constexpr spindle(TIM_TypeDef* index_timer, GPIO_TypeDef* index_port, uint16_t index_pin) :
 			_index_timer(index_timer), _index_port(index_port), _index_pin(index_pin),
-			_captured(0), _overflowed(false)
+			_captured(0), _overflowed(true)
 	{
 	}
 	spindle(spindle const&) = delete;

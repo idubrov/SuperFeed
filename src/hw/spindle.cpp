@@ -41,6 +41,11 @@ void hw::spindle::initialize()
 	TIM_SelectSlaveMode(_index_timer, TIM_SlaveMode_Reset);
 	TIM_SelectInputTrigger(_index_timer, TIM_TS_TI1FP1);
 
+	// We don't want capture event to generate update interrupt.
+	// Update interrupt is used to detect cases when spindle speed is too low
+	// (or spindle is stopped)
+	TIM_UpdateRequestConfig(_index_timer, TIM_UpdateSource_Regular);
+
 	// Configure interrupts
 	TIM_ClearITPendingBit(_index_timer, TIM_IT_Update | TIM_IT_CC1);
 	TIM_ITConfig(_index_timer, TIM_IT_Update | TIM_IT_CC1, ENABLE);
@@ -52,9 +57,8 @@ void hw::spindle::overflow_handler()
 {
 	// Ignore next reading: timer overflowed!
 	_overflowed = true;
-	_captured = 0; // No data
-
-	// FIXME: increase ARR if it is not 0xffff already?
+	_captured = 0; // No data, spindle speed is unstable
+	_index_timer->ARR = 0xffff;
 }
 
 void hw::spindle::index_pulse_hanlder()
@@ -66,7 +70,8 @@ void hw::spindle::index_pulse_hanlder()
 	else
 	{
 		_captured = TIM_GetCapture1(_index_timer);
-		// FIXME: we probably want to set ARR to something like _captured * 1.2, so
-		// we catch fast spindle speed changes early
+		// Allow spindle to slow down by 25% (delay is 1.25 the current one)
+		uint32_t top = _captured + (_captured / 4);
+		_index_timer->ARR = _captured < 0xffff ? _captured : 0xffff;
 	}
 }

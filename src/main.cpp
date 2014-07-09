@@ -121,11 +121,9 @@ public:
 		//		_settings.run();
 		while(1) {
 			_lcd << lcd::position(0, 0);
-			_lcd << TIM_GetCapture1(TIM15) << "           ";
-			_lcd << lcd::position(0, 1);
 			_lcd << TIM_GetCounter(TIM15) << "           ";
-			_lcd << lcd::position(0, 2);
-			_lcd << (_spindle.raw_index() ? 'T' : 'F');
+			_lcd << lcd::position(0, 1);
+			_lcd << _spindle.raw_speed() << "       ";
 		}
 		while (1)
 		{
@@ -245,5 +243,7 @@ TIM1_BRK_TIM15_IRQHandler()
 	if (TIM_GetITStatus(TIM15, TIM_IT_CC1)) {
 		TIM_ClearITPendingBit(TIM15, TIM_IT_CC1);
 		application::instance()._spindle.index_pulse_hanlder();
+
+		// Spindle sampling
 	}
 }
