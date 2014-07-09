@@ -72,6 +72,6 @@ void hw::spindle::index_pulse_hanlder()
 		_captured = TIM_GetCapture1(_index_timer);
 		// Allow spindle to slow down by 25% (delay is 1.25 the current one)
 		uint32_t top = _captured + (_captured / 4);
-		_index_timer->ARR = _captured < 0xffff ? _captured : 0xffff;
+		_index_timer->ARR = _captured < 0xffff ? top : 0xffff;
 	}
 }
