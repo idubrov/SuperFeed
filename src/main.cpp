@@ -6,6 +6,7 @@
 #include "eeprom.hpp"
 #include "tui/menu/settings.hpp"
 #include "tui/menu/sampler.hpp"
+#include "tui/menu/inputs.hpp"
 
 #include "stm32f10x_gpio.h"
 
@@ -49,13 +50,13 @@ public:
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
-							::cfg::stepper::DirectionHold)),
-			_spindle(TIM15, GPIOB, GPIO_Pin_14),
+							::cfg::stepper::DirectionHold)), _spindle(TIM15,
+					GPIOB, GPIO_Pin_14),
 			// Use page 126 and 127 for persistent storage
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
-					_console),
-			_sampler(_console, _spindle, FLASH_BASE + 125 * 0x400)
+					_console), _sampler(_console, _spindle,
+					FLASH_BASE + 125 * 0x400), _inputs(_console)
 	{
 	}
 
@@ -75,7 +76,6 @@ public:
 		AFIO->MAPR2 |= AFIO_MAPR2_TIM15_REMAP;
 		// XXX: The following line doesn't work with gcc optimizations
 		//GPIO_PinRemapConfig(GPIO_Remap_TIM15, ENABLE);
-
 
 		// Setup interrupt for pulse timer (TIM1)
 		NVIC_InitTypeDef timerIT;
@@ -119,7 +119,12 @@ public:
 	void run()
 	{
 		_lcd.clear();
-		_sampler.run();
+
+		while (true)
+		{
+			_inputs.run();
+			_sampler.run();
+		}
 
 		//		_settings.run();
 //		while(1) {
@@ -128,31 +133,6 @@ public:
 //			_lcd << lcd::position(0, 1);
 //			_lcd << _spindle.raw_delay() << "       ";
 //		}
-
-		_console.set_encoder_limit(20);
-		_lcd << "Events: ";
-		while (1)
-		{
-			auto ev = _console.read();
-			if (ev.kind == console::Nothing)
-			{
-				core::delay_ms(100);
-				continue;
-			}
-
-			if (ev.kind == console::EncoderMove)
-			{
-				_lcd << "M";
-			}
-			else if (ev.kind == console::ButtonPressed)
-			{
-				_lcd << '?' << ev.key;
-			}
-			else if (ev.kind == console::ButtonUnpressed)
-			{
-				_lcd << '!' << ev.key;
-			}
-		}
 
 ////		// STEPPER.....
 //		bool pressed = false;
@@ -207,6 +187,7 @@ private:
 	console _console;
 	settings _settings;
 	menu::sampler _sampler;
+	menu::inputs _inputs;
 private:
 	static application g_app;
 };
@@ -243,11 +224,13 @@ TIM7_IRQHandler()
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_BRK_TIM15_IRQHandler()
 {
-	if (TIM_GetITStatus(TIM15, TIM_IT_Update)) {
+	if (TIM_GetITStatus(TIM15, TIM_IT_Update))
+	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
 		application::instance()._spindle.overflow_handler();
 	}
-	if (TIM_GetITStatus(TIM15, TIM_IT_CC1)) {
+	if (TIM_GetITStatus(TIM15, TIM_IT_CC1))
+	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_CC1);
 		application::instance()._spindle.index_pulse_hanlder();
 

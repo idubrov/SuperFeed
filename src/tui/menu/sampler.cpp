@@ -15,7 +15,8 @@ void sampler::run()
 	while (true)
 	{
 		auto ev = _console.read();
-		lcd << lcd::position(0, 0) << "Spindle delay: " << format<10>(_spindle.raw_delay(), 5);
+		lcd << lcd::position(0, 0) << "Spindle delay: "
+				<< format<10>(_spindle.raw_delay(), 5);
 
 		unsigned captured = _captured;
 		if (captured < _buffer_size)
@@ -40,16 +41,23 @@ void sampler::run()
 		}
 		else if (captured == 0xffff)
 		{
-			lcd << lcd::position(0, 1) << "Capture size: " << format<10>(_buffer_size, 3);
-			lcd << lcd::position(0, 3) << "Press to capture";
+			lcd << lcd::position(0, 1) << "Capture size: "
+					<< format<10>(_buffer_size, 3);
+			lcd << lcd::position(0, 3) << "Press \xa5 to capture";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
 			{
 				_captured = 0; // Start capturing
 				lcd.clear();
-			} else if (ev.kind == console::EncoderMove)
+			}
+			else if (ev.kind == console::EncoderMove)
 			{
 				_buffer_size = ev.position + 1;
+			}
+			else if (ev.kind == console::ButtonPressed)
+			{
+				// Any other button
+				break;
 			}
 		}
 	}

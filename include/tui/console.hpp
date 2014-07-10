@@ -22,8 +22,8 @@ public:
 		// Note that these should not intersect with keypad buttons
 		LeftButton = '<',
 		RightButton = '>',
-		SelectButton = '.',
-		EncoderButton = '@'
+		SelectButton = 'S',
+		EncoderButton = '.'
 	};
 	enum Kind
 	{
