@@ -6,26 +6,26 @@
 using namespace ::hw;
 using namespace ::tui;
 
-const uint16_t settings::Microsteps[] =
+const uint16_t tui::menu::settings::Microsteps[] =
 { 1, 2, 4, 8, 10, 16, 32 };
-const setting settings::Options[] =
+const tui::menu::setting tui::menu::settings::Options[] =
 {
 { "Microsteps", 1, 1, Microsteps, sizeof(Microsteps) / sizeof(Microsteps[0]) },
 { "Dummy", 1, 1, nullptr, 0 },
 { "Dummy2", 1, 1, nullptr, 0 }
 };
-const uint16_t settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
+const uint16_t tui::menu::settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 
-void settings::run()
+void tui::menu::settings::activate(tui::console& console)
 {
-	auto& lcd = _console.lcd();
+	auto& lcd = console.lcd();
 	lcd << lcd::clear();
-	_console.set_encoder_limit(sizeof(Options) / sizeof(Options[0]));
-	redraw();
+	console.set_encoder_limit(sizeof(Options) / sizeof(Options[0]));
+	redraw(console);
 
 	while (true)
 	{
-		auto ev = _console.read();
+		auto ev = console.read();
 		if (ev.kind == console::Nothing)
 		{
 			core::delay_ms(100);
@@ -34,20 +34,20 @@ void settings::run()
 		if (ev.kind == console::EncoderMove)
 		{
 			_selected = ev.position;
-			redraw();
+			redraw(console);
 		}
 		if (ev.kind == console::ButtonPressed && ev.key == console::EncoderButton)
 		{
 			uint8_t x = strlen(Options[_selected].title) + 3;
-			tui::spinner(_console, x, _selected - _scroll,
+			tui::spinner(console, x, _selected - _scroll,
 					1, 10, 5);
 		}
 	}
 }
 
-void settings::redraw()
+void tui::menu::settings::redraw(tui::console& console)
 {
-	auto& lcd = _console.lcd();
+	auto& lcd = console.lcd();
 	for (uint16_t y = 0; y < 4; y++)
 	{
 		lcd << lcd::position(0, y);

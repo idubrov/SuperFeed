@@ -27,8 +27,14 @@ public:
 		_captured = 0xffff;
 	}
 
-	void run();
-	void print_label();
+	sampler(sampler&&) = delete;
+	sampler(sampler const&) = delete;
+
+	void activate(tui::console& console);
+	void print_label(tui::console& console)
+	{
+		console.lcd() << "Spindle sampling";
+	}
 	void index_pulse_handler();
 private:
 	FLASH_Status write_flash();

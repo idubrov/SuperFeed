@@ -4,6 +4,10 @@
 #include "tui/console.hpp"
 #include "tui/widgets.hpp"
 
+namespace tui
+{
+namespace menu
+{
 struct setting
 {
 	char const* title;
@@ -21,9 +25,13 @@ public:
 	{
 	}
 
-	void run();
+	void activate(tui::console& console);
+	void print_label(tui::console& console)
+	{
+		console.lcd() << "Settings";
+	}
 private:
-	void redraw();
+	void redraw(tui::console& console);
 private:
 	tui::console& _console;
 
@@ -34,5 +42,6 @@ private:
 	const static setting Options[];
 	const static uint16_t OptionsCount;
 };
-
+}
+}
 #endif /* __SETTINGS_HPP */

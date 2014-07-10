@@ -4,12 +4,12 @@ using namespace ::hw;
 using namespace ::tui;
 using namespace ::tui::menu;
 
-void inputs::run()
+void inputs::activate(tui::console& console)
 {
-	auto state = _console.guard_state();
+	auto state = console.guard_state();
 
-	_console.set_encoder_limit(100);
-	auto& lcd = _console.lcd();
+	console.set_encoder_limit(100);
+	auto& lcd = console.lcd();
 
 	lcd.clear();
 	lcd << lcd::position(0, 0) << "Last event: ";
@@ -17,9 +17,9 @@ void inputs::run()
 	bool enc_pressed = false;
 	while (true)
 	{
-		auto ev = _console.read();
+		auto ev = console.read();
 
-		lcd << lcd::position(0, 2) << "Encoder: " << _console.enc_position()
+		lcd << lcd::position(0, 2) << "Encoder: " << console.enc_position()
 				<< " of 100  ";
 		if (ev.kind == console::Nothing)
 		{

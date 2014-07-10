@@ -57,8 +57,7 @@ public:
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
 					_console), _sampler(_console, _spindle,
-					FLASH_BASE + 125 * 0x400), _inputs(_console),
-					_main_menu(_console, _sampler)
+					FLASH_BASE + 125 * 0x400)
 	{
 	}
 
@@ -122,20 +121,26 @@ public:
 	{
 		_lcd.clear();
 
-		_main_menu.run();
-		while (true)
-		{
-			_inputs.run();
-			_sampler.run();
-		}
-
-		//		_settings.run();
-//		while(1) {
-//			_lcd << lcd::position(0, 0);
-//			_lcd << TIM_GetCounter(TIM15) << "           ";
-//			_lcd << lcd::position(0, 1);
-//			_lcd << _spindle.raw_delay() << "       ";
+		auto main_menu = menu::create(_console, menu::inputs(), _sampler, _settings);
+		//menu::menu<menu::inputs> main_menu(_console, menu::inputs(_console));
+		//auto main_menu = menu::create(_console, menu::inputs(), _sampler);
+		//auto main_menu = menu::create(_console, _sampler);
+		//auto main_menu = menu::create(_console, menu::inputs());
+//		main_menu.run();
+//		static_assert(menu::traits::has_print_label<inputs::sampler&>() == true, "Not a valid action");
+//		while (true)
+//		{
+//			_inputs.run();
+//			_sampler.run();
 //		}
+//
+//		//		_settings.run();
+////		while(1) {
+////			_lcd << lcd::position(0, 0);
+////			_lcd << TIM_GetCounter(TIM15) << "           ";
+////			_lcd << lcd::position(0, 1);
+////			_lcd << _spindle.raw_delay() << "       ";
+////		}
 
 ////		// STEPPER.....
 //		bool pressed = false;
@@ -190,10 +195,8 @@ private:
 	console _console;
 
 	// Menus
-	settings _settings;
+	menu::settings _settings;
 	menu::sampler _sampler;
-	menu::inputs _inputs;
-	menu::menu<menu::sampler> _main_menu;
 private:
 	static application g_app;
 };

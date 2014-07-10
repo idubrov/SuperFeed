@@ -2,19 +2,17 @@
 #include "util.hpp"
 
 using namespace ::hw;
-using namespace ::tui;
-using namespace ::tui::menu;
 
-void sampler::run()
+void tui::menu::sampler::activate(tui::console& console)
 {
-	auto state = _console.guard_state();
+	auto state = console.guard_state();
 
-	_console.set_encoder(BufferCapacity, BufferCapacity - 1);
-	auto& lcd = _console.lcd();
+	console.set_encoder(BufferCapacity, BufferCapacity - 1);
+	auto& lcd = console.lcd();
 	lcd.clear();
 	while (true)
 	{
-		auto ev = _console.read();
+		auto ev = console.read();
 		lcd << lcd::position(0, 0) << "Spindle delay: "
 				<< format<10>(_spindle.raw_delay(), 5);
 
@@ -71,12 +69,7 @@ void sampler::run()
 	}
 }
 
-void sampler::print_label()
-{
-	_console.lcd() << "Sample spindle";
-}
-
-FLASH_Status sampler::write_flash()
+FLASH_Status tui::menu::sampler::write_flash()
 {
 	FLASH_Unlock();
 	FLASH_Status status;
@@ -98,7 +91,7 @@ FLASH_Status sampler::write_flash()
 	return FLASH_COMPLETE;
 }
 
-void sampler::index_pulse_handler()
+void tui::menu::sampler::index_pulse_handler()
 {
 	unsigned pos = _captured;
 	if (pos < _buffer_size)

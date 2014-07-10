@@ -2,6 +2,7 @@
 #define __CORE_HPP
 
 #include "config.hpp"
+#include "stm32f10x.h"
 
 namespace hw
 {

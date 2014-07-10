@@ -11,13 +11,11 @@ namespace menu
 class inputs
 {
 public:
-	inputs(tui::console& console) : _console(console)
+	void activate(tui::console& console);
+	void print_label(tui::console& console)
 	{
+		console.lcd() << "Verify inputs";
 	}
-
-	void run();
-private:
-	tui::console& _console;
 };
 }
 }

@@ -88,6 +88,11 @@ public:
 		reset();
 	}
 
+	console(console&&) = delete;
+	console(console const&) = delete;
+	console& operator=(console&&) = delete;
+	console& operator=(console const&) = delete;
+
 	void initialize();
 
 	void reset()
