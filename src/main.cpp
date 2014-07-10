@@ -122,12 +122,15 @@ public:
 		_sampler.run();
 
 		//		_settings.run();
-		while(1) {
-			_lcd << lcd::position(0, 0);
-			_lcd << TIM_GetCounter(TIM15) << "           ";
-			_lcd << lcd::position(0, 1);
-			_lcd << _spindle.raw_delay() << "       ";
-		}
+//		while(1) {
+//			_lcd << lcd::position(0, 0);
+//			_lcd << TIM_GetCounter(TIM15) << "           ";
+//			_lcd << lcd::position(0, 1);
+//			_lcd << _spindle.raw_delay() << "       ";
+//		}
+
+		_console.set_encoder_limit(20);
+		_lcd << "Events: ";
 		while (1)
 		{
 			auto ev = _console.read();

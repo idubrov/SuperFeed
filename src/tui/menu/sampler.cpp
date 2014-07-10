@@ -9,7 +9,7 @@ void sampler::run()
 {
 	auto state = _console.guard_state();
 
-	_console.set_encoder_limit(BufferCapacity - 1);
+	_console.set_encoder(BufferCapacity, BufferCapacity - 1);
 	auto& lcd = _console.lcd();
 	lcd.clear();
 	while (true)
@@ -41,7 +41,7 @@ void sampler::run()
 		else if (captured == 0xffff)
 		{
 			lcd << lcd::position(0, 1) << "Capture size: " << format<10>(_buffer_size, 3);
-			lcd << lcd::position(0, 2) << "Press to capture";
+			lcd << lcd::position(0, 3) << "Press to capture";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
 			{
