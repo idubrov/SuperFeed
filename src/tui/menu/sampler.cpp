@@ -22,6 +22,13 @@ void sampler::run()
 		if (captured < _buffer_size)
 		{
 			lcd << lcd::position(0, 1) << captured << " of " << _buffer_size;
+			lcd << lcd::position(0, 3) << "Press \xa5 to stop";
+			if (ev.kind == console::ButtonPressed
+					&& ev.key == console::EncoderButton)
+			{
+				_captured = 0xffff; // Stop capturing
+				lcd.clear();
+			}
 		}
 		else if (captured == _buffer_size)
 		{
@@ -43,7 +50,8 @@ void sampler::run()
 		{
 			lcd << lcd::position(0, 1) << "Capture size: "
 					<< format<10>(_buffer_size, 3);
-			lcd << lcd::position(0, 3) << "Press \xa5 to capture";
+			lcd << lcd::position(0, 2) << "Press \xa5 to capture";
+			lcd << lcd::position(0, 3) << "Other key to exit";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
 			{

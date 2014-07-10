@@ -18,7 +18,6 @@ void inputs::run()
 	while (true)
 	{
 		auto ev = _console.read();
-		auto st = _console.guard_state();
 
 		lcd << lcd::position(0, 2) << "Encoder: " << _console.enc_position()
 				<< " of 100  ";
