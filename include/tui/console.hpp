@@ -85,13 +85,14 @@ public:
 					keypad), _buttons(buttons), _current(0), _last(0), _keypad_debounce(
 					0), _buttons_debounce(0), _enc_debounce(0)
 	{
+		reset();
 	}
 
 	void initialize();
 
 	void reset()
 	{
-		_last = _current;
+		_last = (static_cast<uint8_t>(hw::keypad::None) << KeypadShift) & KeypadMask;
 	}
 
 	Event read();
@@ -126,6 +127,11 @@ public:
 	inline void set_encoder_limit(uint16_t limit)
 	{
 		_encoder.set_limit(limit);
+	}
+	inline void set_encoder(uint_fast16_t limit, uint_fast16_t position)
+	{
+		_encoder.set_limit(limit);
+		_encoder.set_position(position);
 	}
 	inline hw::lcd::HD44780 const& lcd() const
 	{

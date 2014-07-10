@@ -58,15 +58,14 @@ void tui::console::debounce()
 		_buttons_debounce |= EncoderBit;
 
 	uint16_t bd = _buttons_debounce;
-	uint_fast8_t buttons = (current & ButtonsMask) >> ButtonsShift;
 	// Set bits which are '1' in last four samples
-	uint_fast8_t set = (bd >> 12) & (bd >> 8) & (bd >> 4) & bd & 0xf;
+	uint_fast32_t set = (bd >> 12) & (bd >> 8) & (bd >> 4) & bd & 0xf;
 	current |= set << ButtonsShift;
 	// Reset bits which are '0' in last four samples
-	uint_fast8_t reset = (bd >> 12) | (bd >> 8) | (bd >> 4) | bd;
-	buttons &= ~ButtonsMask | (reset << ButtonsShift);
+	uint_fast32_t reset = (bd >> 12) | (bd >> 8) | (bd >> 4) | bd;
+	current &= ~ButtonsMask | (reset << ButtonsShift);
 
-	_current.store(std::memory_order_relaxed);
+	_current.store(current, std::memory_order_relaxed);
 }
 
 tui::console::Event tui::console::read()
@@ -116,9 +115,9 @@ tui::console::Event tui::console::read()
 		// Scan all button bits, report one button at a time
 		for (int i = 0; i < 4; i++)
 		{
-			uint_fast8_t mask = (1 << i);
-			bool l = last_buttons & mask;
-			bool c = curr_buttons & mask;
+			uint_fast32_t mask = (1 << i);
+			bool l = (last_buttons & mask) != 0;
+			bool c = (curr_buttons & mask) != 0;
 			if (c && !l)
 			{
 				event.kind = ButtonPressed;
