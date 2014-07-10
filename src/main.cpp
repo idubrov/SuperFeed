@@ -7,6 +7,7 @@
 #include "tui/menu/settings.hpp"
 #include "tui/menu/sampler.hpp"
 #include "tui/menu/inputs.hpp"
+#include "tui/menu/menu.hpp"
 
 #include "stm32f10x_gpio.h"
 
@@ -56,7 +57,8 @@ public:
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
 					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
 					_console), _sampler(_console, _spindle,
-					FLASH_BASE + 125 * 0x400), _inputs(_console)
+					FLASH_BASE + 125 * 0x400), _inputs(_console),
+					_main_menu(_console, _sampler)
 	{
 	}
 
@@ -120,6 +122,7 @@ public:
 	{
 		_lcd.clear();
 
+		_main_menu.run();
 		while (true)
 		{
 			_inputs.run();
@@ -185,9 +188,12 @@ private:
 	spindle _spindle;
 	eeprom _eeprom;
 	console _console;
+
+	// Menus
 	settings _settings;
 	menu::sampler _sampler;
 	menu::inputs _inputs;
+	menu::menu<menu::sampler> _main_menu;
 private:
 	static application g_app;
 };

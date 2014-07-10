@@ -71,6 +71,11 @@ void sampler::run()
 	}
 }
 
+void sampler::print_label()
+{
+	_console.lcd() << "Sample spindle";
+}
+
 FLASH_Status sampler::write_flash()
 {
 	FLASH_Unlock();

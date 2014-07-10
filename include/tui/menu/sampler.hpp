@@ -1,11 +1,11 @@
 #ifndef __SAMPLER_HPP
 #define __SAMPLER_HPP
 
-#include "tui/console.hpp"
-#include "hw/spindle.hpp"
-#include <cstdint>
 #include <algorithm>
 #include <atomic>
+
+#include "tui/console.hpp"
+#include "hw/spindle.hpp"
 
 namespace tui
 {
@@ -28,6 +28,7 @@ public:
 	}
 
 	void run();
+	void print_label();
 	void index_pulse_handler();
 private:
 	FLASH_Status write_flash();
