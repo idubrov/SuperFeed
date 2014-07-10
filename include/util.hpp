@@ -55,7 +55,7 @@ public:
 			F<H, Args...>::apply(head, args...);
 	}
 private:
-	H head;
+	H&& head;
 	tuple<T...> tail;
 };
 

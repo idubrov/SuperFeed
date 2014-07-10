@@ -55,9 +55,7 @@ public:
 					GPIOB, GPIO_Pin_14),
 			// Use page 126 and 127 for persistent storage
 			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
-					_lcd, TIM7, _encoder, _keypad, _buttons), _settings(
-					_console), _sampler(_console, _spindle,
-					FLASH_BASE + 125 * 0x400)
+					_lcd, TIM7, _encoder, _keypad, _buttons)
 	{
 	}
 
@@ -120,27 +118,11 @@ public:
 	void run()
 	{
 		_lcd.clear();
-
-		auto main_menu = menu::create(_console, menu::inputs(), _sampler, _settings);
-		//menu::menu<menu::inputs> main_menu(_console, menu::inputs(_console));
-		//auto main_menu = menu::create(_console, menu::inputs(), _sampler);
-		//auto main_menu = menu::create(_console, _sampler);
-		//auto main_menu = menu::create(_console, menu::inputs());
-//		main_menu.run();
-//		static_assert(menu::traits::has_print_label<inputs::sampler&>() == true, "Not a valid action");
-//		while (true)
-//		{
-//			_inputs.run();
-//			_sampler.run();
-//		}
-//
-//		//		_settings.run();
-////		while(1) {
-////			_lcd << lcd::position(0, 0);
-////			_lcd << TIM_GetCounter(TIM15) << "           ";
-////			_lcd << lcd::position(0, 1);
-////			_lcd << _spindle.raw_delay() << "       ";
-////		}
+		//menu::sampler sampler(_spindle, FLASH_BASE + 125 * 0x400);
+		auto main_menu = menu::create(_console, menu::inputs(),
+				menu::sampler(_spindle, FLASH_BASE + 125 * 0x400),
+				menu::settings());
+		main_menu.run();
 
 ////		// STEPPER.....
 //		bool pressed = false;
@@ -193,10 +175,6 @@ private:
 	spindle _spindle;
 	eeprom _eeprom;
 	console _console;
-
-	// Menus
-	menu::settings _settings;
-	menu::sampler _sampler;
 private:
 	static application g_app;
 };
@@ -244,6 +222,6 @@ TIM1_BRK_TIM15_IRQHandler()
 		application::instance()._spindle.index_pulse_hanlder();
 
 		// Spindle sampling
-		application::instance()._sampler.index_pulse_handler();
+		//application::instance()._sampler.index_pulse_handler();
 	}
 }

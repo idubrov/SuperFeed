@@ -20,8 +20,7 @@ struct setting
 class settings
 {
 public:
-	settings(tui::console& console) :
-			_console(console), _scroll(0), _selected(0)
+	settings() : _scroll(0), _selected(0)
 	{
 	}
 
@@ -33,8 +32,6 @@ public:
 private:
 	void redraw(tui::console& console);
 private:
-	tui::console& _console;
-
 	uint16_t _scroll;
 	uint16_t _selected;
 

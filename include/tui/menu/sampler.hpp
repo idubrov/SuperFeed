@@ -15,8 +15,8 @@ namespace menu
 class sampler
 {
 public:
-	sampler(tui::console& console, hw::spindle& spindle, uint32_t flash_start) :
-			_console(console), _spindle(spindle), _flash_start(flash_start),
+	sampler(hw::spindle& spindle, uint32_t flash_start) :
+			_spindle(spindle), _flash_start(flash_start),
 			_captured(), _buffer_size(BufferCapacity)
 	{
 		static_assert(BufferCapacity * sizeof(_buffer[0]) <= 1024,
@@ -27,9 +27,6 @@ public:
 		_captured = 0xffff;
 	}
 
-	sampler(sampler&&) = delete;
-	sampler(sampler const&) = delete;
-
 	void activate(tui::console& console);
 	void print_label(tui::console& console)
 	{
@@ -39,7 +36,6 @@ public:
 private:
 	FLASH_Status write_flash();
 private:
-	tui::console& _console;
 	hw::spindle& _spindle;
 	uint32_t const _flash_start;
 
