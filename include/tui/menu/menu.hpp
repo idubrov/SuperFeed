@@ -16,6 +16,10 @@ template<>
 class menu_items<>
 {
 public:
+	void print_label(unsigned)
+	{
+		assert_param(0);
+	}
 	constexpr static unsigned size = 0;
 };
 
@@ -26,6 +30,23 @@ public:
 	menu_items(Item& first, Rest&... rest) :
 			_first(first), _rest(rest...)
 	{
+	}
+
+	void activate(unsigned i)
+	{
+		if (i > 0)
+			_rest.activate(i - 1);
+		else
+			_first.run();
+	}
+
+	void print_label(unsigned i)
+	{
+		if (i > 0)
+			_rest.print_label(i - 1);
+		else
+			_first.print_label();
+
 	}
 
 	constexpr static unsigned size = 1 + menu_items<Rest...>::size;
@@ -65,7 +86,7 @@ private:
 		for (unsigned i = 0; i < 4 && i + _scroll < count; i++)
 		{
 			lcd << hw::lcd::position(0, i) << "  ";
-			//(*(_menu_items + i))->print_label();
+			_menu_items.print_label(i + _scroll);
 		}
 
 	}
