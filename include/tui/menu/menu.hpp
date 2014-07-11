@@ -58,9 +58,12 @@ constexpr bool assert_valid_actions(H*, T*... tail)
 class menu_base
 {
 public:
-	menu_base(std::size_t actions_count) : actions_count(actions_count), scroll(0)
+	menu_base(char const* label, std::size_t actions_count) :
+			label(label), actions_count(actions_count), scroll(0)
 	{
 	}
+	menu_base(menu_base const&) = default;
+	menu_base& operator=(menu_base const&) = default;
 
 	virtual ~menu_base()
 	{
@@ -69,7 +72,7 @@ public:
 	void activate(tui::console& console);
 	void print_label(tui::console& console)
 	{
-		console.lcd() << "Main menu";
+		console.lcd() << label;
 	}
 
 protected:
@@ -78,13 +81,14 @@ protected:
 	virtual void print_actions(tui::console& console) = 0;
 	virtual void activate_action(tui::console& console, unsigned idx) = 0;
 
+protected:
+	char const* label;
 	std::size_t actions_count;
 	unsigned scroll;
 };
 
-
 template<typename ... Actions>
-class menu : public menu_base
+class menu: public menu_base
 {
 	template<typename I, typename ...Param>
 	struct Print
@@ -109,19 +113,14 @@ class menu : public menu_base
 			std::tuple_size<actions_tuple>::value;
 	constexpr static unsigned lines_count = 4;
 public:
-	menu(Actions&&... actions) :
-			menu_base(std::tuple_size<actions_tuple>::value),
-			actions(std::forward<Actions>(actions)...)
+	menu(char const* label, Actions&&... actions) :
+			menu_base(label, std::tuple_size<actions_tuple>::value), actions(
+					std::forward<Actions>(actions)...)
 	{
 		static_assert(traits::assert_valid_actions<
 				typename std::remove_reference<Actions>::type...>(
 						(typename std::remove_reference<Actions>::type*)nullptr...),
 				"Not a valid action list");
-	}
-
-	void print_label(tui::console& console)
-	{
-		console.lcd() << "Main menu";
 	}
 private:
 	void print_actions(tui::console& console)
@@ -129,22 +128,24 @@ private:
 		for (unsigned i = 0; i < lines_count && i + scroll < actions_count; i++)
 		{
 			console.lcd() << hw::lcd::position(2, i);
-			util::make_tuple_applicator(actions, console).template apply_to<Print>(i + scroll);
+			util::make_tuple_applicator(actions, console).template apply_to<
+					Print>(i + scroll);
 		}
 	}
 
 	void activate_action(tui::console& console, unsigned idx)
 	{
-		util::make_tuple_applicator(actions, console).template apply_to<Activate>(idx);
+		util::make_tuple_applicator(actions, console).template apply_to<Activate>(
+				idx);
 	}
 private:
 	actions_tuple actions;
 };
 
 template<typename ... Actions>
-menu<Actions...> create(Actions&&... actions)
+menu<Actions...> create(char const* label, Actions&&... actions)
 {
-	return menu<Actions...>(std::forward<Actions>(actions)...);
+	return menu<Actions...>(label, std::forward<Actions>(actions)...);
 }
 
 }

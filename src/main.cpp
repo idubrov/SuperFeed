@@ -119,6 +119,7 @@ public:
 	{
 		lcd.clear();
 		auto main_menu = tui::menu::create(
+				"Main menu",
 				sampler,
 				tui::menu::inputs(),
 				tui::menu::settings());
