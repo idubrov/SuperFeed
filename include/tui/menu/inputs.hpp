@@ -2,14 +2,13 @@
 #define __INPUTS_HPP
 
 #include "tui/console.hpp"
-#include "tui/menu/action.hpp"
 
 namespace tui
 {
 namespace menu
 {
 
-class inputs : public action
+class inputs
 {
 public:
 	void activate(tui::console& console);

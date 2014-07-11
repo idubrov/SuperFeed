@@ -6,14 +6,13 @@
 
 #include "hw/spindle.hpp"
 #include "tui/console.hpp"
-#include "tui/menu/action.hpp"
 
 namespace tui
 {
 namespace menu
 {
 
-class sampler : public action
+class sampler
 {
 public:
 	sampler(hw::spindle& spindle, uint32_t flash_start) :
