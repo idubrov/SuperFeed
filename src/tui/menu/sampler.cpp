@@ -14,21 +14,22 @@ void tui::menu::sampler::activate(tui::console& console)
 	{
 		auto ev = console.read();
 		lcd << lcd::position(0, 0) << "Spindle delay: "
-				<< format<10>(_spindle.raw_delay(), 5);
+				<< format<10>(spindle.raw_delay(), 5);
 
-		unsigned captured = _captured;
-		if (captured < _buffer_size)
+		// Get local copy
+		unsigned cap = captured;
+		if (cap < buffer_size)
 		{
-			lcd << lcd::position(0, 1) << "Sampled " << captured << " of " << _buffer_size;
+			lcd << lcd::position(0, 1) << "Sampled " << cap << " of " << buffer_size;
 			lcd << lcd::position(0, 3) << "Press \xa5 to stop";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
 			{
-				_captured = 0xffff; // Stop capturing
+				captured = 0xffff; // Stop capturing
 				lcd.clear();
 			}
 		}
-		else if (captured == _buffer_size)
+		else if (cap == buffer_size)
 		{
 			lcd << lcd::position(0, 1) << "Writing to flash... ";
 			FLASH_Status status = write_flash();
@@ -41,28 +42,28 @@ void tui::menu::sampler::activate(tui::console& console)
 				while (1)
 					;
 			}
-			_captured = 0xffff;
+			captured = 0xffff;
 			lcd.clear();
 		}
-		else if (captured == 0xffff)
+		else if (cap == 0xffff)
 		{
 			lcd << lcd::position(0, 1) << "Capture size: "
-					<< format<10>(_buffer_size, 3);
+					<< format<10>(buffer_size, 3);
 			lcd << lcd::position(0, 2) << "Press \xa5 to capture";
 			lcd << lcd::position(0, 3) << "Other key to exit";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
 			{
-				_captured = 0; // Start capturing
+				captured = 0; // Start capturing
 				lcd.clear();
 			}
 			else if (ev.kind == console::EncoderMove)
 			{
-				_buffer_size = ev.position + 1;
+				buffer_size = ev.position + 1;
 			}
 			else if (ev.kind == console::ButtonPressed)
 			{
-				// Any other button
+				// Any other button -- exit
 				break;
 			}
 		}
@@ -73,15 +74,15 @@ FLASH_Status tui::menu::sampler::write_flash()
 {
 	FLASH_Unlock();
 	FLASH_Status status;
-	if ((status = FLASH_ErasePage(_flash_start)) != FLASH_COMPLETE)
+	if ((status = FLASH_ErasePage(flash_start)) != FLASH_COMPLETE)
 	{
 		return status;
 	}
-	unsigned cnt = _buffer_size;
+	unsigned cnt = buffer_size;
 	for (unsigned i = 0; i < cnt; i++)
 	{
-		uint32_t offset = _flash_start + i * sizeof(uint16_t);
-		if ((status = FLASH_ProgramHalfWord(offset, _buffer[i]))
+		uint32_t offset = flash_start + i * sizeof(uint16_t);
+		if ((status = FLASH_ProgramHalfWord(offset, buffer[i]))
 				!= FLASH_COMPLETE)
 		{
 			return status;
@@ -93,12 +94,12 @@ FLASH_Status tui::menu::sampler::write_flash()
 
 void tui::menu::sampler::index_pulse_handler()
 {
-	unsigned pos = _captured;
-	if (pos < _buffer_size)
+	unsigned pos = captured;
+	if (pos < buffer_size)
 	{
-		_buffer[pos] = _spindle.raw_delay();
+		buffer[pos] = spindle.raw_delay();
 
-		// Make sure we update _captured after writing to buffer
-		_captured.store(pos + 1);
+		// Make sure we update captured after writing to buffer
+		captured.store(pos + 1);
 	}
 }

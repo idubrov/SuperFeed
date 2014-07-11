@@ -16,12 +16,18 @@ class sampler
 {
 public:
 	sampler(hw::spindle& spindle, uint32_t flash_start) :
-			_spindle(spindle), _flash_start(flash_start),
-			_captured(0xffff), _buffer_size(BufferCapacity)
+			spindle(spindle), flash_start(flash_start),
+			captured(0xffff), buffer_size(BufferCapacity)
 	{
-		static_assert(BufferCapacity * sizeof(_buffer[0]) <= 1024,
+		static_assert(BufferCapacity * sizeof(buffer[0]) <= 1024,
 				"Buffer must fit into one flash page");
-		std::fill_n(_buffer, BufferCapacity, 0);
+		std::fill_n(buffer, BufferCapacity, 0);
+	}
+	sampler(sampler const& other) : spindle(other.spindle),
+			flash_start(other.flash_start), captured(0xffff),
+			buffer_size(other.buffer_size)
+	{
+		std::fill_n(buffer, BufferCapacity, 0);
 	}
 
 	void activate(tui::console& console);
@@ -33,13 +39,13 @@ public:
 private:
 	FLASH_Status write_flash();
 private:
-	hw::spindle& _spindle;
-	uint32_t const _flash_start;
+	hw::spindle& spindle;
+	uint32_t const flash_start;
 
 	constexpr static unsigned BufferCapacity = 512;
-	std::atomic_uint_fast16_t _captured;
-	unsigned _buffer_size;
-	uint16_t _buffer[BufferCapacity]; // Buffer for temporary storage
+	std::atomic_uint_fast16_t captured;
+	unsigned buffer_size;
+	uint16_t buffer[BufferCapacity]; // Buffer for temporary storage
 };
 }
 }
