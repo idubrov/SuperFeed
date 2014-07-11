@@ -54,7 +54,7 @@ void hw::lcd::HD44780::initialize() const
 	}
 
 	// Finally, set # lines, font size
-	command(FunctionSet | _mode | Line2 | Dots5x10);
+	command(FunctionSet | _mode | Line2 | Dots5x8);
 
 	// Now display should be properly initialized, we can check BF now
 	// Though if we are not checking BF, waiting time is longer
@@ -133,4 +133,15 @@ void hw::lcd::HD44780::wait_busy_flag() const
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_data_port, &GPIO_InitStructure);
+}
+
+void hw::lcd::HD44780::upload_character(uint_fast8_t location,
+		uint8_t map[8]) const
+{
+	// Only 8 locations are available
+	command(SetCGRamAddr | ((location & 0x7) << 3));
+	for (unsigned i = 0; i < 8; i++)
+	{
+		write ((char) map[i]);
+	}
 }

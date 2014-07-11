@@ -133,6 +133,8 @@ public:
 	}
 
 	void write(char data) const;
+
+	void upload_character(uint_fast8_t location, uint8_t map[8]) const;
 private:
 	void command(uint_fast8_t cmd) const;
 	void wait_busy_flag() const;

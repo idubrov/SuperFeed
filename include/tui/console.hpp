@@ -17,6 +17,11 @@ namespace tui
 class console
 {
 public:
+	// Custom characters
+	constexpr static char UpArrowCharacter = 0x01;
+	constexpr static char DownArrowCharacter = 0x02;
+
+	// Buttons to key mappings
 	enum Button
 	{
 		// Note that these should not intersect with keypad buttons
@@ -163,6 +168,7 @@ private:
 	{
 		return (current() & ButtonsMask) >> ButtonsShift;
 	}
+	void upload_characters();
 
 private:
 	// Outputs

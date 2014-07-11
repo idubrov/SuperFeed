@@ -24,6 +24,19 @@ void tui::console::initialize()
 	TIM_ClearITPendingBit(_debounce_timer, TIM_IT_Update);
 	TIM_ITConfig(_debounce_timer, TIM_IT_Update, ENABLE);
 	TIM_Cmd(_debounce_timer, ENABLE);
+
+	// Upload custom character
+	upload_characters();
+}
+
+void tui::console::upload_characters()
+{
+	uint8_t up[8] =
+	{ 0x00, 0x4, 0x0e, 0x1f, 0x04, 0x04, 0x04, 0x00 };
+	_lcd.upload_character(1, up);
+	uint8_t down[8] =
+	{ 0x00, 0x4, 0x04, 0x04, 0x1f, 0x0e, 0x04, 0x00 };
+	_lcd.upload_character(2, down);
 }
 
 void tui::console::debounce()
@@ -107,7 +120,8 @@ tui::console::Event tui::console::read()
 			// If current is not 'None', make it as one to convert button change
 			// into two events (unpressed and then pressed).
 			_last &= ~KeypadMask;
-			_last |= (static_cast<uint8_t>(hw::keypad::None) << KeypadShift) & KeypadMask;
+			_last |= (static_cast<uint8_t>(hw::keypad::None) << KeypadShift)
+					& KeypadMask;
 		}
 	}
 	else if ((_last & ButtonsMask) != (curr & ButtonsMask))

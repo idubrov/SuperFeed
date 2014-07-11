@@ -119,7 +119,8 @@ public:
 				for (unsigned i = 0; i < 4; i++)
 				{
 					bool current = (scroll + i == selected);
-					console.lcd() << hw::lcd::position(1, i) << (current ? '>' : ' ');
+					console.lcd() << hw::lcd::position(1, i)
+							<< (current ? '>' : ' ');
 				}
 			}
 		}
@@ -130,18 +131,24 @@ private:
 		auto& lcd = console.lcd();
 		lcd.clear();
 
-//		if (scroll > 0) {
-//			lcd << hw::lcd::position(0, 0) << '\x8f';
-//		}
+		if (scroll > 0)
+		{
+			lcd << hw::lcd::position(0, 0) << console::UpArrowCharacter;
+		}
 
 		unsigned selected = console.enc_position();
 		for (unsigned i = 0; i < lines_count && i + scroll < actions_count; i++)
 		{
-			lcd << hw::lcd::position(0, i) << " ";
+			lcd << hw::lcd::position(1, i);
 			bool current = (scroll + i == selected);
 			lcd << (current ? '>' : ' ');
 			util::make_tuple_applicator(actions, console).template apply_to<
 					Print>(i + scroll);
+		}
+
+		if (scroll + lines_count < actions_count)
+		{
+			lcd << hw::lcd::position(0, lines_count - 1) << console::DownArrowCharacter;
 		}
 	}
 private:

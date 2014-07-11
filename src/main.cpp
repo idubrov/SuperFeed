@@ -118,8 +118,9 @@ public:
 	void run()
 	{
 		_lcd.clear();
-		//menu::sampler sampler(_spindle, FLASH_BASE + 125 * 0x400);
 		auto main_menu = menu::create(_console,
+				menu::inputs(),
+				menu::inputs(),
 				menu::inputs(),
 				menu::sampler(_spindle, FLASH_BASE + 125 * 0x400),
 				menu::settings());
