@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include "util.hpp"
+#include "tuple_util.hpp"
 #include "tui/console.hpp"
 
 namespace tui
@@ -102,42 +103,6 @@ public:
 		}
 	}
 private:
-
-	template<unsigned N, typename ...Args>
-	struct Apply
-	{
-		template<template<typename, typename ... > class F>
-		static void apply(actions_tuple& actions, unsigned idx, Args&&... args)
-		{
-			if (idx > 0)
-			{
-				Apply<N + 1, Args...>::template apply<F>(actions, idx - 1, args...);
-			}
-			else
-			{
-				using H = typename std::tuple_element<N, actions_tuple>::type;
-				F<H, Args...>::apply(std::get<N>(actions), args...);
-			}
-		}
-
-	};
-
-	template<typename ...Args>
-	struct Apply<actions_count, Args...>
-	{
-		template<template<typename, typename ... > class F>
-		static void apply(actions_tuple&, unsigned, Args&&...)
-		{
-			// FIXME: Fail at runtime!!!
-		}
-	};
-
-	template<typename ...Args>
-	Apply<0, Args...> make_apply(Args&&...)
-	{
-		return Apply<0, Args...>();
-	}
-
 	void redraw()
 	{
 		auto& lcd = console.lcd();
@@ -145,7 +110,7 @@ private:
 		for (unsigned i = 0; i < 4 && i + scroll < actions_count; i++)
 		{
 			lcd << hw::lcd::position(0, i) << "  ";
-			make_apply(console).template apply<Print>(actions, i + scroll, console);
+			util::make_tuple_applicator(actions, console).template apply_to<Print>(i + scroll);
 		}
 	}
 private:
