@@ -19,7 +19,7 @@ void tui::menu::sampler::activate(tui::console& console)
 		unsigned captured = _captured;
 		if (captured < _buffer_size)
 		{
-			lcd << lcd::position(0, 1) << captured << " of " << _buffer_size;
+			lcd << lcd::position(0, 1) << "Sampled " << captured << " of " << _buffer_size;
 			lcd << lcd::position(0, 3) << "Press \xa5 to stop";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::EncoderButton)
