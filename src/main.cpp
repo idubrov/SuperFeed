@@ -118,13 +118,12 @@ public:
 	void run()
 	{
 		_lcd.clear();
-		auto main_menu = menu::create(_console,
-				menu::inputs(),
-				menu::inputs(),
-				menu::inputs(),
-				menu::sampler(_spindle, FLASH_BASE + 125 * 0x400),
-				menu::settings());
-		main_menu.run();
+		menu::sampler sampler(_spindle, FLASH_BASE + 125 * 0x400);
+		menu::inputs inputs;
+		menu::settings settings;
+		menu::action* actions[] = { &sampler, &inputs, &settings };
+		menu::menu main_menu(actions, 3);
+		main_menu.activate(_console);
 
 ////		// STEPPER.....
 //		bool pressed = false;

@@ -3,6 +3,7 @@
 
 #include "tui/console.hpp"
 #include "tui/widgets.hpp"
+#include "tui/menu/action.hpp"
 
 namespace tui
 {
@@ -17,7 +18,7 @@ struct setting
 	uint16_t values_cnt;
 };
 
-class settings
+class settings : public action
 {
 public:
 	settings() : _scroll(0), _selected(0)

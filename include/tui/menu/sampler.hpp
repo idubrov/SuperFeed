@@ -4,27 +4,25 @@
 #include <algorithm>
 #include <atomic>
 
-#include "tui/console.hpp"
 #include "hw/spindle.hpp"
+#include "tui/console.hpp"
+#include "tui/menu/action.hpp"
 
 namespace tui
 {
 namespace menu
 {
 
-class sampler
+class sampler : public action
 {
 public:
 	sampler(hw::spindle& spindle, uint32_t flash_start) :
 			_spindle(spindle), _flash_start(flash_start),
-			_captured(), _buffer_size(BufferCapacity)
+			_captured(0xffff), _buffer_size(BufferCapacity)
 	{
 		static_assert(BufferCapacity * sizeof(_buffer[0]) <= 1024,
 				"Buffer must fit into one flash page");
 		std::fill_n(_buffer, BufferCapacity, 0);
-
-		// Capturing is stopped
-		_captured = 0xffff;
 	}
 
 	void activate(tui::console& console);
