@@ -10,7 +10,7 @@ void hw::lcd::HD44780::initialize() const
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_control_port, &GPIO_InitStructure);
 
-	// Set 8 data pins to output
+	// Set 4/8 data pins to output
 	GPIO_InitStructure.GPIO_Pin = (_mode == Bit8 ? 0xff : 0xf) << _data_shift;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -86,9 +86,9 @@ void hw::lcd::HD44780::wait_busy_flag() const
 	// LCD has OD output, set all to '0' just to be sure.
 	_data_port->BRR = 0xff << _data_shift;
 
-	// First, set 8 data ports to input
+	// First, set 4/8 data ports to input
 	GPIO_InitTypeDef GPIO_InitStructure;
-	GPIO_InitStructure.GPIO_Pin = 0xff << _data_shift;
+	GPIO_InitStructure.GPIO_Pin = (_mode == Bit8 ? 0xff : 0xf) << _data_shift;
 	// LCD will pull-up to 5v
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(_data_port, &GPIO_InitStructure);
@@ -100,11 +100,28 @@ void hw::lcd::HD44780::wait_busy_flag() const
 	bool busy;
 	do
 	{
-		_control_port->BSRR = _e_pin;
-		core::delay_us(1); // minimum delay is 360+25 ns (tDDR + tER)
-		busy = (_data_port->IDR & (0x80 << _data_shift)) != 0;
-		core::delay_us(1); // minimum delay is 450ns (PWen)
-		_control_port->BRR = _e_pin;
+		if (_mode == Bit8)
+		{
+			_control_port->BSRR = _e_pin;
+			core::delay_us(1); // minimum delay is 360+25 ns (tDDR + tER)
+			busy = (_data_port->IDR & (0x80 << _data_shift)) != 0;
+			core::delay_us(1); // minimum delay is 450ns (PWen)
+			_control_port->BRR = _e_pin;
+		}
+		else
+		{
+			// First read
+			_control_port->BSRR = _e_pin;
+			core::delay_us(1); // minimum delay is 360+25 ns (tDDR + tER)
+			busy = (_data_port->IDR & (0x8 << _data_shift)) != 0;
+			core::delay_us(1); // minimum delay is 450ns (PWen)
+			_control_port->BRR = _e_pin;
+
+			// Second read
+			_control_port->BSRR = _e_pin;
+			core::delay_us(1); // minimum delay is 360+25+450 ns (tDDR + tER + PWEn)
+			_control_port->BRR = _e_pin;
+		}
 	} while (busy);
 	// tAH is 10ns, which is less than one cycle. So we don't have to wait.
 
@@ -112,7 +129,7 @@ void hw::lcd::HD44780::wait_busy_flag() const
 	_control_port->BRR = _rw_pin;
 
 	// Reset data port to output
-	GPIO_InitStructure.GPIO_Pin = 0xff << _data_shift;
+	GPIO_InitStructure.GPIO_Pin = (_mode == Bit8 ? 0xff : 0xf) << _data_shift;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(_data_port, &GPIO_InitStructure);
