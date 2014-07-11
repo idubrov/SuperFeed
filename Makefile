@@ -14,6 +14,7 @@ SOURCES := $(wildcard src/*.c) \
 		   $(wildcard system/src/cortexm/*.c) \
 		   $(wildcard system/src/diag/*.c) \
 		   $(wildcard system/src/newlib/*.c) \
+		   $(wildcard system/src/newlib/*.cpp) \
 		   system/src/stm32f1-stdperiph/misc.c \
 		   system/src/stm32f1-stdperiph/stm32f10x_gpio.c \
 		   system/src/stm32f1-stdperiph/stm32f10x_rcc.c \
