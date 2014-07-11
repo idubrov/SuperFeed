@@ -123,7 +123,7 @@ public:
 				sampler,
 				tui::menu::inputs(),
 				tui::menu::settings());
-		main_menu.activate(console);
+		main_menu.activate(console, 0);
 
 ////		// STEPPER.....
 //		bool pressed = false;

@@ -16,7 +16,7 @@ const tui::menu::setting tui::menu::settings::Options[] =
 };
 const uint16_t tui::menu::settings::OptionsCount = sizeof(Options) / sizeof(Options[0]);
 
-void tui::menu::settings::activate(tui::console& console)
+void tui::menu::settings::activate(tui::console& console, unsigned)
 {
 	auto& lcd = console.lcd();
 	lcd << lcd::clear();

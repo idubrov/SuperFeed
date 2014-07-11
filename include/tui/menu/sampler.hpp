@@ -30,7 +30,7 @@ public:
 		std::fill_n(buffer, BufferCapacity, 0);
 	}
 
-	void activate(tui::console& console);
+	void activate(tui::console& console, unsigned);
 	void print_label(tui::console& console)
 	{
 		console.lcd() << "Spindle sampling";

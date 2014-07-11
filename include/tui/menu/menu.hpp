@@ -29,7 +29,7 @@ constexpr bool has_print_label(...)
 
 template<typename A>
 constexpr auto has_activate(
-		A*) -> decltype(((A*)nullptr)->activate(*(tui::console*)nullptr), bool())
+		A*) -> decltype(((A*)nullptr)->activate(*(tui::console*)nullptr, (unsigned)0), bool())
 {
 	return true;
 }
@@ -69,7 +69,7 @@ public:
 	{
 	}
 
-	void activate(tui::console& console);
+	void activate(tui::console& console, unsigned row);
 	void print_label(tui::console& console)
 	{
 		console.lcd() << label;
@@ -135,7 +135,7 @@ private:
 
 	void activate_action(tui::console& console, unsigned idx)
 	{
-		util::make_tuple_applicator(actions, console).template apply_to<Activate>(
+		util::make_tuple_applicator(actions, console, 0).template apply_to<Activate>(
 				idx);
 	}
 private:

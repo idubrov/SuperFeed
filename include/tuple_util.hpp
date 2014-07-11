@@ -65,7 +65,8 @@ struct apply_wrapper
 			static void apply(integer_sequence<S...>, Tuple&& tuple, ArgTuple& args)
 			{
 				using H = typename std::tuple_element<N, RawTuple>::type;
-				F<H, Args...>::apply(std::get<N>(tuple), std::get<S>(args)...);
+				F<H, Args...>::apply(std::get<N>(tuple),
+						std::forward<typename std::tuple_element<S, ArgTuple>::type>(std::get<S>(args))...);
 			}
 		};
 
@@ -96,7 +97,7 @@ template<typename Tuple, typename ...Args>
 detail::apply_wrapper<Tuple>::apply_wrapper2<0, Args...> make_tuple_applicator(Tuple&& tuple, Args&&... args)
 {
 	using Ret = typename detail::apply_wrapper<Tuple>::template apply_wrapper2<0, Args...>;
-	return Ret(tuple, args...);
+	return Ret(tuple, std::forward<Args>(args)...);
 }
 }
 

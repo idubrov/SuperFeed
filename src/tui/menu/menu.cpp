@@ -27,7 +27,7 @@ void tui::menu::menu_base::redraw(tui::console& console)
 
 }
 
-void tui::menu::menu_base::activate(tui::console& console)
+void tui::menu::menu_base::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 	console.set_encoder_limit(actions_count);

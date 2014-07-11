@@ -3,7 +3,7 @@
 
 using namespace ::hw;
 
-void tui::menu::sampler::activate(tui::console& console)
+void tui::menu::sampler::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 
