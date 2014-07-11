@@ -55,8 +55,7 @@ public:
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
 							::cfg::stepper::DirectionHold)), console(lcd, TIM7,
-					encoder, keypad, buttons), sampler(spindle,
-			FLASH_BASE + 125 * 0x400), inputs(), settings()
+					encoder, keypad, buttons), sampler(spindle)
 	{
 	}
 
@@ -119,12 +118,10 @@ public:
 	void run()
 	{
 		lcd.clear();
-//		tui::menu::action* actions[] =
-//		{ &sampler, &inputs, &settings };
-//		tui::menu::menu main_menu(actions, 3);
-//		main_menu.activate(console);
-
-		auto main_menu = tui::menu::create(sampler, inputs, settings);
+		auto main_menu = tui::menu::create(
+				sampler,
+				tui::menu::inputs(),
+				tui::menu::settings());
 		main_menu.activate(console);
 
 ////		// STEPPER.....
@@ -183,11 +180,7 @@ private:
 
 	// TUI
 	tui::console console;
-
-	// Menus
 	tui::menu::sampler sampler;
-	tui::menu::inputs inputs;
-	tui::menu::settings settings;
 private:
 	static application g_app;
 };

@@ -55,8 +55,36 @@ constexpr bool assert_valid_actions(H*, T*... tail)
 }
 }
 
+class menu_base
+{
+public:
+	menu_base(std::size_t actions_count) : actions_count(actions_count), scroll(0)
+	{
+	}
+
+	virtual ~menu_base()
+	{
+	}
+
+	void activate(tui::console& console);
+	void print_label(tui::console& console)
+	{
+		console.lcd() << "Main menu";
+	}
+
+protected:
+	void redraw(tui::console& console);
+
+	virtual void print_actions(tui::console& console) = 0;
+	virtual void activate_action(tui::console& console, unsigned idx) = 0;
+
+	std::size_t actions_count;
+	unsigned scroll;
+};
+
+
 template<typename ... Actions>
-class menu
+class menu : public menu_base
 {
 	template<typename I, typename ...Param>
 	struct Print
@@ -82,7 +110,8 @@ class menu
 	constexpr static unsigned lines_count = 4;
 public:
 	menu(Actions&&... actions) :
-			actions(std::forward<Actions>(actions)...), scroll(0)
+			menu_base(std::tuple_size<actions_tuple>::value),
+			actions(std::forward<Actions>(actions)...)
 	{
 		static_assert(traits::assert_valid_actions<
 				typename std::remove_reference<Actions>::type...>(
@@ -90,86 +119,26 @@ public:
 				"Not a valid action list");
 	}
 
-	void activate(tui::console& console)
-	{
-		auto state = console.guard_state();
-		console.set_encoder_limit(actions_count);
-
-		redraw(console);
-		while (true)
-		{
-			auto ev = console.read();
-			if (ev.kind == console::EncoderMove)
-			{
-				unsigned selected = ev.position;
-				if (selected < scroll)
-				{
-					scroll = selected;
-					redraw(console);
-				}
-				else if (selected >= scroll + lines_count)
-				{
-					scroll = selected - lines_count + 1;
-					redraw(console);
-				}
-
-				for (unsigned i = 0; i < 4; i++)
-				{
-					bool current = (scroll + i == selected);
-					console.lcd() << hw::lcd::position(1, i)
-							<< (current ? '>' : ' ');
-				}
-			}
-			else if (ev.kind == console::ButtonPressed
-					&& ev.key == console::EncoderButton)
-			{
-				unsigned selected = console.enc_position();
-				//actions[selected]->activate(console);
-				util::make_tuple_applicator(actions, console).template apply_to<
-									Activate>(selected);
-				redraw(console);
-			}
-		}
-
-	}
 	void print_label(tui::console& console)
 	{
 		console.lcd() << "Main menu";
 	}
-
 private:
-	void redraw(tui::console& console)
+	void print_actions(tui::console& console)
 	{
-		auto& lcd = console.lcd();
-		lcd.clear();
-
-		if (scroll > 0)
-		{
-			lcd << hw::lcd::position(0, 0) << console::UpArrowCharacter;
-		}
-
-		unsigned selected = console.enc_position();
 		for (unsigned i = 0; i < lines_count && i + scroll < actions_count; i++)
 		{
-			lcd << hw::lcd::position(1, i);
-			bool current = (scroll + i == selected);
-			lcd << (current ? '>' : ' ');
-			//actions[i + scroll]->print_label(console);
-			util::make_tuple_applicator(actions, console).template apply_to<
-					Print>(i + scroll);
+			console.lcd() << hw::lcd::position(2, i);
+			util::make_tuple_applicator(actions, console).template apply_to<Print>(i + scroll);
 		}
-
-		if (scroll + lines_count < actions_count)
-		{
-			lcd << hw::lcd::position(0, lines_count - 1)
-					<< console::DownArrowCharacter;
-		}
-
 	}
 
+	void activate_action(tui::console& console, unsigned idx)
+	{
+		util::make_tuple_applicator(actions, console).template apply_to<Activate>(idx);
+	}
 private:
 	actions_tuple actions;
-	unsigned scroll;
 };
 
 template<typename ... Actions>

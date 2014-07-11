@@ -15,7 +15,7 @@ namespace menu
 class sampler
 {
 public:
-	sampler(hw::spindle& spindle, uint32_t flash_start) :
+	sampler(hw::spindle& spindle, uint32_t flash_start = FLASH_BASE + 125 * 0x400) :
 			spindle(spindle), flash_start(flash_start),
 			captured(0xffff), buffer_size(BufferCapacity)
 	{
