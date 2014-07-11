@@ -1,7 +1,7 @@
 #include "eeprom.hpp"
 #include "stm32f10x_flash.h"
 
-eeprom::Status eeprom::initialize()
+hw::eeprom::Status hw::eeprom::initialize()
 {
 	FlashUnlock unlock; // Unlock flash
 
@@ -28,7 +28,7 @@ eeprom::Status eeprom::initialize()
 	return Ok;
 }
 
-int16_t eeprom::find_current()
+int16_t hw::eeprom::find_current()
 {
 	for (int16_t page = 0; page < _page_count; page++)
 	{
@@ -38,7 +38,7 @@ int16_t eeprom::find_current()
 	return -1;
 }
 
-bool eeprom::dirty(int16_t page)
+bool hw::eeprom::dirty(int16_t page)
 {
 	for (uint32_t offset = 0; offset < PageSize; offset += 2)
 	{
@@ -49,7 +49,7 @@ bool eeprom::dirty(int16_t page)
 	return false;
 }
 
-bool eeprom::search(uint32_t start, uint32_t end, uint16_t tag)
+bool hw::eeprom::search(uint32_t start, uint32_t end, uint16_t tag)
 {
 	for (uint32_t offset = start; offset < end; offset += 4)
 	{
@@ -59,7 +59,7 @@ bool eeprom::search(uint32_t start, uint32_t end, uint16_t tag)
 	return false;
 }
 
-FLASH_Status eeprom::rescue_if_full(int16_t page)
+FLASH_Status hw::eeprom::rescue_if_full(int16_t page)
 {
 	// Check if last word of the page was written or not
 	uint32_t src_base = _base + page * PageSize;
@@ -110,7 +110,7 @@ FLASH_Status eeprom::rescue_if_full(int16_t page)
 	return FLASH_COMPLETE;
 }
 
-eeprom::Status eeprom::read(uint16_t tag, uint16_t& data)
+hw::eeprom::Status hw::eeprom::read(uint16_t tag, uint16_t& data)
 {
 	int16_t current = find_current();
 	if (current < 0)
@@ -131,7 +131,7 @@ eeprom::Status eeprom::read(uint16_t tag, uint16_t& data)
 	return NotFound;
 }
 
-eeprom::Status eeprom::write(uint16_t tag, uint16_t data)
+hw::eeprom::Status hw::eeprom::write(uint16_t tag, uint16_t data)
 {
 	FlashUnlock unlock;
 

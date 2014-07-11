@@ -11,9 +11,6 @@
 
 #include "stm32f10x_gpio.h"
 
-using namespace ::hw;
-using namespace ::tui;
-
 extern "C"
 {
 void SysTick_Handler();
@@ -34,28 +31,32 @@ class application
 public:
 	application() :
 			// Columns start with pin PA0, rows start with PA4
-			_keypad(GPIOA, GPIO_PinSource0, GPIO_PinSource4),
+			keypad(GPIOA, GPIO_PinSource0, GPIO_PinSource4),
 			// PC10-PC12 should be connected to the first three output of three buttons.
-			_buttons(GPIOC, GPIO_PinSource10),
+			buttons(GPIOC, GPIO_PinSource10),
 			// PB5 should be connected to encoder button, PB6 and PB7 to rotary encoder.
-			_encoder(GPIOB, TIM4, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
+			encoder(GPIOB, TIM4, GPIO_Pin_5, GPIO_Pin_6 | GPIO_Pin_7),
 			// LCD display, RS pin should be connected to PB15, R/W to PB8 and E to PB9
 			// D4-D7 should be connected to PB8-PB15
-			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA,
-			GPIO_PinSource8, lcd::Bit4, false),
+			lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA,
+			GPIO_PinSource8, hw::lcd::Bit4, false),
 			// Stepper driver, PB13 should be connected to STEP, PB12 to DIR,
 			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			_driver(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
-			GPIO_Pin_10, TIM1, ::cfg::stepper::StepLen), _stepper(_driver,
+			driver(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
+			GPIO_Pin_10, TIM1, ::cfg::stepper::StepLen),
+			// Spindle index, PB14 should be connected to hall sensor or optical sensor
+			spindle(TIM15,
+			GPIOB, GPIO_Pin_14),
+			// Use page 126 and 127 for persistent storage
+			eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), stepper(
+					driver,
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
-							::cfg::stepper::DirectionHold)), _spindle(TIM15,
-					GPIOB, GPIO_Pin_14),
-			// Use page 126 and 127 for persistent storage
-			_eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), _console(
-					_lcd, TIM7, _encoder, _keypad, _buttons)
+							::cfg::stepper::DirectionHold)), console(lcd, TIM7,
+					encoder, keypad, buttons), sampler(spindle,
+					FLASH_BASE + 125 * 0x400), inputs(), settings()
 	{
 	}
 
@@ -99,31 +100,29 @@ public:
 		NVIC_Init(&timerIT);
 
 		// Setup core hardware (on-board LEDs and delay timer)
-		core::setup();
+		hw::core::setup();
 
 		// Setup all used hardware
-		_keypad.initialize();
-		_buttons.initialize();
-		_encoder.initialize();
-		_console.initialize();
-		_lcd.initialize();
-		_lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
-		_driver.initialize();
-		_spindle.initialize();
-		_eeprom.initialize();
+		keypad.initialize();
+		buttons.initialize();
+		encoder.initialize();
+		console.initialize();
+		lcd.initialize();
+		lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
+		driver.initialize();
+		spindle.initialize();
+		eeprom.initialize();
 
-		_stepper.reset();
+		stepper.reset();
 	}
 
 	void run()
 	{
-		_lcd.clear();
-		menu::sampler sampler(_spindle, FLASH_BASE + 125 * 0x400);
-		menu::inputs inputs;
-		menu::settings settings;
-		menu::action* actions[] = { &sampler, &inputs, &settings };
-		menu::menu main_menu(actions, 3);
-		main_menu.activate(_console);
+		lcd.clear();
+		tui::menu::action* actions[] =
+		{ &sampler, &inputs, &settings };
+		tui::menu::menu main_menu(actions, 3);
+		main_menu.activate(console);
 
 ////		// STEPPER.....
 //		bool pressed = false;
@@ -136,20 +135,20 @@ public:
 //
 //		while (1)
 //		{
-//			_lcd << lcd::position(0, 0) << _stepper;
+//			lcd << lcd::position(0, 0) << stepper;
 //
-//			uint8_t pos = _buttons.raw_buttons();
+//			uint8_t pos = buttons.rawbuttons();
 //			if (pos != last)
 //			{
-//				_stepper.set_speed(pos == switch5::LL ? fast : slow);
+//				stepper.set_speed(pos == switch5::LL ? fast : slow);
 //			}
 //			last = pos;
 //
-//			if (_encoder.raw_pressed())
+//			if (encoder.raw_pressed())
 //			{
 //				if (!pressed)
 //				{
-//					_stepper.move(1000);
+//					stepper.move(1000);
 //				}
 //				pressed = true;
 //			}
@@ -167,15 +166,25 @@ public:
 		return g_app;
 	}
 private:
-	keypad _keypad;
-	buttons _buttons;
-	encoder _encoder;
-	lcd::HD44780 _lcd;
-	driver _driver;
-	stepper::controller _stepper;
-	spindle _spindle;
-	eeprom _eeprom;
-	console _console;
+	// Hardware
+	hw::keypad keypad;
+	hw::buttons buttons;
+	hw::encoder encoder;
+	hw::lcd::HD44780 lcd;
+	hw::driver driver;
+	hw::spindle spindle;
+	hw::eeprom eeprom;
+
+	// Stepper motor controller
+	stepper::controller stepper;
+
+	// TUI
+	tui::console console;
+
+	// Menus
+	tui::menu::sampler sampler;
+	tui::menu::inputs inputs;
+	tui::menu::settings settings;
 private:
 	static application g_app;
 };
@@ -199,14 +208,14 @@ extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_UP_TIM16_IRQHandler()
 {
 	TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
-	application::instance()._stepper.step_completed();
+	application::instance().stepper.step_completed();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM7_IRQHandler()
 {
 	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
-	application::instance()._console.debounce();
+	application::instance().console.debounce();
 }
 
 extern "C" void __attribute__ ((section(".after_vectors")))
@@ -215,14 +224,14 @@ TIM1_BRK_TIM15_IRQHandler()
 	if (TIM_GetITStatus(TIM15, TIM_IT_Update))
 	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
-		application::instance()._spindle.overflow_handler();
+		application::instance().spindle.overflow_handler();
 	}
 	if (TIM_GetITStatus(TIM15, TIM_IT_CC1))
 	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_CC1);
-		application::instance()._spindle.index_pulse_hanlder();
+		application::instance().spindle.index_pulse_hanlder();
 
 		// Spindle sampling
-		//application::instance()._sampler.index_pulse_handler();
+		application::instance().sampler.index_pulse_handler();
 	}
 }

@@ -3,6 +3,8 @@
 
 #include "config.hpp"
 
+namespace hw
+{
 class eeprom
 {
 public:
@@ -78,5 +80,6 @@ private:
 		}
 	};
 };
+}
 
 #endif /* __EEPROM_HPP */

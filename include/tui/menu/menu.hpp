@@ -2,6 +2,7 @@
 #define __MENU_HPP
 
 #include <utility>
+#include <array>
 
 #include "tui/console.hpp"
 #include "tui/menu/action.hpp"
@@ -18,6 +19,8 @@ public:
 			actions(actions), actions_count(actions_count), scroll(0)
 	{
 	}
+	menu(menu const&) = delete;
+	menu& operator=(menu const&) = delete;
 
 	void activate(tui::console& console);
 	void print_label(tui::console& console)
