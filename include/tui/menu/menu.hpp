@@ -81,6 +81,7 @@ class menu
 	typedef std::tuple<Actions&&...> actions_tuple;
 	constexpr static std::size_t actions_count =
 			std::tuple_size<actions_tuple>::value;
+	constexpr static unsigned lines_count = 4;
 public:
 	menu(tui::console& console, Actions&&... actions) :
 			console(console), actions(std::forward<Actions>(actions)...), scroll(
@@ -95,11 +96,33 @@ public:
 	void run()
 	{
 		auto state = console.guard_state();
-		console.set_encoder_limit(100);
+		console.set_encoder_limit(actions_count);
+
 		redraw();
 		while (true)
 		{
 
+			auto ev = console.read();
+			if (ev.kind == console::EncoderMove)
+			{
+				unsigned selected = ev.position;
+				if (selected < scroll)
+				{
+					scroll = selected;
+					redraw();
+				}
+				else if (selected >= scroll + lines_count)
+				{
+					scroll = selected - lines_count + 1;
+					redraw();
+				}
+
+				for (unsigned i = 0; i < 4; i++)
+				{
+					bool current = (scroll + i == selected);
+					console.lcd() << hw::lcd::position(1, i) << (current ? '>' : ' ');
+				}
+			}
 		}
 	}
 private:
@@ -107,10 +130,19 @@ private:
 	{
 		auto& lcd = console.lcd();
 		lcd.clear();
-		for (unsigned i = 0; i < 4 && i + scroll < actions_count; i++)
+
+//		if (scroll > 0) {
+//			lcd << hw::lcd::position(0, 0) << '\x8f';
+//		}
+
+		unsigned selected = console.enc_position();
+		for (unsigned i = 0; i < lines_count && i + scroll < actions_count; i++)
 		{
-			lcd << hw::lcd::position(0, i) << "  ";
-			util::make_tuple_applicator(actions, console).template apply_to<Print>(i + scroll);
+			lcd << hw::lcd::position(0, i) << " ";
+			bool current = (scroll + i == selected);
+			lcd << (current ? '>' : ' ');
+			util::make_tuple_applicator(actions, console).template apply_to<
+					Print>(i + scroll);
 		}
 	}
 private:
