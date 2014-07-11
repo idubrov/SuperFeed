@@ -42,7 +42,7 @@ public:
 			// LCD display, RS pin should be connected to PB15, R/W to PB8 and E to PB9
 			// D4-D7 should be connected to PB8-PB15
 			_lcd(GPIOB, GPIO_Pin_15, GPIO_Pin_8, GPIO_Pin_9, GPIOA,
-			GPIO_PinSource8, lcd::Bit4),
+			GPIO_PinSource8, lcd::Bit4, false),
 			// Stepper driver, PB13 should be connected to STEP, PB12 to DIR,
 			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).

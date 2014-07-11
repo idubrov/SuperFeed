@@ -101,7 +101,6 @@ public:
 		redraw();
 		while (true)
 		{
-
 			auto ev = console.read();
 			if (ev.kind == console::EncoderMove)
 			{
