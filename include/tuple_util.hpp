@@ -36,11 +36,11 @@ struct apply_wrapper
 	struct apply_wrapper2
 	{
 		using ArgTuple = std::tuple<Args...>;
-		apply_wrapper2(Tuple&&, Args&&... args) :
+		apply_wrapper2(Tuple&& tuple, Args&&... args) :
 				tuple(tuple), args(args...)
 		{
 		}
-		apply_wrapper2(Tuple&&, ArgTuple& args) :
+		apply_wrapper2(Tuple&& tuple, ArgTuple& args) :
 				tuple(tuple), args(args)
 		{
 		}
