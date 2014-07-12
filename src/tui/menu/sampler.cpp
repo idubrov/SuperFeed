@@ -7,7 +7,7 @@ void tui::menu::sampler::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 
-	console.set_encoder(BufferCapacity, BufferCapacity - 1);
+	console.set_encoder(BufferCapacity, buffer_size - 1);
 	auto& lcd = console.lcd();
 	lcd.clear();
 	while (true)
