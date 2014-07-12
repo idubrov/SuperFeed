@@ -39,16 +39,14 @@ void tui::menu::menu_base::activate(tui::console& console, unsigned)
 		if (ev.kind == console::EncoderMove)
 		{
 			unsigned selected = ev.position;
-
-			unsigned top_scroll = selected - console.lcd().lines() + 1;
 			if (selected < scroll)
 			{
 				scroll = selected;
 				redraw(console);
 			}
-			else if (top_scroll > scroll)
+			else if (selected >= scroll + console.lcd().lines())
 			{
-				scroll = top_scroll;
+				scroll = selected - console.lcd().lines() + 1;
 				redraw(console);
 			}
 
