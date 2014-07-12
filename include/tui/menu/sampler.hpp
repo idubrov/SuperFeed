@@ -17,17 +17,15 @@ class sampler
 public:
 	sampler(hw::spindle& spindle, uint32_t flash_start = FLASH_BASE + 125 * 0x400) :
 			spindle(spindle), flash_start(flash_start),
-			captured(0xffff), buffer_size(BufferCapacity)
+			captured(0xffff), buffer_size(BufferCapacity), buffer {}
 	{
 		static_assert(BufferCapacity * sizeof(buffer[0]) <= 1024,
 				"Buffer must fit into one flash page");
-		std::fill_n(buffer, BufferCapacity, 0);
 	}
 	sampler(sampler const& other) : spindle(other.spindle),
 			flash_start(other.flash_start), captured(0xffff),
-			buffer_size(other.buffer_size)
+			buffer_size(other.buffer_size), buffer {}
 	{
-		std::fill_n(buffer, BufferCapacity, 0);
 	}
 
 	void activate(tui::console& console, unsigned);
