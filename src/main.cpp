@@ -14,6 +14,7 @@
 
 // Text UI
 #include "tui/console.hpp"
+#include "tui/menu/controls.hpp"
 #include "tui/menu/inputs.hpp"
 #include "tui/menu/menu.hpp"
 #include "tui/menu/sampler.hpp"
@@ -129,7 +130,9 @@ public:
 				"Main menu",
 				sampler,
 				tui::menu::inputs(),
-				tui::menu::create("Settings", tui::menu::back()));
+				tui::menu::create("Settings",
+						tui::menu::spinner(eeprom, "Microsteps", 0, 1),
+						tui::menu::back()));
 		main_menu.activate(console, 0);
 
 ////		// STEPPER.....

@@ -107,7 +107,7 @@ menu<Actions...> create(char const* label, Actions&&... actions)
 class back
 {
 public:
-	bool activate(tui::console& console, unsigned)
+	bool activate(tui::console&, unsigned)
 	{
 		return false;
 	}
