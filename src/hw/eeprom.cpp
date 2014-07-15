@@ -1,5 +1,5 @@
-#include "eeprom.hpp"
 #include "stm32f10x_flash.h"
+#include "hw/eeprom.hpp"
 
 hw::eeprom::Status hw::eeprom::initialize()
 {

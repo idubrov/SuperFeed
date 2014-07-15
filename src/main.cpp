@@ -1,14 +1,22 @@
-#include "main.hpp"
-#include "hw/spindle.hpp"
-#include "tui/console.hpp"
 #include "simstream.hpp"
+#include "util.hpp"
 #include "stepper.hpp"
-#include "eeprom.hpp"
-#include "tui/menu/sampler.hpp"
+
+// Hardwre
+#include "hw/buttons.hpp"
+#include "hw/core.hpp"
+#include "hw/driver.hpp"
+#include "hw/eeprom.hpp"
+#include "hw/encoder.hpp"
+#include "hw/keypad.hpp"
+#include "hw/lcd.hpp"
+#include "hw/spindle.hpp"
+
+// Text UI
+#include "tui/console.hpp"
 #include "tui/menu/inputs.hpp"
 #include "tui/menu/menu.hpp"
-
-#include "stm32f10x_gpio.h"
+#include "tui/menu/sampler.hpp"
 
 extern "C"
 {
