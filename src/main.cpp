@@ -4,7 +4,6 @@
 #include "simstream.hpp"
 #include "stepper.hpp"
 #include "eeprom.hpp"
-#include "tui/menu/settings.hpp"
 #include "tui/menu/sampler.hpp"
 #include "tui/menu/inputs.hpp"
 #include "tui/menu/menu.hpp"
@@ -122,8 +121,7 @@ public:
 				"Main menu",
 				sampler,
 				tui::menu::inputs(),
-				tui::menu::create("Settings", tui::menu::back()),
-				tui::menu::settings());
+				tui::menu::create("Settings", tui::menu::back()));
 		main_menu.activate(console, 0);
 
 ////		// STEPPER.....
