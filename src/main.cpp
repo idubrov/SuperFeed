@@ -122,6 +122,7 @@ public:
 				"Main menu",
 				sampler,
 				tui::menu::inputs(),
+				tui::menu::create("Settings", tui::menu::back()),
 				tui::menu::settings());
 		main_menu.activate(console, 0);
 

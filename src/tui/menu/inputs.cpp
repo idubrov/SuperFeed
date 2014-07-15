@@ -4,7 +4,7 @@ using namespace ::hw;
 using namespace ::tui;
 using namespace ::tui::menu;
 
-void inputs::activate(tui::console& console, unsigned)
+bool inputs::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 
@@ -46,4 +46,5 @@ void inputs::activate(tui::console& console, unsigned)
 			lcd << "  unpressed " << ev.key << "       ";
 		}
 	}
+	return true;
 }

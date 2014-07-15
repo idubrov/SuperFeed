@@ -27,7 +27,7 @@ void tui::menu::menu_base::redraw(tui::console& console)
 
 }
 
-void tui::menu::menu_base::activate(tui::console& console, unsigned)
+bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 	console.set_encoder_limit(actions_count);
@@ -61,9 +61,10 @@ void tui::menu::menu_base::activate(tui::console& console, unsigned)
 				&& ev.key == console::EncoderButton)
 		{
 			unsigned selected = console.enc_position();
-			activate_action(console, selected);
+			if (!activate_action(console, selected))
+				break; // false returned -- exit from the menu
 			redraw(console);
 		}
 	}
-
+	return true;
 }

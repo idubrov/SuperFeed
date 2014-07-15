@@ -11,50 +11,6 @@ namespace tui
 {
 namespace menu
 {
-namespace traits
-{
-
-template<typename A>
-constexpr auto has_print_label(
-		A*) -> decltype(((A*)nullptr)->print_label(*(tui::console*)nullptr),
-				bool())
-{
-	return true;
-}
-template<typename A>
-constexpr bool has_print_label(...)
-{
-	return false;
-}
-
-template<typename A>
-constexpr auto has_activate(
-		A*) -> decltype(((A*)nullptr)->activate(*(tui::console*)nullptr, (unsigned)0), bool())
-{
-	return true;
-}
-template<typename A>
-constexpr bool has_activate(...)
-{
-	return false;
-}
-
-constexpr bool assert_valid_actions()
-{
-	return true;
-}
-
-template<typename H, typename ... T>
-constexpr bool assert_valid_actions(H*, T*... tail)
-{
-	static_assert(has_print_label<H>(nullptr),
-			"Not a valid action: doesn't have print_label(tui::console&) has_print_label");
-	static_assert(has_activate<H>(nullptr),
-			"Not a valid action: doesn't have activate(tui::console&) activate");
-	return assert_valid_actions(tail...);
-}
-}
-
 class menu_base
 {
 public:
@@ -69,7 +25,7 @@ public:
 	{
 	}
 
-	void activate(tui::console& console, unsigned row);
+	bool activate(tui::console& console, unsigned row);
 	void print_label(tui::console& console)
 	{
 		console.lcd() << label;
@@ -79,7 +35,7 @@ protected:
 	void redraw(tui::console& console);
 
 	virtual void print_actions(tui::console& console) = 0;
-	virtual void activate_action(tui::console& console, unsigned idx) = 0;
+	virtual bool activate_action(tui::console& console, unsigned idx) = 0;
 
 protected:
 	char const* label;
@@ -93,18 +49,19 @@ class menu: public menu_base
 	template<typename I, typename ...Param>
 	struct Print
 	{
-		static void apply(I& item, Param&&... param)
+		static bool apply(I& item, Param&&... param)
 		{
 			item.print_label(param...);
+			return true;
 		}
 	};
 
 	template<typename I, typename ... Param>
 	struct Activate
 	{
-		static void apply(I& item, Param&&... param)
+		static bool apply(I& item, Param&&... param)
 		{
-			item.activate(param...);
+			return item.activate(param...);
 		}
 	};
 
@@ -117,10 +74,6 @@ public:
 			menu_base(label, std::tuple_size<actions_tuple>::value), actions(
 					std::forward<Actions>(actions)...)
 	{
-		static_assert(traits::assert_valid_actions<
-				typename std::remove_reference<Actions>::type...>(
-						(typename std::remove_reference<Actions>::type*)nullptr...),
-				"Not a valid action list");
 	}
 private:
 	void print_actions(tui::console& console)
@@ -129,14 +82,14 @@ private:
 		{
 			console.lcd() << hw::lcd::position(2, i);
 			util::make_tuple_applicator(actions, console).template apply_to<
-					Print>(i + scroll);
+					bool, Print>(i + scroll);
 		}
 	}
 
-	void activate_action(tui::console& console, unsigned idx)
+	bool activate_action(tui::console& console, unsigned idx)
 	{
-		util::make_tuple_applicator(actions, console, 0).template apply_to<Activate>(
-				idx);
+		return util::make_tuple_applicator(actions, console, 0).template apply_to<
+				bool, Activate>(idx);
 	}
 private:
 	actions_tuple actions;
@@ -148,6 +101,21 @@ menu<Actions...> create(char const* label, Actions&&... actions)
 	return menu<Actions...>(label, std::forward<Actions>(actions)...);
 }
 
+
+// Simple actions
+
+class back
+{
+public:
+	bool activate(tui::console& console, unsigned)
+	{
+		return false;
+	}
+	void print_label(tui::console& console)
+	{
+		console.lcd() << "Back";
+	}
+};
 }
 }
 

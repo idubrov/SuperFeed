@@ -45,27 +45,27 @@ struct apply_wrapper
 		{
 		}
 
-		template<template<typename, typename ... > class F>
-		void apply_to(unsigned idx)
+		template<typename Ret, template<typename, typename ... > class F>
+		Ret apply_to(unsigned idx)
 		{
 			if (idx > 0)
 			{
-				apply_wrapper2<N + 1, Args...>(tuple, args).template apply_to<F>(idx - 1);
+				return apply_wrapper2<N + 1, Args...>(tuple, args).template apply_to<Ret, F>(idx - 1);
 			}
 			else
 			{
-				apply_wrapper3<F>::apply(typename make_integer_sequence<sizeof...(Args)>::sequence(), tuple, args);
+				return apply_wrapper3<Ret, F>::apply(typename make_integer_sequence<sizeof...(Args)>::sequence(), tuple, args);
 			}
 		}
 
-		template<template<typename, typename ... > class F>
+		template<typename Ret, template<typename, typename ... > class F>
 		struct apply_wrapper3
 		{
 			template<int ...S>
-			static void apply(integer_sequence<S...>, Tuple&& tuple, ArgTuple& args)
+			static Ret apply(integer_sequence<S...>, Tuple&& tuple, ArgTuple& args)
 			{
 				using H = typename std::tuple_element<N, RawTuple>::type;
-				F<H, Args...>::apply(std::get<N>(tuple),
+				return F<H, Args...>::apply(std::get<N>(tuple),
 						std::forward<typename std::tuple_element<S, ArgTuple>::type>(std::get<S>(args))...);
 			}
 		};
@@ -84,10 +84,11 @@ struct apply_wrapper
 		{
 		}
 
-		template<template<typename, typename ... > class F>
-		void apply_to(unsigned)
+		template<typename Ret, template<typename, typename ... > class F>
+		Ret apply_to(unsigned)
 		{
 			// FIXME: Fail at runtime?
+			return Ret();
 		}
 	};
 };

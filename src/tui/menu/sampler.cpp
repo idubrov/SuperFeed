@@ -3,7 +3,7 @@
 
 using namespace ::hw;
 
-void tui::menu::sampler::activate(tui::console& console, unsigned)
+bool tui::menu::sampler::activate(tui::console& console, unsigned)
 {
 	auto state = console.guard_state();
 
@@ -68,6 +68,7 @@ void tui::menu::sampler::activate(tui::console& console, unsigned)
 			}
 		}
 	}
+	return true;
 }
 
 FLASH_Status tui::menu::sampler::write_flash()

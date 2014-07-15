@@ -28,7 +28,7 @@ public:
 	{
 	}
 
-	void activate(tui::console& console, unsigned);
+	bool activate(tui::console& console, unsigned);
 	void print_label(tui::console& console)
 	{
 		console.lcd() << "Spindle sampling";
