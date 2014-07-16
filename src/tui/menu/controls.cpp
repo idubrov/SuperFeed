@@ -79,10 +79,10 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 		{
 			uint32_t newValue = value * 10 + (ev.key - '0');
 			if (newValue < max)
-				value = newValue;
-
-			if (empty && value != 0)
+			{
 				empty = false;
+				value = newValue;
+			}
 		}
 
 		lcd << lcd::position(x, y) << blanks(b) << lcd::position(x, y);
