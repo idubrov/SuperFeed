@@ -113,12 +113,12 @@ public:
 		keypad.initialize();
 		buttons.initialize();
 		encoder.initialize();
-		console.initialize();
 		lcd.initialize();
 		lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
 		driver.initialize();
 		spindle.initialize();
 		eeprom.initialize();
+		console.initialize();
 
 		stepper.reset();
 	}
@@ -132,6 +132,7 @@ public:
 				tui::menu::inputs(),
 				tui::menu::create("Settings",
 						tui::menu::spinner(eeprom, "Microsteps", 0, 1, 40, 1),
+						tui::menu::erase_settings(eeprom),
 						tui::menu::back()));
 		main_menu.activate(console, 0);
 

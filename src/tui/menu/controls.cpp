@@ -15,8 +15,9 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 
 	console.set_encoder_limit(max - min + 1);
 
+	uint16_t value = def_value;
 	lcd << lcd::position(x, y) << blanks(b);
-	lcd << lcd::position(x, y) << value << (char)3;
+	lcd << lcd::position(x, y) << value << (char) 3;
 	while (true)
 	{
 		auto ev = console.read();
@@ -28,7 +29,7 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 		{
 			value = ev.position + 1;
 			lcd << lcd::position(x, y) << blanks(b);
-			lcd << lcd::position(x, y) << value << (char)3;
+			lcd << lcd::position(x, y) << value << (char) 3;
 		}
 	}
 
@@ -37,6 +38,27 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	if (current != value)
 	{
 		eeprom.write(tag, value);
+	}
+	return true;
+}
+
+bool tui::menu::erase_settings::activate(console& console, unsigned)
+{
+	auto& lcd = console.lcd();
+	lcd << hw::lcd::clear() << "Erasing...";
+	if (eeprom.erase_settings() != hw::eeprom::Ok)
+	{
+		lcd << hw::lcd::clear() << "EEPROM error.";
+		while (1)
+			;
+	}
+	lcd << hw::lcd::clear() << "Settings erased.";
+	lcd << hw::lcd::position(0, 1) << "Press . to exit.";
+	while (true)
+	{
+		auto ev = console.read();
+		if (ev.kind == console::ButtonPressed)
+			break;
 	}
 	return true;
 }

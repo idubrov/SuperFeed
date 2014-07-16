@@ -25,6 +25,7 @@ public:
 	Status read(uint16_t tag, uint16_t& data);
 	Status write(uint16_t tag, uint16_t data);
 
+	Status erase_settings();
 private:
 	FLASH_Status rescue_if_full(int16_t page);
 	int16_t find_current();

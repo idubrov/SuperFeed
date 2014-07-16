@@ -28,6 +28,23 @@ hw::eeprom::Status hw::eeprom::initialize()
 	return Ok;
 }
 
+hw::eeprom::Status hw::eeprom::erase_settings()
+{
+	FlashUnlock unlock; // Unlock flash
+
+	int16_t current = find_current();
+	for (int16_t page = 0; page < _page_count; page++)
+	{
+		if (erase_page(page) != FLASH_COMPLETE)
+			return Error;
+	}
+
+	// We don't have current page, mark first page as one.
+	if (set_page_status(0, CurrentPage) != FLASH_COMPLETE)
+		return Error;
+	return Ok;
+}
+
 int16_t hw::eeprom::find_current()
 {
 	for (int16_t page = 0; page < _page_count; page++)
