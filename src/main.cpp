@@ -128,6 +128,10 @@ public:
 				tui::menu::create("Settings",
 						tui::menu::spinner(eeprom, settings::Microsteps),
 						tui::menu::spinner(eeprom, settings::Acceleration),
+						tui::menu::spinner(eeprom, settings::StepLen),
+						tui::menu::spinner(eeprom, settings::StepSpace),
+						tui::menu::spinner(eeprom, settings::DirectionSetup),
+						tui::menu::spinner(eeprom, settings::DirectionHold),
 						tui::menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
 

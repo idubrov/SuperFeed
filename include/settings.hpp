@@ -34,10 +34,10 @@ constexpr setting GearDenominator("Gear Denom.", 4, 1, 1);
 constexpr setting Acceleration("Accel.", 5, 1, 1);
 
 // Stepper driver settings
-constexpr setting StepLen("Step length", 0x10, 1, 1, 50000); // in us
-constexpr setting StepSpace("Step space", 0x10, 1, 1, 50000); // in us
-constexpr setting DirectionSetup("Dir. setup", 0x10, 1, 1, 50000); // in us
-constexpr setting DirectionHold("Dir. hold", 0x10, 1, 1, 50000); // in us
+constexpr setting StepLen("Step length", 0x10, 1, 1, 50000); // in ns
+constexpr setting StepSpace("Step space", 0x10, 1, 1, 50000); // in ns
+constexpr setting DirectionSetup("Dir setup", 0x10, 1, 1, 50000); // in ns
+constexpr setting DirectionHold("Dir hold", 0x10, 1, 1, 50000); // in ns
 
 }
 

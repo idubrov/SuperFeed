@@ -7,10 +7,11 @@ using namespace ::cfg::stepper;
 void controller::reset()
 {
 	// Reload delays
-	step_len = settings::StepLen.get(eeprom);
-	step_space = settings::StepSpace.get(eeprom);
-	dir_setup = settings::DirectionSetup.get(eeprom);
-	dir_hold = settings::DirectionHold.get(eeprom);
+	// FIXME: converting to usec...
+	step_len = (settings::StepLen.get(eeprom) + 999) / 1000;
+	step_space = (settings::StepSpace.get(eeprom) + 999) / 1000;
+	dir_setup = (settings::DirectionSetup.get(eeprom) + 999) / 1000;
+	dir_hold = (settings::DirectionHold.get(eeprom) + 999) / 1000;
 
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);
