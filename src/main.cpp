@@ -122,17 +122,20 @@ public:
 
 	void run()
 	{
+		using namespace tui;
 		lcd.clear();
-		auto main_menu = tui::menu::create("Main menu", sampler,
-				tui::menu::inputs(),
-				tui::menu::create("Settings",
-						tui::menu::spinner(eeprom, settings::Microsteps),
-						tui::menu::spinner(eeprom, settings::Acceleration),
-						tui::menu::spinner(eeprom, settings::StepLen),
-						tui::menu::spinner(eeprom, settings::StepSpace),
-						tui::menu::spinner(eeprom, settings::DirectionSetup),
-						tui::menu::spinner(eeprom, settings::DirectionHold),
-						tui::menu::erase_settings(eeprom), tui::menu::back()));
+		auto main_menu = menu::create("Main menu", sampler, menu::inputs(),
+				menu::create("Settings",
+						menu::create("Driver timings",
+								menu::label("Timings in nsec"),
+								menu::spinner(eeprom, settings::StepLen),
+								menu::spinner(eeprom, settings::StepSpace),
+								menu::spinner(eeprom, settings::DirectionSetup),
+								menu::spinner(eeprom, settings::DirectionHold)),
+						menu::create("Stepper config",
+								menu::spinner(eeprom, settings::Microsteps),
+								menu::spinner(eeprom, settings::Acceleration)),
+						menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
 
 ////		// STEPPER.....

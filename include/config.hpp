@@ -13,12 +13,8 @@ namespace util
 // Stepper motor configuration
 namespace stepper
 {
-constexpr uint32_t Clock = 24000000; // Clock frequency
-constexpr uint32_t Prescaler = 23;
-constexpr uint32_t TicksPerSec = Clock / (Prescaler + 1);
-
 // Hardware configuration
-constexpr uint32_t FullSteps = 200; // Steps per revolution
+//constexpr uint32_t FullSteps = 200; // Steps per revolution
 //constexpr uint32_t Acceleration = 10000; // Steps per second per second
 
 // All delays are in nanoseconds

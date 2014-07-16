@@ -6,12 +6,11 @@ using namespace ::cfg::stepper;
 
 void controller::reset()
 {
-	// Reload delays
-	// FIXME: converting to usec...
-	step_len = (settings::StepLen.get(eeprom) + 999) / 1000;
-	step_space = (settings::StepSpace.get(eeprom) + 999) / 1000;
-	dir_setup = (settings::DirectionSetup.get(eeprom) + 999) / 1000;
-	dir_hold = (settings::DirectionHold.get(eeprom) + 999) / 1000;
+	// Reload delays from the settings
+	step_len = hw::driver::ns2ticks(settings::StepLen.get(eeprom));
+	step_space = hw::driver::ns2ticks(settings::StepSpace.get(eeprom));
+	dir_setup = hw::driver::ns2ticks(settings::DirectionSetup.get(eeprom));
+	dir_hold = hw::driver::ns2ticks(settings::DirectionHold.get(eeprom));
 
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);

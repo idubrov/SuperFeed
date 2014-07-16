@@ -9,6 +9,11 @@ namespace hw
 class driver
 {
 public:
+	constexpr static uint32_t Clock = 24000000; // Clock frequency
+	constexpr static uint32_t Prescaler = 23; // Driver timer prescaler
+	constexpr static uint32_t Frequency = Clock / (Prescaler + 1);
+
+public:
 	constexpr driver(GPIO_TypeDef* port, uint16_t step_pin, uint16_t dir_pin,
 			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* timer) :
 			_port(port), _step_pin(step_pin), _dir_pin(dir_pin), _enable_pin(
@@ -64,12 +69,21 @@ public:
 			;
 	}
 
+	/// Convert nanoseconds to driver ticks, with ceil rounding.
+	inline static uint16_t ns2ticks(uint16_t ns)
+	{
+		static_assert(Clock == (Prescaler + 1) * 1000000,
+				"Driver clock must run with 1us intervals");
+		return (ns + 999) / 1000;
+	}
 private:
 	void initialize_port() const;
 	void initialize_timer() const;
 private:
 	// Port and pins
 	GPIO_TypeDef* const _port;
+
+	// Driver delays (in driver timer ticks)
 	uint16_t const _step_pin;
 	uint16_t const _dir_pin;
 	uint16_t const _enable_pin;

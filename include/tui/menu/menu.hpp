@@ -35,7 +35,8 @@ protected:
 	void redraw(tui::console& console);
 
 	virtual void print_actions(tui::console& console) = 0;
-	virtual bool activate_action(tui::console& console, unsigned idx, unsigned row) = 0;
+	virtual bool activate_action(tui::console& console, unsigned idx,
+			unsigned row) = 0;
 
 protected:
 	char const* label;
@@ -82,14 +83,14 @@ private:
 		{
 			console.lcd() << hw::lcd::position(2, i);
 			util::make_tuple_applicator(actions, console).template apply_to<
-					bool, Print>(i + scroll);
+			bool, Print>(i + scroll);
 		}
 	}
 
 	bool activate_action(tui::console& console, unsigned idx, unsigned row)
 	{
 		return util::make_tuple_applicator(actions, console, row).template apply_to<
-				bool, Activate>(idx);
+		bool, Activate>(idx);
 	}
 private:
 	actions_tuple actions;
@@ -100,7 +101,6 @@ menu<Actions...> create(char const* label, Actions&&... actions)
 {
 	return menu<Actions...>(label, std::forward<Actions>(actions)...);
 }
-
 
 // Simple actions
 
@@ -115,6 +115,27 @@ public:
 	{
 		console.lcd() << "Back";
 	}
+};
+
+class label
+{
+public:
+	label(char const* label) :
+			l(label)
+	{
+	}
+
+	bool activate(tui::console&, unsigned)
+	{
+		return true;
+	}
+	void print_label(tui::console& console)
+	{
+		console.lcd() << l;
+	}
+
+private:
+	char const* l;
 };
 }
 }

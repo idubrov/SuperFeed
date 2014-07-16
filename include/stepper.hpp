@@ -26,7 +26,7 @@ public:
 public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
 			eeprom(eeprom), _driver(driver), step_len(0), step_space(0), dir_setup(
-					0), dir_hold(0), _stepgen(::cfg::stepper::TicksPerSec), _stop(
+					0), dir_hold(0), _stepgen(hw::driver::Frequency), _stop(
 			false)
 	{
 	}
@@ -68,11 +68,11 @@ private:
 	hw::eeprom& eeprom; // Settings
 	hw::driver const& _driver; // Low-level driver control
 
-	// Delays required by the stepper driver
-	uint32_t step_len;
-	uint32_t step_space;
-	uint32_t dir_setup;
-	uint32_t dir_hold;
+	// Delays required by the stepper driver, in ticks
+	uint16_t step_len;
+	uint16_t step_space;
+	uint16_t dir_setup;
+	uint16_t dir_hold;
 
 	// Current state
 	stepgen::stepgen _stepgen;
