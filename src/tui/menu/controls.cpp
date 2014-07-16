@@ -46,21 +46,51 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 
 bool tui::menu::numeric::activate(console& console, unsigned y)
 {
-	unsigned max_len = util::digits(max);
+	unsigned b = util::digits(max) + 1;
 	unsigned x = 4 + std::strlen(label);
 
 	auto& lcd = console.lcd();
 
+	bool empty = false;
 	uint16_t value = def_value;
 	eeprom.read(tag, value);
 
-	lcd << lcd::position(x, y) << blanks(max_len + 1);
+	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value;
-
-	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOn, hw::lcd::BlinkOn);
-	while (1)
+	while (true)
 	{
+		auto ev = console.read();
+		if (ev.kind != console::ButtonPressed)
+			continue;
 
+		if (ev.key == console::EncoderButton) {
+			if (value < min)
+				value = min;
+			break;
+		}
+		else if (ev.key == '#' && !empty)
+		{
+			if (value == 0)
+				empty = true;
+			else
+				value /= 10;
+		}
+		else if (ev.key >= '0' && ev.key <= '0')
+		{
+			uint32_t newValue = value * 10 + (ev.key - '0');
+			if (newValue < max)
+				value = newValue;
+		}
+
+		lcd << lcd::position(x, y) << blanks(b);
+		lcd << lcd::position(x, y) << value;
+	}
+
+	uint16_t current = def_value;
+	eeprom.read(tag, current);
+	if (current != value)
+	{
+		eeprom.write(tag, value);
 	}
 
 	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
