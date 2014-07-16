@@ -134,7 +134,10 @@ public:
 								menu::spinner(eeprom, settings::DirectionHold)),
 						menu::create("Stepper config",
 								menu::spinner(eeprom, settings::Microsteps),
-								menu::spinner(eeprom, settings::Acceleration)),
+								menu::spinner(eeprom, settings::Acceleration),
+								menu::spinner(eeprom, settings::LeadscrewTPI),
+								menu::spinner(eeprom, settings::GearNominator),
+								menu::spinner(eeprom, settings::GearDenominator)),
 						menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
 

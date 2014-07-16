@@ -27,13 +27,15 @@ struct setting
 	uint16_t const max;
 };
 
-constexpr setting Microsteps("Microsteps", 1, 1, 1, 32);
-constexpr setting LeadscrewTPI("Leadscrew TPI", 2, 1, 1, 40);
-constexpr setting GearNominator("Gear Nom.", 3, 1, 1);
-constexpr setting GearDenominator("Gear Denom.", 4, 1, 1);
-constexpr setting Acceleration("Accel.", 5, 1, 1);
+// Hardware configuration
+constexpr setting Microsteps("Microsteps", 0x01, 1, 1, 32);
+constexpr setting Acceleration("Accel.", 0x02, 1, 1, 50000);
+constexpr setting LeadscrewTPI("Leadscrew TPI", 0x03, 1, 1, 40);
+constexpr setting GearNominator("Gear Nom.", 3, 0x04, 1);
+constexpr setting GearDenominator("Gear Denom.", 0x05, 1, 1);
 
-// Stepper driver settings
+
+// Stepper driver timings
 constexpr setting StepLen("Step length", 0x10, 1, 1, 50000); // in ns
 constexpr setting StepSpace("Step space", 0x10, 1, 1, 50000); // in ns
 constexpr setting DirectionSetup("Dir setup", 0x10, 1, 1, 50000); // in ns
