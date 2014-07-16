@@ -42,6 +42,17 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	return true;
 }
 
+bool tui::menu::toggle::activate(console&, unsigned)
+{
+	bool value = def_value;
+	uint16_t raw;
+	if (eeprom.read(tag, raw) == eeprom::Ok) {
+		value = static_cast<bool>(raw);
+	}
+	eeprom.write(tag, value ? 0 : 1); // Write inverted
+	return true;
+}
+
 bool tui::menu::erase_settings::activate(console& console, unsigned)
 {
 	auto& lcd = console.lcd();

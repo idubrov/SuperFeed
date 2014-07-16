@@ -1,16 +1,18 @@
 #ifndef __SETTINGS_HPP
 #define __SETTINGS_HPP
 
+#include <limits>
+
 #include "hw/eeprom.hpp"
 
 namespace settings
 {
 
+template<typename Data>
 struct setting
 {
-	constexpr setting(char const* label, uint16_t tag, uint16_t def_value,
-			uint16_t min, uint16_t max = 0xffff) : label(label),
-			tag(tag), def_value(def_value), min(min), max(max)
+	constexpr setting(char const* label, uint16_t tag, Data def_value) :
+			label(label), tag(tag), def_value(def_value)
 	{
 	}
 	uint16_t get(hw::eeprom& eeprom) const
@@ -20,26 +22,50 @@ struct setting
 		return result;
 	}
 
-	char const* label;
+	char const* const label;
 	uint16_t const tag;
-	uint16_t const def_value;
+	Data const def_value;
+
+};
+
+struct numeric: setting<uint16_t>
+{
+	constexpr numeric(char const* label, uint16_t tag, uint16_t def_value,
+			uint16_t min, uint16_t max = std::numeric_limits<uint16_t>::max()) :
+			setting<uint16_t>(label, tag, def_value), min(min), max(max)
+	{
+	}
+
 	uint16_t const min;
 	uint16_t const max;
 };
 
-// Hardware configuration
-constexpr setting Microsteps("Microsteps", 0x01, 1, 1, 32);
-constexpr setting Acceleration("Accel.", 0x02, 1, 1, 50000);
-constexpr setting LeadscrewTPI("Leadscrew TPI", 0x03, 1, 1, 40);
-constexpr setting GearNominator("Gear Nom.", 3, 0x04, 1);
-constexpr setting GearDenominator("Gear Denom.", 0x05, 1, 1);
+struct boolean: setting<bool>
+{
+	constexpr boolean(char const* label, uint16_t tag, bool def_value,
+			char const* off_label, char const* on_label) :
+			setting<bool>(label, tag, def_value), off_label(off_label), on_label(
+					on_label)
+	{
+	}
+	char const* const off_label;
+	char const* const on_label;
+};
 
+// Hardware configuration
+constexpr numeric Microsteps("Microsteps", 0x01, 1, 1, 32);
+constexpr numeric Acceleration("Accel.", 0x02, 1, 1, 50000);
+constexpr boolean Leadscrew("Leadscrew type", 0x03, false, "(inch)", "(mm)");
+constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
+constexpr numeric LeadscrewPitch("  Pitch (mm)", 0x05, 1, 1, 40);
+constexpr numeric GearNominator("Gear Nom.", 3, 0x06, 1);
+constexpr numeric GearDenominator("Gear Denom.", 0x07, 1, 1);
 
 // Stepper driver timings
-constexpr setting StepLen("Step length", 0x10, 1, 1, 50000); // in ns
-constexpr setting StepSpace("Step space", 0x10, 1, 1, 50000); // in ns
-constexpr setting DirectionSetup("Dir setup", 0x10, 1, 1, 50000); // in ns
-constexpr setting DirectionHold("Dir hold", 0x10, 1, 1, 50000); // in ns
+constexpr numeric StepLen("Step length", 0x10, 1, 1, 50000); // in ns
+constexpr numeric StepSpace("Step space", 0x10, 1, 1, 50000); // in ns
+constexpr numeric DirectionSetup("Dir setup", 0x10, 1, 1, 50000); // in ns
+constexpr numeric DirectionHold("Dir hold", 0x10, 1, 1, 50000); // in ns
 
 }
 

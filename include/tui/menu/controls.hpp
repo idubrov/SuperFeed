@@ -13,13 +13,7 @@ namespace menu
 class spinner
 {
 public:
-	spinner(hw::eeprom& eeprom, char const* label, uint_fast16_t tag,
-			uint16_t min, uint16_t max, uint16_t def_value = 0) :
-			eeprom(eeprom), label(label), tag(tag), min(min), max(max), def_value(
-					def_value)
-	{
-	}
-	spinner(hw::eeprom& eeprom, settings::setting const& setting) :
+	spinner(hw::eeprom& eeprom, settings::numeric const& setting) :
 			eeprom(eeprom), label(setting.label), tag(setting.tag), min(
 					setting.min), max(setting.max), def_value(setting.def_value)
 	{
@@ -34,11 +28,37 @@ public:
 	}
 private:
 	hw::eeprom& eeprom;
-	char const* label;
+	char const* const label;
 	uint16_t const tag;
 	uint16_t const min;
 	uint16_t const max;
 	uint16_t const def_value;
+};
+
+class toggle
+{
+public:
+	toggle(hw::eeprom& eeprom, settings::boolean const& setting) :
+			eeprom(eeprom), label(setting.label), off_label(setting.off_label), on_label(
+					setting.on_label), tag(setting.tag), def_value(
+					setting.def_value)
+	{
+	}
+
+	bool activate(tui::console& console, unsigned);
+	void print_label(tui::console& console)
+	{
+		uint16_t value = def_value;
+		eeprom.read(tag, value);
+		console.lcd() << label << ": " << (value ? on_label : off_label);
+	}
+private:
+	hw::eeprom& eeprom;
+	char const* const label;
+	char const* const off_label;
+	char const* const on_label;
+	uint16_t const tag;
+	bool const def_value;
 };
 
 class erase_settings
