@@ -2,7 +2,6 @@
 #define __DRIVER_HPP
 
 #include "stm32f10x.h"
-#include "config.hpp"
 
 namespace hw
 {

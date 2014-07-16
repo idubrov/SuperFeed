@@ -25,8 +25,8 @@ public:
 	};
 public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
-			eeprom(eeprom), _driver(driver), step_len(0), step_space(0), dir_setup(
-					0), dir_hold(0), _stepgen(hw::driver::Frequency), _stop(
+			eeprom(eeprom), driver(driver), step_len(0), step_space(0), dir_setup(
+					0), dir_hold(0), stepgen(hw::driver::Frequency), is_stopped(
 			false)
 	{
 	}
@@ -38,7 +38,7 @@ public:
 
 	void stop()
 	{
-		_stop = true;
+		is_stopped = true;
 	}
 
 	/// Move to given position. Note that no new move commands will be accepted
@@ -48,25 +48,28 @@ public:
 
 	inline void set_speed(uint32_t speed)
 	{
-		_stepgen.set_target_speed(speed);
+		stepgen.set_target_speed(speed);
 	}
 
 	/// Print state for debugging purposes
 	template<typename S>
 	S const& dump(S const& sink) const
 	{
-		sink << "S:" << _stepgen.step();
-		sink << " T:" << _stepgen.target_step();
-		sink << " Sp:" << _stepgen.speed() << "TSp: "
-				<< _stepgen.target_delay();
+		sink << "S:" << stepgen.step();
+		sink << " T:" << stepgen.target_step();
+		sink << " Sp:" << stepgen.speed() << "TSp: "
+				<< stepgen.target_delay();
 		return sink;
 	}
 private:
 	uint32_t load_delay();
 
 private:
-	hw::eeprom& eeprom; // Settings
-	hw::driver const& _driver; // Low-level driver control
+	// Settings
+	hw::eeprom& eeprom;
+
+	// Low-level driver control
+	hw::driver const& driver;
 
 	// Delays required by the stepper driver, in ticks
 	uint16_t step_len;
@@ -75,10 +78,10 @@ private:
 	uint16_t dir_hold;
 
 	// Current state
-	stepgen::stepgen _stepgen;
+	stepgen::stepgen stepgen;
 
 	// Stop signal
-	std::atomic_bool _stop;
+	std::atomic_bool is_stopped;
 };
 }
 
