@@ -7,15 +7,17 @@ using namespace hw;
 
 bool tui::menu::spinner::activate(console& console, unsigned y)
 {
-	uint16_t x = 4 + std::strlen(label);
+	unsigned x = 4 + std::strlen(label);
+	unsigned b = util::digits(max) + 1;
 
-	uint8_t b = util::digits(max) + 1;
 	auto& lcd = console.lcd();
 	auto state(console.guard_state());
 
 	console.set_encoder_limit(max - min + 1);
 
 	uint16_t value = def_value;
+	eeprom.read(tag, value);
+
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value << (char) 3;
 	while (true)
@@ -42,11 +44,35 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	return true;
 }
 
+bool tui::menu::numeric::activate(console& console, unsigned y)
+{
+	unsigned max_len = util::digits(max);
+	unsigned x = 4 + std::strlen(label);
+
+	auto& lcd = console.lcd();
+
+	uint16_t value = def_value;
+	eeprom.read(tag, value);
+
+	lcd << lcd::position(x, y) << blanks(max_len + 1);
+	lcd << lcd::position(x, y) << value;
+
+	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOn, hw::lcd::BlinkOn);
+	while (1)
+	{
+
+	}
+
+	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
+	return true;
+}
+
 bool tui::menu::toggle::activate(console&, unsigned)
 {
 	bool value = def_value;
 	uint16_t raw;
-	if (eeprom.read(tag, raw) == eeprom::Ok) {
+	if (eeprom.read(tag, raw) == eeprom::Ok)
+	{
 		value = static_cast<bool>(raw);
 	}
 	eeprom.write(tag, value ? 0 : 1); // Write inverted

@@ -127,7 +127,7 @@ public:
 		auto main_menu = menu::create("Main menu", sampler, menu::inputs(),
 				menu::create("Settings",
 						menu::create("Driver timings",
-								menu::label("Timings in nsec"),
+								menu::label("Timings (in nsec)"),
 								menu::spinner(eeprom, settings::StepLen),
 								menu::spinner(eeprom, settings::StepSpace),
 								menu::spinner(eeprom, settings::DirectionSetup),
@@ -138,6 +138,7 @@ public:
 								menu::toggle(eeprom, settings::Leadscrew),
 								menu::spinner(eeprom, settings::LeadscrewTPI),
 								menu::spinner(eeprom, settings::LeadscrewPitch),
+								menu::label("Gearing"),
 								menu::spinner(eeprom, settings::GearNominator),
 								menu::spinner(eeprom, settings::GearDenominator)),
 						menu::erase_settings(eeprom), tui::menu::back()));
