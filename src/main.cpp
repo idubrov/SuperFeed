@@ -1,6 +1,7 @@
 #include "simstream.hpp"
 #include "util.hpp"
 #include "stepper.hpp"
+#include "settings.hpp"
 
 // Hardwre
 #include "hw/buttons.hpp"
@@ -58,7 +59,7 @@ public:
 			GPIOB, GPIO_Pin_14),
 			// Use page 126 and 127 for persistent storage
 			eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), stepper(
-					driver,
+					eeprom, driver,
 					stepper::delays(::cfg::stepper::StepLen,
 							::cfg::stepper::StepSpace,
 							::cfg::stepper::DirectionSetup,
@@ -126,14 +127,12 @@ public:
 	void run()
 	{
 		lcd.clear();
-		auto main_menu = tui::menu::create(
-				"Main menu",
-				sampler,
+		auto main_menu = tui::menu::create("Main menu", sampler,
 				tui::menu::inputs(),
 				tui::menu::create("Settings",
-						tui::menu::spinner(eeprom, "Microsteps", 0, 1, 40, 1),
-						tui::menu::erase_settings(eeprom),
-						tui::menu::back()));
+						tui::menu::spinner(eeprom, settings::Microsteps),
+						tui::menu::spinner(eeprom, settings::Acceleration),
+						tui::menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
 
 ////		// STEPPER.....

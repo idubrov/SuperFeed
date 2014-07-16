@@ -61,7 +61,7 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 				&& ev.key == console::EncoderButton)
 		{
 			unsigned selected = console.enc_position();
-			if (!activate_action(console, selected))
+			if (!activate_action(console, selected, selected - scroll))
 				break; // false returned -- exit from the menu
 			redraw(console);
 		}

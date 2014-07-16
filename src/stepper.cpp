@@ -1,5 +1,6 @@
 #include "stepper.hpp"
 #include "config.hpp"
+#include "settings.hpp"
 
 using namespace ::stepper;
 using namespace ::cfg::stepper;
@@ -7,7 +8,9 @@ using namespace ::cfg::stepper;
 void controller::reset()
 {
 	// FIXME: check return value
-	_stepgen.set_acceleration((Acceleration * Microsteps) << 8);
+	uint16_t accel = settings::Acceleration.get(eeprom);
+	uint16_t microsteps = settings::Microsteps.get(eeprom);
+	_stepgen.set_acceleration((accel * microsteps) << 8);
 }
 
 bool controller::move(uint32_t steps)

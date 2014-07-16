@@ -35,7 +35,7 @@ protected:
 	void redraw(tui::console& console);
 
 	virtual void print_actions(tui::console& console) = 0;
-	virtual bool activate_action(tui::console& console, unsigned idx) = 0;
+	virtual bool activate_action(tui::console& console, unsigned idx, unsigned row) = 0;
 
 protected:
 	char const* label;
@@ -86,9 +86,9 @@ private:
 		}
 	}
 
-	bool activate_action(tui::console& console, unsigned idx)
+	bool activate_action(tui::console& console, unsigned idx, unsigned row)
 	{
-		return util::make_tuple_applicator(actions, console, 0).template apply_to<
+		return util::make_tuple_applicator(actions, console, row).template apply_to<
 				bool, Activate>(idx);
 	}
 private:

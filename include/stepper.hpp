@@ -5,6 +5,7 @@
 
 #include "config.hpp"
 #include "hw/driver.hpp"
+#include "hw/eeprom.hpp"
 #include "stepgen.hpp"
 #include "util.hpp"
 
@@ -41,7 +42,7 @@ public:
 		Stopped, Accelerating, Slewing, Decelerating
 	};
 public:
-	controller(hw::driver const& driver, delays&& delays) :
+	controller(hw::eeprom& eeprom, hw::driver const& driver, delays&& delays) : eeprom(eeprom),
 			_driver(driver), _delays(delays), _stepgen(::cfg::stepper::TicksPerSec), _stop(
 					false)
 	{
@@ -80,6 +81,7 @@ private:
 	uint32_t load_delay();
 
 private:
+	hw::eeprom& eeprom; // Settings
 	hw::driver const& _driver; // Low-level driver control
 	delays const _delays; // Delays required by the stepper driver
 

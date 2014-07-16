@@ -1,6 +1,7 @@
 #ifndef __CONTROLS_HPP
 #define __CONTROLS_HPP
 
+#include "settings.hpp"
 #include "hw/eeprom.hpp"
 #include "tui/console.hpp"
 
@@ -16,6 +17,11 @@ public:
 			uint16_t min, uint16_t max, uint16_t def_value = 0) :
 			eeprom(eeprom), label(label), tag(tag), min(min), max(max), def_value(
 					def_value)
+	{
+	}
+	spinner(hw::eeprom& eeprom, settings::setting const& setting) :
+			eeprom(eeprom), label(setting.label), tag(setting.tag), min(
+					setting.min), max(setting.max), def_value(setting.def_value)
 	{
 	}
 
