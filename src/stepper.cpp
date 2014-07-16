@@ -1,5 +1,4 @@
 #include "stepper.hpp"
-#include "config.hpp"
 #include "settings.hpp"
 
 using namespace ::stepper;

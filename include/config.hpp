@@ -8,12 +8,6 @@ namespace cfg
 // Utility module timer and LEDs
 namespace util
 {
-// Timer used for delays
-constexpr TIM_TypeDef* DelayTimer = TIM6;
-// On-board LEDs port
-constexpr GPIO_TypeDef* LedPort = GPIOC;
-constexpr uint16_t Led3Pin = GPIO_Pin_9;
-constexpr uint16_t Led4Pin = GPIO_Pin_8;
 }
 
 // Stepper motor configuration

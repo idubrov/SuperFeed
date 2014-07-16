@@ -3,7 +3,6 @@
 
 #include <atomic>
 
-#include "config.hpp"
 #include "hw/driver.hpp"
 #include "hw/eeprom.hpp"
 #include "stepgen.hpp"

@@ -1,6 +1,6 @@
 #include "hw/core.hpp"
 
-using namespace ::cfg::util;
+using namespace ::hw::core::config;
 
 // Configuration
 void hw::core::setup()

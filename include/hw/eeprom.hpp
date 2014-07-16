@@ -1,7 +1,7 @@
 #ifndef __EEPROM_HPP
 #define __EEPROM_HPP
 
-#include "config.hpp"
+#include "stm32f10x.h"
 
 namespace hw
 {
