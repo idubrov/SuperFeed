@@ -131,7 +131,7 @@ public:
 				sampler,
 				tui::menu::inputs(),
 				tui::menu::create("Settings",
-						tui::menu::spinner(eeprom, "Microsteps", 0, 1),
+						tui::menu::spinner(eeprom, "Microsteps", 0, 1, 40, 1),
 						tui::menu::back()));
 		main_menu.activate(console, 0);
 

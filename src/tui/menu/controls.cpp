@@ -7,21 +7,16 @@ using namespace hw;
 
 bool tui::menu::spinner::activate(console& console, unsigned y)
 {
-	uint16_t min = 1;
-	uint16_t max = 32;
 	uint16_t x = 4 + std::strlen(label);
 
-	uint8_t padding = util::digits(max);
+	uint8_t b = util::digits(max) + 1;
 	auto& lcd = console.lcd();
 	auto state(console.guard_state());
 
-	console.set_encoder_limit(max - min);
+	console.set_encoder_limit(max - min + 1);
 
-	lcd << lcd::position(x, y);
-	for (int i = 0; i < padding; i++)
-		lcd << ' ';
-	lcd << lcd::position(x, y) << value;
-	lcd.display(lcd::DisplayOn, lcd::CursorOn, lcd::BlinkOn);
+	lcd << lcd::position(x, y) << blanks(b);
+	lcd << lcd::position(x, y) << value << (char)3;
 	while (true)
 	{
 		auto ev = console.read();
@@ -32,14 +27,10 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 		if (ev.kind == console::EncoderMove)
 		{
 			value = ev.position + 1;
-			lcd << lcd::position(x, y);
-			for (int i = 0; i < padding; i++)
-				lcd << ' ';
-			lcd << lcd::position(x, y) << value;
+			lcd << lcd::position(x, y) << blanks(b);
+			lcd << lcd::position(x, y) << value << (char)3;
 		}
 	}
-
-	lcd.display(lcd::DisplayOn, lcd::CursorOff, lcd::BlinkOff);
 
 	uint16_t current = def_value;
 	eeprom.read(tag, current);

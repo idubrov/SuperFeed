@@ -26,14 +26,14 @@ enum Alignment
 };
 
 template<typename N, int R, Alignment A>
-struct __format
+struct print_format
 {
 	N value;
 	int padding;
 };
 
 template<int Radix = 10, Alignment Align = Left>
-__format <int, Radix, Align> format(int value, int padding = 0)
+print_format <int, Radix, Align> format(int value, int padding = 0)
 {
 	return
 	{	value, padding};
@@ -54,7 +54,7 @@ constexpr int buf_size(N value = std::numeric_limits<int>::max(),
 }
 
 template<typename S, typename N, int R = 10, Alignment A>
-S const& operator<<(S const& sink, __format <N, R, A> nn)
+S const& operator<<(S const& sink, print_format <N, R, A> nn)
 {
 	constexpr int size = util::digits<N, R>();
 	char buf[size];
@@ -95,4 +95,21 @@ S const& operator<<(S const& sink, __format <N, R, A> nn)
 	return sink;
 }
 
+struct print_blanks
+{
+	unsigned blanks;
+};
+
+inline print_blanks blanks(unsigned blanks)
+{
+	return
+	{	blanks};
+}
+
+template<typename S>
+S const& operator<<(S const& sink, print_blanks b)
+{
+	for (unsigned i = 0; i < b.blanks; i++)
+		sink << ' ';
+}
 #endif /* __SIMSTREAM_HPP */

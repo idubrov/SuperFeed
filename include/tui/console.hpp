@@ -20,6 +20,7 @@ public:
 	// Custom characters
 	constexpr static char UpArrowCharacter = 0x01;
 	constexpr static char DownArrowCharacter = 0x02;
+	constexpr static char UpDownArrowCharacter = 0x03;
 
 	// Buttons to key mappings
 	enum Button

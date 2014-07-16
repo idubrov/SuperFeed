@@ -33,10 +33,13 @@ void tui::console::upload_characters()
 {
 	uint8_t up[8] =
 	{ 0x00, 0x4, 0x0e, 0x1f, 0x04, 0x04, 0x04, 0x00 };
-	_lcd.upload_character(1, up);
+	_lcd.upload_character(UpArrowCharacter, up);
 	uint8_t down[8] =
 	{ 0x00, 0x4, 0x04, 0x04, 0x1f, 0x0e, 0x04, 0x00 };
-	_lcd.upload_character(2, down);
+	_lcd.upload_character(DownArrowCharacter, down);
+	uint8_t updown[8] =
+	{ 0x00, 0x4, 0x0e, 0x04, 0x04, 0x0e, 0x04, 0x00 };
+	_lcd.upload_character(UpDownArrowCharacter, updown);
 }
 
 void tui::console::debounce()
