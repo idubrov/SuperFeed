@@ -68,7 +68,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 				value = min;
 			break;
 		}
-		else if (ev.key == '#' && !empty)
+		else if (ev.key == '#')
 		{
 			if (value == 0)
 				empty = true;
@@ -80,10 +80,14 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 			uint32_t newValue = value * 10 + (ev.key - '0');
 			if (newValue < max)
 				value = newValue;
+
+			if (empty && value != 0)
+				empty = false;
 		}
 
-		lcd << lcd::position(x, y) << blanks(b);
-		lcd << lcd::position(x, y) << value;
+		lcd << lcd::position(x, y) << blanks(b) << lcd::position(x, y);
+		if (!empty)
+			lcd << value;
 	}
 
 	uint16_t current = def_value;
