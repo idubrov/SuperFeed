@@ -111,5 +111,6 @@ S const& operator<<(S const& sink, print_blanks b)
 {
 	for (unsigned i = 0; i < b.blanks; i++)
 		sink << ' ';
+	return sink;
 }
 #endif /* __SIMSTREAM_HPP */
