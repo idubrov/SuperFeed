@@ -6,6 +6,12 @@ using namespace ::cfg::stepper;
 
 void controller::reset()
 {
+	// Reload delays
+	step_len = settings::StepLen.get(eeprom);
+	step_space = settings::StepSpace.get(eeprom);
+	dir_setup = settings::DirectionSetup.get(eeprom);
+	dir_hold = settings::DirectionHold.get(eeprom);
+
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);
 	uint16_t microsteps = settings::Microsteps.get(eeprom);
@@ -51,13 +57,13 @@ uint32_t controller::load_delay()
 	{
 		// Load new step into ARR, start pulse at the end
 		uint32_t d = (delay + 128) >> 8; // Delay is in 16.8 format
-		_driver.set_delay(d);
+		_driver.set_delay(d, step_len);
 	}
 	else
 	{
 		// Load idle values. This is important to do on the last update
 		// when timer is switched into one-pulse mode.
-		_driver.set_delay(0);
+		_driver.set_delay(0, step_len);
 	}
 	return delay;
 }

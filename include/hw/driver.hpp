@@ -10,11 +10,9 @@ class driver
 {
 public:
 	constexpr driver(GPIO_TypeDef* port, uint16_t step_pin, uint16_t dir_pin,
-			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* timer,
-			uint32_t step_len) :
+			uint16_t enable_pin, uint16_t reset_pin, TIM_TypeDef* timer) :
 			_port(port), _step_pin(step_pin), _dir_pin(dir_pin), _enable_pin(
-					enable_pin), _reset_pin(reset_pin), _timer(timer), _step_len(
-					step_len)
+					enable_pin), _reset_pin(reset_pin), _timer(timer)
 	{
 	}
 	driver(driver const&) = default;
@@ -35,10 +33,10 @@ public:
 		_timer->CR1 |= TIM_CR1_OPM;
 	}
 
-	inline void set_delay(uint32_t delay) const
+	inline void set_delay(uint16_t delay, uint16_t step_len) const
 	{
 		_timer->ARR = delay;
-		_timer->CCR1 = (delay >= _step_len) ? (delay - _step_len) : 0;
+		_timer->CCR1 = (delay >= step_len) ? (delay - step_len) : 0;
 	}
 
 	inline void start(bool is_last) const
@@ -81,7 +79,7 @@ private:
 	TIM_TypeDef* const _timer;
 
 	// Step length
-	uint32_t const _step_len;
+	//uint32_t const _step_len;
 };
 }
 

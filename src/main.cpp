@@ -52,19 +52,15 @@ public:
 			// Stepper driver, PB13 should be connected to STEP, PB12 to DIR,
 			// PB11 to ENABLE and PB10 to RESET.
 			// ENABLE and RESET are active high (i.e, driver is enabled when both are high).
-			driver(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11,
-			GPIO_Pin_10, TIM1, ::cfg::stepper::StepLen),
+			driver(GPIOB, GPIO_Pin_13, GPIO_Pin_12, GPIO_Pin_11, GPIO_Pin_10,
+			TIM1),
 			// Spindle index, PB14 should be connected to hall sensor or optical sensor
 			spindle(TIM15,
 			GPIOB, GPIO_Pin_14),
 			// Use page 126 and 127 for persistent storage
 			eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), stepper(
-					eeprom, driver,
-					stepper::delays(::cfg::stepper::StepLen,
-							::cfg::stepper::StepSpace,
-							::cfg::stepper::DirectionSetup,
-							::cfg::stepper::DirectionHold)), console(lcd, TIM7,
-					encoder, keypad, buttons), sampler(spindle)
+					eeprom, driver), console(lcd,
+			TIM7, encoder, keypad, buttons), sampler(spindle)
 	{
 	}
 
@@ -111,6 +107,7 @@ public:
 		hw::core::setup();
 
 		// Setup all used hardware
+		eeprom.initialize();
 		keypad.initialize();
 		buttons.initialize();
 		encoder.initialize();
@@ -118,7 +115,6 @@ public:
 		lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
 		driver.initialize();
 		spindle.initialize();
-		eeprom.initialize();
 		console.initialize();
 
 		stepper.reset();
