@@ -128,10 +128,11 @@ public:
 				menu::create("Settings",
 						menu::create("Driver timings",
 								menu::label("Timings (in nsec)"),
-								menu::spinner(eeprom, settings::StepLen),
-								menu::spinner(eeprom, settings::StepSpace),
-								menu::spinner(eeprom, settings::DirectionSetup),
-								menu::spinner(eeprom, settings::DirectionHold)),
+								menu::numeric(eeprom, settings::StepLen),
+								menu::numeric(eeprom, settings::StepSpace),
+								menu::numeric(eeprom, settings::DirectionSetup),
+								menu::numeric(eeprom, settings::DirectionHold),
+								menu::back()),
 						menu::create("Stepper config",
 								menu::spinner(eeprom, settings::Microsteps),
 								menu::spinner(eeprom, settings::Acceleration),
@@ -140,7 +141,8 @@ public:
 								menu::spinner(eeprom, settings::LeadscrewPitch),
 								menu::label("Gearing"),
 								menu::spinner(eeprom, settings::GearNominator),
-								menu::spinner(eeprom, settings::GearDenominator)),
+								menu::spinner(eeprom, settings::GearDenominator),
+								menu::back()),
 						menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
 

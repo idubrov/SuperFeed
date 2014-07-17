@@ -55,6 +55,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 	uint16_t value = def_value;
 	eeprom.read(tag, value);
 
+	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOn, hw::lcd::BlinkOn);
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value;
 	while (true)
@@ -70,15 +71,14 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 		}
 		else if (ev.key == '#')
 		{
-			if (value == 0)
+			if (value <= 9)
 				empty = true;
-			else
-				value /= 10;
+			value /= 10;
 		}
-		else if (ev.key >= '0' && ev.key <= '0')
+		else if (ev.key >= '0' && ev.key <= '9')
 		{
 			uint32_t newValue = value * 10 + (ev.key - '0');
-			if (newValue < max)
+			if (newValue <= max)
 			{
 				empty = false;
 				value = newValue;

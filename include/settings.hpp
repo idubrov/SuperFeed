@@ -55,17 +55,17 @@ struct boolean: setting<bool>
 // Hardware configuration
 constexpr numeric Microsteps("Microsteps", 0x01, 1, 1, 32);
 constexpr numeric Acceleration("Accel.", 0x02, 1, 1, 50000);
-constexpr boolean Leadscrew("Leadscrew type", 0x03, false, "(inch)", "(mm)");
+constexpr boolean Leadscrew("Leadscrew", 0x03, false, "(inch)", "(mm)");
 constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
 constexpr numeric LeadscrewPitch("  Pitch (mm)", 0x05, 1, 1, 40);
 constexpr numeric GearNominator("  A", 3, 0x06, 1);
 constexpr numeric GearDenominator("  B", 0x07, 1, 1);
 
 // Stepper driver timings
-constexpr numeric StepLen("Step length", 0x10, 1, 1, 50000); // in ns
-constexpr numeric StepSpace("Step space", 0x10, 1, 1, 50000); // in ns
-constexpr numeric DirectionSetup("Dir setup", 0x10, 1, 1, 50000); // in ns
-constexpr numeric DirectionHold("Dir hold", 0x10, 1, 1, 50000); // in ns
+constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns
+constexpr numeric StepSpace("Step space", 0x11, 1, 1, 50000); // in ns
+constexpr numeric DirectionSetup("Dir setup", 0x12, 1, 1, 50000); // in ns
+constexpr numeric DirectionHold("Dir hold", 0x13, 1, 1, 50000); // in ns
 
 }
 
