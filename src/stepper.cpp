@@ -1,13 +1,14 @@
+#include <stdint.h>
 #include "stepper.hpp"
 #include "settings.hpp"
 
 void stepper::controller::reset()
 {
 	// Reload delays from the settings
-	step_len = hw::driver::ns2ticks(settings::StepLen.get(eeprom));
-	step_space = hw::driver::ns2ticks(settings::StepSpace.get(eeprom));
-	dir_setup = hw::driver::ns2ticks(settings::DirectionSetup.get(eeprom));
-	dir_hold = hw::driver::ns2ticks(settings::DirectionHold.get(eeprom));
+	step_len_ticks = hw::driver::ns2ticks(settings::StepLen.get(eeprom));
+	step_space_ticks = hw::driver::ns2ticks(settings::StepSpace.get(eeprom));
+	dir_setup_ns = settings::DirectionSetup.get(eeprom);
+	dir_hold_ns = settings::DirectionHold.get(eeprom);
 
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);
@@ -15,12 +16,29 @@ void stepper::controller::reset()
 	stepgen.set_acceleration((accel * microsteps) << 8);
 }
 
-bool stepper::controller::move(uint32_t steps)
+bool stepper::controller::move_to(int32_t target)
 {
 	if (!driver.check_stopped())
 		return false;
 
-	stepgen.set_target_step(steps);
+	int32_t pos = update_position();
+	uint32_t delta;
+	if (pos < target)
+	{
+		delta = target - pos;
+		set_direction(true);
+	}
+	else if (pos > target)
+	{
+		delta = pos - target;
+		set_direction(false);
+	}
+	else
+	{
+		// Nothing to do!
+		return true;
+	}
+	stepgen.set_target_step(base_step + delta);
 	stop_requested = false;
 
 	// Load first delay into ARR/CC1, if not stopped
@@ -48,36 +66,15 @@ uint32_t stepper::controller::load_delay()
 	{
 		// Load new step into ARR, start pulse at the end
 		uint32_t d = (delay + 128) >> 8; // Delay is in 16.8 format
-		driver.set_delay(d, step_len);
+		driver.set_delay(d, step_len_ticks);
 	}
 	else
 	{
 		// Load idle values. This is important to do on the last update
 		// when timer is switched into one-pulse mode.
-		driver.set_delay(0, step_len);
+		driver.set_delay(0, step_len_ticks);
 	}
 	return delay;
-}
-
-bool stepper::controller::set_direction(bool dir)
-{
-	if (direction == dir)
-		return true; // Nothing to do!
-
-	if (!driver.check_stopped())
-		return false;
-
-	// Accumulate steps from the stepgen
-	uint32_t step = stepgen.current_step();
-	uint32_t offset = step - base_step;
-	base_step = step;
-	if (direction)
-		total_steps += offset;
-	else
-		total_steps -= offset;
-
-	direction = dir;
-	return true;
 }
 
 void stepper::controller::step_completed()

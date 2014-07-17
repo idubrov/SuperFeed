@@ -33,6 +33,13 @@ void hw::core::setup()
 	GPIO_Init(LedPort, &GPIO_InitStructure);
 }
 
+void hw::core::delay_ns(uint32_t ns)
+{
+	// FIXME: overflow is possible!
+	uint16_t usec = (ns + 999) / 1000;
+	delay_us(usec);
+}
+
 void hw::core::delay_us(uint16_t usec)
 {
 	DelayTimer->ARR = usec;

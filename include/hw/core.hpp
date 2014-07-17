@@ -19,8 +19,10 @@ constexpr uint16_t Led4Pin = GPIO_Pin_8;
 
 void setup();
 
+void delay_ns(uint32_t nsec);
 void delay_us(uint16_t usec);
 void delay_ms(uint16_t msec);
+
 
 inline void led3_on()
 {

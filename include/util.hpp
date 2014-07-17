@@ -16,6 +16,12 @@ constexpr unsigned c_strlen(char const* str, unsigned count = 0)
 {
 	return ('\0' == str[0]) ? count : c_strlen(str + 1, count + 1);
 }
+
+template<typename T>
+constexpr T ns2us(T ns)
+{
+	return (ns + 999) / 1000;
+}
 }
 
 #endif /* __UTIL_HPP */

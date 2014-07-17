@@ -27,6 +27,14 @@ public:
 		initialize_port();
 	}
 
+	inline void set_direction(bool dir) const
+	{
+		if (dir)
+			_port->BSRR = _dir_pin;
+		else
+			_port->BRR = _dir_pin;
+	}
+
 	inline bool check_stopped() const
 	{
 		// Step generation is still running
