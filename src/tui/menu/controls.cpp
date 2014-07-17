@@ -13,10 +13,9 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	auto& lcd = console.lcd();
 	auto state(console.guard_state());
 
-	console.set_encoder_limit(max - min + 1);
-
 	uint16_t value = def_value;
 	eeprom.read(tag, value);
+	console.set_encoder(max - min + 1, value - min);
 
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value << (char) 3;
@@ -29,7 +28,7 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 
 		if (ev.kind == console::EncoderMove)
 		{
-			value = ev.position + 1;
+			value = ev.position + min;
 			lcd << lcd::position(x, y) << blanks(b);
 			lcd << lcd::position(x, y) << value << (char) 3;
 		}
