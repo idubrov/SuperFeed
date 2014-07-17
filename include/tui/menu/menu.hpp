@@ -113,7 +113,7 @@ public:
 	}
 	void print_label(tui::console& console)
 	{
-		console.lcd() << "Back";
+		console.lcd() << "Back" << tui::console::BackCharacter;
 	}
 };
 

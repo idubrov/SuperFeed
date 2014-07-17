@@ -140,8 +140,8 @@ public:
 								menu::spinner(eeprom, settings::LeadscrewTPI),
 								menu::spinner(eeprom, settings::LeadscrewPitch),
 								menu::label("Gearing"),
-								menu::spinner(eeprom, settings::GearNominator),
-								menu::spinner(eeprom, settings::GearDenominator),
+								menu::numeric(eeprom, settings::GearNominator),
+								menu::numeric(eeprom, settings::GearDenominator),
 								menu::back()),
 						menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);

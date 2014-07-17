@@ -26,6 +26,6 @@ void hw::encoder::initialize()
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
 	TIM_TimeBaseInit(_timer, &TIM_TimeBaseStructure);
-	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI1, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
+	TIM_EncoderInterfaceConfig(_timer, TIM_EncoderMode_TI2, TIM_ICPolarity_Rising, TIM_ICPolarity_Rising);
 	TIM_Cmd(_timer, ENABLE);
 }

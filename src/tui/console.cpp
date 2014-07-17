@@ -40,6 +40,9 @@ void tui::console::upload_characters()
 	uint8_t updown[8] =
 	{ 0x00, 0x4, 0x0e, 0x04, 0x04, 0x0e, 0x04, 0x00 };
 	_lcd.upload_character(UpDownArrowCharacter, updown);
+	uint8_t back[8] =
+	{ 0x00, 0x00, 0x01, 0x09, 0x1f, 0x08, 0x00, 0x00 };
+	_lcd.upload_character(BackCharacter, back);
 }
 
 void tui::console::debounce()
