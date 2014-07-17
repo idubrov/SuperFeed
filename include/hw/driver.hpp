@@ -71,9 +71,12 @@ public:
 	/// Convert nanoseconds to driver ticks, with ceil rounding.
 	inline static uint16_t ns2ticks(uint16_t ns)
 	{
+		constexpr uint32_t NanosecondsInTick = 1000000000 / Frequency;
+
 		static_assert(Clock == (Prescaler + 1) * 1000000,
 				"Driver clock must run with 1us intervals");
-		return (ns + 999) / 1000;
+		static_assert(NanosecondsInTick == 1000, "");
+		return (ns + NanosecondsInTick - 1) / NanosecondsInTick;
 	}
 private:
 	void initialize_port() const;

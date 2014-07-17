@@ -15,7 +15,7 @@ struct setting
 			label(label), tag(tag), def_value(def_value)
 	{
 	}
-	uint16_t get(hw::eeprom& eeprom) const
+	uint16_t get(hw::eeprom const& eeprom) const
 	{
 		uint16_t result = def_value;
 		eeprom.read(tag, result);
@@ -54,7 +54,7 @@ struct boolean: setting<bool>
 
 // Hardware configuration
 constexpr numeric Microsteps("Microsteps", 0x01, 1, 1, 32);
-constexpr numeric Acceleration("Accel.", 0x02, 1, 1, 50000);
+constexpr numeric Acceleration("Accel.", 0x02, 10000, 1, 50000);
 constexpr boolean Leadscrew("Leadscrew", 0x03, false, "(inch)", "(mm)");
 constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
 constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);

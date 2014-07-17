@@ -43,7 +43,7 @@ hw::eeprom::Status hw::eeprom::erase_settings()
 	return Ok;
 }
 
-int16_t hw::eeprom::find_current()
+int16_t hw::eeprom::find_current() const
 {
 	for (int16_t page = 0; page < _page_count; page++)
 	{
@@ -125,7 +125,7 @@ FLASH_Status hw::eeprom::rescue_if_full(int16_t page)
 	return FLASH_COMPLETE;
 }
 
-hw::eeprom::Status hw::eeprom::read(uint16_t tag, uint16_t& data)
+hw::eeprom::Status hw::eeprom::read(uint16_t tag, uint16_t& data) const
 {
 	int16_t current = find_current();
 	if (current < 0)

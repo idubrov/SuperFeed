@@ -19,6 +19,7 @@
 #include "tui/menu/inputs.hpp"
 #include "tui/menu/menu.hpp"
 #include "tui/menu/sampler.hpp"
+#include "tui/menu/limits.hpp"
 
 extern "C"
 {
@@ -124,7 +125,10 @@ public:
 	{
 		using namespace tui;
 		lcd.clear();
-		auto main_menu = menu::create("Main menu", sampler, menu::inputs(),
+		auto main_menu = menu::create("Main menu",
+				menu::limits(eeprom),
+				sampler,
+				menu::inputs(),
 				menu::create("Settings",
 						menu::create("Driver timings",
 								menu::label("Timings (in nsec)"),

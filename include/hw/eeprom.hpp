@@ -22,15 +22,15 @@ public:
 	}
 	Status initialize();
 
-	Status read(uint16_t tag, uint16_t& data);
+	Status read(uint16_t tag, uint16_t& data) const;
 	Status write(uint16_t tag, uint16_t data);
 
 	Status erase_settings();
 private:
 	FLASH_Status rescue_if_full(int16_t page);
-	int16_t find_current();
+	int16_t find_current() const;
 
-	uint16_t page_status(int16_t page)
+	uint16_t page_status(int16_t page) const
 	{
 		return *(__I uint16_t*) (_base + page * PageSize);
 	}
