@@ -21,7 +21,7 @@ bool stepper::controller::move(uint32_t steps)
 		return false;
 
 	stepgen.set_target_step(steps);
-	is_stopped = false;
+	stop_requested = false;
 
 	// Load first delay into ARR/CC1, if not stopped
 	if (load_delay() == 0)
@@ -88,10 +88,10 @@ void stepper::controller::step_completed()
 		return;
 	}
 
-	if (is_stopped)
+	if (stop_requested)
 	{
 		stepgen.set_target_step(0);
-		is_stopped = false;
+		stop_requested = false;
 	}
 
 	if (load_delay() == 0)

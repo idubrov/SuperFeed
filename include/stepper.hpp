@@ -27,7 +27,7 @@ public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
 			eeprom(eeprom), driver(driver), step_len(0), step_space(0), dir_setup(
 					0), dir_hold(0), stepgen(hw::driver::Frequency), direction(
-					true), base_step(0), total_steps(0), is_stopped(
+					true), base_step(0), total_steps(0), stop_requested(
 			false)
 	{
 	}
@@ -39,7 +39,12 @@ public:
 
 	void stop()
 	{
-		is_stopped = true;
+		stop_requested = true;
+	}
+
+	inline bool is_stopped()
+	{
+		return driver.check_stopped();
 	}
 
 	bool set_direction(bool direction);
@@ -93,7 +98,7 @@ private:
 	int32_t total_steps;
 
 	// Stop signal
-	std::atomic_bool is_stopped;
+	std::atomic_bool stop_requested;
 };
 }
 
