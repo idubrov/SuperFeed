@@ -57,7 +57,7 @@ constexpr numeric Microsteps("Microsteps", 0x01, 1, 1, 32);
 constexpr numeric Acceleration("Accel.", 0x02, 1, 1, 50000);
 constexpr boolean Leadscrew("Leadscrew", 0x03, false, "(inch)", "(mm)");
 constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
-constexpr numeric LeadscrewPitch("  Pitch (mm)", 0x05, 1, 1, 40);
+constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);
 constexpr numeric GearNominator("  A", 3, 0x06, 1);
 constexpr numeric GearDenominator("  B", 0x07, 1, 1);
 
