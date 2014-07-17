@@ -2,21 +2,21 @@
 
 void stepgen::stepgen::speedup()
 {
-	uint32_t denom = 4 * _speed + 1;
-	_delay -= ((2 * _delay + denom / 2) / denom);
-	_speed++;
+	uint32_t denom = 4 * speed + 1;
+	delay -= ((2 * delay + denom / 2) / denom);
+	speed++;
 }
 
 void stepgen::stepgen::slowdown()
 {
-	_speed--;
-	uint32_t denom = 4 * _speed - 1;
-	_delay += ((2 * _delay + denom / 2) / denom);
+	speed--;
+	uint32_t denom = 4 * speed - 1;
+	delay += ((2 * delay + denom / 2) / denom);
 }
 
 bool stepgen::stepgen::set_target_speed(uint32_t speed)
 {
-	uint64_t delay = (static_cast<uint64_t>(_frequency) << 16) / speed;
+	uint64_t delay = (static_cast<uint64_t>(frequency) << 16) / speed;
 	if (delay >> 24)
 	{
 		return false; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
@@ -27,7 +27,7 @@ bool stepgen::stepgen::set_target_speed(uint32_t speed)
 		// just to make sure we have enough time to calculate next delay.
 		return false;
 	}
-	_target_delay.store(delay, std::memory_order_relaxed);
+	tgt_delay.store(delay, std::memory_order_relaxed);
 	return true;
 }
 
@@ -41,42 +41,43 @@ bool stepgen::stepgen::set_acceleration(uint32_t acceleration)
 	// We shift 24 bits to the left to adjust for acceleration in 24.8 format plus to convert
 	// result into 24.8 format, so the resulting shift is 40 bits.
 	uint64_t c0long = ((2LL * 676 * 676) << 40) / acceleration;
-	uint64_t c0 = (_frequency * sqrt(c0long) / 1000) >> 8;
+	uint64_t c0 = (frequency * sqrt(c0long) / 1000) >> 8;
 	if (c0 >> 24)
 		return false; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
-	_first_delay = static_cast<uint32_t>(c0);
+	first_delay = static_cast<uint32_t>(c0);
 	return true;
 }
 
 uint32_t stepgen::stepgen::next()
 {
 	// Read latest values once
-	uint32_t target_step = _target_step.load(std::memory_order_relaxed);
-	uint32_t target_delay = _target_delay.load(std::memory_order_relaxed);
-	if (_step >= target_step && _speed <= 1)
+	uint32_t target_step = tgt_step.load(std::memory_order_relaxed);
+	uint32_t target_delay = tgt_delay.load(std::memory_order_relaxed);
+	uint32_t st = current_step();
+	if (st >= target_step && speed <= 1)
 	{
-		_speed = 0;
+		speed = 0;
 		return 0;
 	}
 
 	// Stop slewing if target delay was changed
-	if (_slewing_delay && _slewing_delay != target_delay)
+	if (slewing_delay && slewing_delay != target_delay)
 	{
-		_slewing_delay = 0;
+		slewing_delay = 0;
 	}
 
 	// Steps made so far
-	_step++;
-	if (_speed == 0)
+	step.fetch_add(1, std::memory_order_relaxed);
+	if (speed == 0)
 	{
 		// First step: load first delay
-		_delay = _first_delay;
-		_speed = 1;
-		return _delay;
+		delay = first_delay;
+		speed = 1;
+		return delay;
 	}
 
 	// Calculate the projected step we would stop at if we start decelerating right now
-	uint32_t est_stop = _step + _speed - 1;
+	uint32_t est_stop = st + speed;
 	if (est_stop == target_step)
 	{
 		// We would stop one step earlier than we want, so let's just
@@ -89,35 +90,35 @@ uint32_t stepgen::stepgen::next()
 		slowdown();
 
 		// We are not slewing even though we could have slowed down below the slewing speed
-		_slewing_delay = 0;
+		slewing_delay = 0;
 	}
-	else if (!_slewing_delay && _delay < target_delay)
+	else if (!slewing_delay && delay < target_delay)
 	{
 		// Not slewing and running too fast, slow down
 		slowdown();
 
 		// Switch to slewing if we slowed down enough
-		if (_delay >= target_delay)
+		if (delay >= target_delay)
 		{
-			_slewing_delay = target_delay;
+			slewing_delay = target_delay;
 		}
 
 	}
-	else if (!_slewing_delay && _delay > target_delay)
+	else if (!slewing_delay && delay > target_delay)
 	{
 		// Not slewing and running too slow, speed up
 		speedup();
 
 		// Switch to slewing if we have accelerated enough
-		if (_delay <= target_delay)
+		if (delay <= target_delay)
 		{
-			_slewing_delay = target_delay;
+			slewing_delay = target_delay;
 		}
 	}
 
-	// If slewing, return slew delay. _delay should be close enough, but could
+	// If slewing, return slew delay. delay should be close enough, but could
 	// be different due to the accumulated rounding errors
-	return _slewing_delay ? _slewing_delay : _delay;
+	return slewing_delay ? slewing_delay : delay;
 }
 
 uint64_t stepgen::stepgen::sqrt(uint64_t x)

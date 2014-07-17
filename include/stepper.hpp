@@ -26,7 +26,8 @@ public:
 public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
 			eeprom(eeprom), driver(driver), step_len(0), step_space(0), dir_setup(
-					0), dir_hold(0), stepgen(hw::driver::Frequency), is_stopped(
+					0), dir_hold(0), stepgen(hw::driver::Frequency), direction(
+					true), base_step(0), total_steps(0), is_stopped(
 			false)
 	{
 	}
@@ -41,6 +42,8 @@ public:
 		is_stopped = true;
 	}
 
+	bool set_direction(bool direction);
+
 	/// Move to given position. Note that no new move commands will be accepted
 	/// while stepper is running. However, other target parameter, target speed,
 	/// could be changed any time.
@@ -51,14 +54,20 @@ public:
 		stepgen.set_target_speed(speed);
 	}
 
+	/// Return current stepper position.
+	inline int32_t position()
+	{
+		uint32_t offset = stepgen.current_step() - base_step;
+		return total_steps + (direction ? offset : -offset);
+	}
+
 	/// Print state for debugging purposes
 	template<typename S>
 	S const& dump(S const& sink) const
 	{
 		sink << "S:" << stepgen.step();
 		sink << " T:" << stepgen.target_step();
-		sink << " Sp:" << stepgen.speed() << "TSp: "
-				<< stepgen.target_delay();
+		sink << " Sp:" << stepgen.speed() << "TSp: " << stepgen.target_delay();
 		return sink;
 	}
 private:
@@ -78,7 +87,10 @@ private:
 	uint16_t dir_hold;
 
 	// Current state
-	stepgen::stepgen stepgen;
+	stepgen::stepgen stepgen;bool direction;
+
+	uint32_t base_step;
+	int32_t total_steps;
 
 	// Stop signal
 	std::atomic_bool is_stopped;

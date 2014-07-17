@@ -17,14 +17,8 @@ void stepper::controller::reset()
 
 bool stepper::controller::move(uint32_t steps)
 {
-	// Timer is running already, we can't start new moves!
-	if (driver.is_running())
+	if (!driver.check_stopped())
 		return false;
-
-	// If interrupt is pending, wait until it is cleared.
-	// (for instance, we got move command just after last timer overflow
-	// and it wasn't processed yet.
-	driver.wait_flag();
 
 	stepgen.set_target_step(steps);
 	is_stopped = false;
@@ -65,9 +59,30 @@ uint32_t stepper::controller::load_delay()
 	return delay;
 }
 
+bool stepper::controller::set_direction(bool dir)
+{
+	if (direction == dir)
+		return true; // Nothing to do!
+
+	if (!driver.check_stopped())
+		return false;
+
+	// Accumulate steps from the stepgen
+	uint32_t step = stepgen.current_step();
+	uint32_t offset = step - base_step;
+	base_step = step;
+	if (direction)
+		total_steps += offset;
+	else
+		total_steps -= offset;
+
+	direction = dir;
+	return true;
+}
+
 void stepper::controller::step_completed()
 {
-	if (!driver.is_running())
+	if (driver.check_stopped())
 	{
 		// If timer is stopped, do nothing!
 		return;

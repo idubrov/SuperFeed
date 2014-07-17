@@ -10,8 +10,8 @@ class stepgen
 {
 public:
 	stepgen(uint32_t frequency) :
-			_step(0), _speed(0), _delay(0), _slewing_delay(0), _frequency(
-					frequency), _first_delay(0), _target_step(0), _target_delay(
+			step(0), speed(0), delay(0), slewing_delay(0), frequency(
+					frequency), first_delay(0), tgt_step(0), tgt_delay(
 					0)
 	{
 	}
@@ -45,7 +45,7 @@ public:
 	/// \param step step to stop at
 	void set_target_step(uint32_t step)
 	{
-		_target_step.store(step, std::memory_order_relaxed);
+		tgt_step.store(step, std::memory_order_relaxed);
 	}
 
 	/// Set slew speed (maximum speed stepper motor would run). Note that stepper
@@ -61,24 +61,24 @@ public:
 	/// These shouldn't be used for making decisions, as they are not thread-safe
 	///
 
-	inline uint32_t step() const
+	inline uint32_t current_step() const
 	{
-		return _step;
+		return step.load(std::memory_order_relaxed);
 	}
 
 	inline uint32_t target_step() const
 	{
-		return _target_step.load(std::memory_order_relaxed);
+		return tgt_step.load(std::memory_order_relaxed);
 	}
 
-	inline uint32_t speed() const
+	inline uint32_t current_speed() const
 	{
-		return _speed;
+		return speed;
 	}
 
 	inline uint32_t target_delay() const
 	{
-		return _target_delay.load(std::memory_order_relaxed);
+		return tgt_delay.load(std::memory_order_relaxed);
 	}
 
 private:
@@ -87,23 +87,24 @@ private:
 	void speedup();
 	void slowdown();
 private:
-	// State, updated in IRQ handler, shouldn't be used outside of it
-	// (other than for display purposes)
-	uint32_t _step;	// Current step
-	uint32_t _speed; // Amount of acceleration steps we've taken so far
-	uint32_t _delay; // Previously calculated delay
+	// State, updated in the IRQ handler
+	std::atomic_uint_fast32_t step;	// Current step
+
+	// These two are not used outside of the IRQ handler
+	uint32_t speed; // Amount of acceleration steps we've taken so far
+	uint32_t delay; // Previously calculated delay
 
 	// If slewing, this will be the slewing delay. Switched to this mode once
 	// we overshoot target speed.
-	uint32_t _slewing_delay;
+	uint32_t slewing_delay;
 
 	// Parameters
-	uint32_t _frequency; // Timer frequency
-	uint32_t _first_delay; // First step delay
+	uint32_t frequency; // Timer frequency
+	uint32_t first_delay; // First step delay
 
 	// These two could be changed from outside
-	std::atomic_uint_fast32_t _target_step; // Target step
-	std::atomic_uint_fast32_t _target_delay; // Target speed delay
+	std::atomic_uint_fast32_t tgt_step; // Target step
+	std::atomic_uint_fast32_t tgt_delay; // Target speed delay
 };
 }
 

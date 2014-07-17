@@ -27,9 +27,17 @@ public:
 		initialize_port();
 	}
 
-	inline bool is_running() const
+	inline bool check_stopped() const
 	{
-		return _timer->CR1 & TIM_CR1_CEN;
+		// Step generation is still running
+		if (_timer->CR1 & TIM_CR1_CEN)
+			return false;
+
+		// If there is a pending interrupt, wait until it is cleared.
+		// (for instance, we got here just after last timer overflow and it wasn't processed yet).
+		while (TIM_GetITStatus(_timer, TIM_IT_Update))
+			;
+		return true;
 	}
 
 	inline void set_last_pulse() const
@@ -49,13 +57,6 @@ public:
 				is_last ? TIM_OPMode_Single : TIM_OPMode_Repetitive);
 		TIM_CtrlPWMOutputs(_timer, ENABLE);
 		TIM_Cmd(_timer, ENABLE);
-	}
-
-	/// Wait until interrupt is processed by the handler
-	inline void wait_flag() const
-	{
-		while (TIM_GetITStatus(_timer, TIM_IT_Update))
-			;
 	}
 
 	inline void manual_update() const
