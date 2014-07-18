@@ -1,7 +1,6 @@
 #ifndef __SAMPLER_HPP
 #define __SAMPLER_HPP
 
-#include <algorithm>
 #include <atomic>
 
 #include "hw/spindle.hpp"

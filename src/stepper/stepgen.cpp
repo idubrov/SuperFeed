@@ -1,4 +1,4 @@
-#include "stepgen.hpp"
+#include "stepper/stepgen.hpp"
 
 void stepgen::stepgen::speedup()
 {
@@ -18,12 +18,10 @@ bool stepgen::stepgen::set_target_speed(uint32_t speed)
 {
 	uint64_t delay = (static_cast<uint64_t>(frequency) << 16) / speed;
 	if (delay >> 24)
+		return false; // Too slow, doesn't fit in in 16.8 format, our timer is only 16 bit.
+	if (delay <= stepgen::stepgen::TicksPerUpdate * (1 << 8))
 	{
-		return false; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
-	}
-	if (delay <= 10 * (1 << 8))
-	{
-		// Too slow, less than 10 ticks of a timer. 10 is an arbitrary number,
+		// Too fast, less than 10 ticks of a timer. 10 is an arbitrary number,
 		// just to make sure we have enough time to calculate next delay.
 		return false;
 	}

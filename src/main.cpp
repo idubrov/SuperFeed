@@ -1,6 +1,5 @@
 #include "simstream.hpp"
 #include "util.hpp"
-#include "stepper.hpp"
 #include "settings.hpp"
 
 // Hardwre
@@ -20,6 +19,10 @@
 #include "tui/menu/menu.hpp"
 #include "tui/menu/sampler.hpp"
 #include "tui/menu/limits.hpp"
+#include "tui/menu/powerfeed.hpp"
+
+// Stepper
+#include "stepper/stepper.hpp"
 
 extern "C"
 {
@@ -126,6 +129,7 @@ public:
 		using namespace tui;
 		lcd.clear();
 		auto main_menu = menu::create("Main menu",
+				menu::powerfeed(stepper),
 				menu::limits(eeprom),
 				sampler,
 				menu::inputs(),
@@ -139,10 +143,10 @@ public:
 								menu::back()),
 						menu::create("Stepper config",
 								menu::spinner(eeprom, settings::Microsteps),
-								menu::spinner(eeprom, settings::Acceleration),
+								menu::numeric(eeprom, settings::Acceleration),
 								menu::toggle(eeprom, settings::Leadscrew),
-								menu::spinner(eeprom, settings::LeadscrewTPI),
-								menu::spinner(eeprom, settings::LeadscrewPitch),
+								menu::numeric(eeprom, settings::LeadscrewTPI),
+								menu::numeric(eeprom, settings::LeadscrewPitch),
 								menu::label("Gearing"),
 								menu::numeric(eeprom, settings::GearNominator),
 								menu::numeric(eeprom, settings::GearDenominator),

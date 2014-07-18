@@ -10,6 +10,7 @@ SOURCES := $(wildcard src/*.c) \
 		   $(wildcard src/tui/*.cpp) \
            $(wildcard src/tui/menu/*.cpp) \
 		   $(wildcard src/hw/*.cpp) \
+		   $(wildcard src/stepper/*.cpp) \
 		   $(wildcard system/src/cmsis/*.c) \
 		   $(wildcard system/src/cortexm/*.c) \
 		   $(wildcard system/src/diag/*.c) \

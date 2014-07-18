@@ -22,8 +22,7 @@ void hw::driver::initialize_port() const
 void hw::driver::initialize_timer() const
 {
 	TIM_TimeBaseInitTypeDef init;
-	// FIXME: should be 23 for real delay timer, to have 1usec period.
-	init.TIM_Prescaler = 2399; // 100us period
+	init.TIM_Prescaler = driver::Prescaler;
 	init.TIM_ClockDivision = TIM_CKD_DIV1;
 	init.TIM_CounterMode = TIM_CounterMode_Up;
 	init.TIM_Period = 0; // Configured later

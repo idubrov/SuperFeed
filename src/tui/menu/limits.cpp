@@ -3,6 +3,7 @@
 #include "settings.hpp"
 #include "hw/driver.hpp"
 #include "tui/menu/limits.hpp"
+#include "stepper/stepgen.hpp"
 
 
 bool tui::menu::limits::activate(tui::console& console, unsigned)
@@ -18,12 +19,8 @@ bool tui::menu::limits::activate(tui::console& console, unsigned)
 	RCC_ClocksTypeDef RCC_Clocks;
 	RCC_GetClocksFreq(&RCC_Clocks);
 
-	// Our guestimation how many cycles one update could take
-	constexpr uint32_t CyclesPerUpdate = 100;
-
 	// Max speed -- CPU speed limitation
-	uint32_t max_pulse_tim = (RCC_Clocks.HCLK_Frequency + CyclesPerUpdate - 1)
-			/ CyclesPerUpdate;
+	uint32_t max_pulse_tim = hw::driver::Frequency / stepgen::stepgen::TicksPerUpdate;
 	lcd << hw::lcd::position(0, 1) << "Max speed: " << max_pulse_tim;
 
 	// Max speed -- driver limitation
@@ -32,6 +29,7 @@ bool tui::menu::limits::activate(tui::console& console, unsigned)
 	uint32_t max_pulse_dr = 1000000000 / (step_len + step_space);
 	lcd << hw::lcd::position(0, 2) << "Max speed: " << max_pulse_dr;
 
+	// FIXME: min acceleration!
 
 	//
 	while (true)

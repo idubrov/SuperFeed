@@ -9,6 +9,9 @@ namespace stepgen
 class stepgen
 {
 public:
+	// How many timer ticks it would take for one update
+	constexpr static uint32_t TicksPerUpdate = 10;
+public:
 	stepgen(uint32_t frequency) :
 			step(0), speed(0), delay(0), slewing_delay(0), frequency(
 					frequency), first_delay(0), tgt_step(0), tgt_delay(

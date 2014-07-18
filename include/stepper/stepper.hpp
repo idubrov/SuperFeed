@@ -26,8 +26,9 @@ public:
 	};
 public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
-			eeprom(eeprom), driver(driver), step_len_ticks(0), step_space_ticks(0), dir_setup_ns(
-					0), dir_hold_ns(0), stepgen(hw::driver::Frequency), direction(
+			eeprom(eeprom), driver(driver), step_len_ticks(0), step_space_ticks(
+					0), dir_setup_ns(0), dir_hold_ns(0), stepgen(
+					hw::driver::Frequency), direction(
 			true), base_step(0), position(0), stop_requested(
 			false)
 	{
@@ -53,9 +54,15 @@ public:
 	/// could be changed any time.
 	bool move_to(int32_t target);
 
-	inline void set_speed(uint32_t speed)
+	/// Set slew speed (maximum speed stepper motor would run). Note that stepper
+	/// motor would only reach this speed if target step is far enough, so there is
+	/// enough time for deceleration.
+	/// \param speed target slew speed to reach, in steps per second, 24.8 format
+	/// \return false if target speed is either too slow (doesn't fit into timer counter)
+	/// or too fast.
+	inline bool set_speed(uint32_t speed)
 	{
-		stepgen.set_target_speed(speed);
+		return stepgen.set_target_speed(speed);
 	}
 
 	/// Return current stepper position.
@@ -63,6 +70,11 @@ public:
 	{
 		uint32_t offset = stepgen.current_step() - base_step;
 		return position + (direction ? offset : -offset);
+	}
+
+	inline uint32_t current_speed()
+	{
+		return stepgen.current_speed();
 	}
 
 	/// Print state for debugging purposes

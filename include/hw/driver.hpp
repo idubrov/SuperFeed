@@ -2,6 +2,7 @@
 #define __DRIVER_HPP
 
 #include "stm32f10x.h"
+#include "stepper/stepgen.hpp"
 
 namespace hw
 {

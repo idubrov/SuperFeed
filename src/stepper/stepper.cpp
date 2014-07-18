@@ -1,6 +1,7 @@
-#include <stdint.h>
-#include "stepper.hpp"
+#include <cstdint>
+
 #include "settings.hpp"
+#include "stepper/stepper.hpp"
 
 void stepper::controller::reset()
 {
