@@ -38,7 +38,7 @@
 <layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="yes" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
-<layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
+<layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
 <layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
 <layer number="48" name="Document" color="7" fill="1" visible="yes" active="yes"/>
@@ -56,10 +56,12 @@
 </layers>
 <board>
 <plain>
-<wire x1="0" y1="0" x2="50.47" y2="0" width="0" layer="20"/>
-<wire x1="50.47" y1="0" x2="50.47" y2="21.58" width="0" layer="20"/>
-<wire x1="50.47" y1="21.58" x2="0" y2="21.58" width="0" layer="20"/>
-<wire x1="0" y1="21.58" x2="0" y2="0" width="0" layer="20"/>
+<wire x1="2.54" y1="0" x2="60.63" y2="0" width="0" layer="20"/>
+<wire x1="60.63" y1="0" x2="60.63" y2="16.5" width="0" layer="20"/>
+<wire x1="60.63" y1="16.5" x2="2.54" y2="16.5" width="0" layer="20"/>
+<wire x1="2.54" y1="16.5" x2="2.54" y2="0" width="0" layer="20"/>
+<hole x="6.35" y="6.35" drill="3.175"/>
+<hole x="57.15" y="6.35" drill="3.175"/>
 </plain>
 <libraries>
 <library name="SuperFeed">
@@ -306,32 +308,34 @@ design rules under a new name.</description>
 </pass>
 </autorouter>
 <elements>
-<element name="U$1" library="SuperFeed" package="PUSH" value="PUSH" x="44.45" y="6.35" rot="R90"/>
-<element name="U$2" library="SuperFeed" package="PUSH" value="PUSH" x="25.4" y="6.35" rot="R90"/>
-<element name="U$3" library="SuperFeed" package="PUSH" value="PUSH" x="6.35" y="6.35" rot="R90"/>
-<element name="SV1" library="SuperFeed" package="MA04-1W" value="" x="16.51" y="17.78"/>
+<element name="U$1" library="SuperFeed" package="PUSH" value="PUSH" x="50.8" y="6.35" rot="R90"/>
+<element name="U$2" library="SuperFeed" package="PUSH" value="PUSH" x="31.75" y="6.35" rot="R90"/>
+<element name="U$3" library="SuperFeed" package="PUSH" value="PUSH" x="12.7" y="6.35" rot="R90"/>
+<element name="SV1" library="SuperFeed" package="MA04-1W" value="" x="22.86" y="13.97"/>
 </elements>
 <signals>
 <signal name="N$1">
 <contactref element="U$3" pad="2"/>
 <contactref element="U$3" pad="1"/>
 <contactref element="SV1" pad="2"/>
-<wire x1="4.0894" y1="3.0988" x2="4.0894" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="4.0894" y1="9.6012" x2="4.0894" y2="10.4394" width="0.8128" layer="16"/>
-<wire x1="4.0894" y1="10.4394" x2="7.62" y2="13.97" width="0.8128" layer="16"/>
-<wire x1="7.62" y1="13.97" x2="12.7" y2="13.97" width="0.8128" layer="16"/>
-<wire x1="12.7" y1="13.97" x2="15.24" y2="16.51" width="0.8128" layer="16"/>
-<wire x1="15.24" y1="16.51" x2="15.24" y2="17.78" width="0.8128" layer="16"/>
+<wire x1="10.4394" y1="3.0988" x2="10.4394" y2="9.6012" width="0.8128" layer="16"/>
+<wire x1="10.4394" y1="9.6012" x2="10.4394" y2="10.4394" width="0.8128" layer="16"/>
+<wire x1="10.4394" y1="10.4394" x2="12.7" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="12.7" y1="12.7" x2="16.51" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="16.51" y1="12.7" x2="17.78" y2="11.43" width="0.8128" layer="16"/>
+<wire x1="17.78" y1="11.43" x2="20.32" y2="11.43" width="0.8128" layer="16"/>
+<wire x1="20.32" y1="11.43" x2="21.59" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="21.59" y1="12.7" x2="21.59" y2="13.97" width="0.8128" layer="16"/>
 </signal>
 <signal name="N$3">
 <contactref element="U$1" pad="2"/>
 <contactref element="U$1" pad="1"/>
 <contactref element="SV1" pad="4"/>
-<wire x1="42.1894" y1="3.0988" x2="42.1894" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="42.1894" y1="3.0988" x2="42.1894" y2="11.1506" width="0.8128" layer="16"/>
-<wire x1="42.1894" y1="11.1506" x2="39.37" y2="13.97" width="0.8128" layer="16"/>
-<wire x1="39.37" y1="13.97" x2="24.13" y2="13.97" width="0.8128" layer="16"/>
-<wire x1="24.13" y1="13.97" x2="20.32" y2="17.78" width="0.8128" layer="16"/>
+<wire x1="48.5394" y1="3.0988" x2="48.5394" y2="9.6012" width="0.8128" layer="16"/>
+<wire x1="48.5394" y1="9.6012" x2="48.5394" y2="11.1506" width="0.8128" layer="16"/>
+<wire x1="48.5394" y1="11.1506" x2="46.99" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="46.99" y1="12.7" x2="27.94" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="27.94" y1="12.7" x2="26.67" y2="13.97" width="0.8128" layer="16"/>
 </signal>
 <signal name="GND">
 <contactref element="U$1" pad="4"/>
@@ -341,27 +345,21 @@ design rules under a new name.</description>
 <contactref element="U$3" pad="4"/>
 <contactref element="U$3" pad="3"/>
 <contactref element="SV1" pad="1"/>
-<wire x1="8.6106" y1="3.0988" x2="8.6106" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="27.6606" y1="3.0988" x2="27.6606" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="46.7106" y1="9.6012" x2="46.7106" y2="3.0988" width="0.8128" layer="16"/>
 <polygon width="0.8128" layer="16">
-<vertex x="0" y="0"/>
-<vertex x="50.8" y="0"/>
-<vertex x="50.8" y="21.59"/>
-<vertex x="0" y="21.59"/>
+<vertex x="2.54" y="0"/>
+<vertex x="60.96" y="0"/>
+<vertex x="60.96" y="16.51"/>
+<vertex x="2.54" y="16.51"/>
 </polygon>
 </signal>
 <signal name="N$2">
 <contactref element="U$2" pad="2"/>
 <contactref element="U$2" pad="1"/>
 <contactref element="SV1" pad="3"/>
-<wire x1="23.1394" y1="3.0988" x2="23.1394" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="23.1394" y1="9.6012" x2="23.1394" y2="9.8806" width="0.8128" layer="16"/>
-<wire x1="23.1394" y1="9.8806" x2="22.86" y2="10.16" width="0.8128" layer="16"/>
-<wire x1="22.86" y1="10.16" x2="22.86" y2="9.8806" width="0.8128" layer="16"/>
-<wire x1="22.86" y1="9.8806" x2="23.1394" y2="9.6012" width="0.8128" layer="16"/>
-<wire x1="17.78" y1="17.78" x2="17.78" y2="15.24" width="0.8128" layer="16"/>
-<wire x1="17.78" y1="15.24" x2="22.86" y2="10.16" width="0.8128" layer="16"/>
+<wire x1="29.4894" y1="9.6012" x2="27.2288" y2="9.6012" width="0.8128" layer="16"/>
+<wire x1="27.2288" y1="9.6012" x2="24.13" y2="12.7" width="0.8128" layer="16"/>
+<wire x1="24.13" y1="12.7" x2="24.13" y2="13.97" width="0.8128" layer="16"/>
+<wire x1="29.4894" y1="9.6012" x2="29.4894" y2="3.0988" width="0.8128" layer="16"/>
 </signal>
 </signals>
 </board>
