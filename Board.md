@@ -43,10 +43,10 @@ Driver
 |----------|--------|----|
 |Red       |5V      |    |
 |Black     |GND     |    |
-|Blue      |STEP    |PB13|
-|Green     |DIR     |PB12|
-|Brown     |ENABLE  |PB11|
-|Gray      |RESET   |PB10|
+|Gray      |STEP    |PB13|
+|Orange    |DIR     |PB12|
+|Green     |ENABLE  |PB11|
+|Brown     |RESET   |PB10|
 
 Spindle
 
