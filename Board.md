@@ -56,7 +56,7 @@ Spindle
 |Black     |GND     |    |
 |Blue      |QUAD    |PC6 |
 |Green     |QUAD    |PC7 |
-|Brown     |INDEX   |PB14|
+|White     |INDEX   |PB14|
 
 Switch
 
