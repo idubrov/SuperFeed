@@ -36,6 +36,22 @@ public:
 			_port->BRR = _dir_pin;
 	}
 
+	inline void reset() const {
+		_port->BRR = _reset_pin;
+	}
+
+	inline void release() const {
+		_port->BSRR = _reset_pin;
+	}
+
+	inline void disable() const {
+		_port->BRR = _enable_pin;
+	}
+
+	inline void enable() const {
+		_port->BSRR = _enable_pin;
+	}
+
 	inline bool check_stopped() const
 	{
 		// Step generation is still running

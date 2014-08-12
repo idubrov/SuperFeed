@@ -17,6 +17,7 @@ void hw::driver::initialize_port() const
 
 	// Start in reset mode
 	_port->BRR = _reset_pin;
+	_port->BRR = _enable_pin;
 }
 
 void hw::driver::initialize_timer() const

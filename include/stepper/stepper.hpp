@@ -127,7 +127,8 @@ private:
 	uint16_t dir_hold_ns;
 
 	// Current state
-	stepgen::stepgen stepgen;bool direction;
+	stepgen::stepgen stepgen;
+	bool direction;
 
 	uint32_t base_step;
 	int32_t position;

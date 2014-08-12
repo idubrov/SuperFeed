@@ -27,7 +27,7 @@ public:
 
 	/// Set stepper motor acceleration. Note that this method is computation intensive,
 	/// so it's best to set acceleration once and never change it.
-	/// \param acceleration acceleration, in steps per second, in 24.8 format
+	/// \param acceleration acceleration, in steps per second per second, in 24.8 format
 	/// \return false if acceleration is too slow and thus delay of the first
 	/// step would not fit into 16 bit timer counter.
 	bool set_acceleration(uint32_t acceleration);

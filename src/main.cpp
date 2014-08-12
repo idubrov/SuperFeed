@@ -20,6 +20,7 @@
 #include "tui/menu/sampler.hpp"
 #include "tui/menu/limits.hpp"
 #include "tui/menu/powerfeed.hpp"
+#include "tui/menu/drvtest.hpp"
 
 // Stepper
 #include "stepper/stepper.hpp"
@@ -64,7 +65,7 @@ public:
 			// Use page 126 and 127 for persistent storage
 			eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), stepper(
 					eeprom, driver), console(lcd,
-			TIM7, encoder, keypad, buttons), sampler(spindle)
+			TIM7, encoder, keypad, buttons), sampler(spindle), rotatetest(driver, stepper, eeprom)
 	{
 	}
 
@@ -144,6 +145,7 @@ public:
 						menu::create("Stepper config",
 								menu::spinner(eeprom, settings::Microsteps),
 								menu::numeric(eeprom, settings::Acceleration),
+							    rotatetest,
 								menu::toggle(eeprom, settings::Leadscrew),
 								menu::numeric(eeprom, settings::LeadscrewTPI),
 								menu::numeric(eeprom, settings::LeadscrewPitch),
@@ -211,6 +213,7 @@ private:
 	// TUI
 	tui::console console;
 	tui::menu::sampler sampler;
+	tui::menu::rotatetest rotatetest;
 private:
 	static application g_app;
 };

@@ -14,7 +14,9 @@ void stepper::controller::reset()
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);
 	uint16_t microsteps = settings::Microsteps.get(eeprom);
-	stepgen.set_acceleration((accel * microsteps) << 8);
+	stepgen.set_acceleration((static_cast<uint32_t>(accel) * microsteps) << 8);
+
+	// FIXME: reset position
 }
 
 bool stepper::controller::move_to(int32_t target)
