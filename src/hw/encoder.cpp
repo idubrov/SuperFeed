@@ -11,7 +11,7 @@ void hw::encoder::initialize()
 	// Quadrature encoder on timer
 	GPIO_InitTypeDef GPIO_InitStructure2;
 	GPIO_InitStructure2.GPIO_Pin = _encoder_pins;
-	GPIO_InitStructure2.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure2.GPIO_Mode = GPIO_Mode_IPD;
 	GPIO_InitStructure2.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(_port, &GPIO_InitStructure2);
 
