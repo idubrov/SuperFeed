@@ -29,8 +29,7 @@ public:
 		// Note that these should not intersect with keypad buttons
 		LeftButton = '<',
 		RightButton = '>',
-		SelectButton = 'S',
-		EncoderButton = '.'
+		SelectButton = '.'
 	};
 	enum Kind
 	{
@@ -78,7 +77,7 @@ private:
 	};
 private:
 	// Bit to button key mapping
-	constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, EncoderButton};
+	constexpr static char ButtonsMap[] = { LeftButton, SelectButton, RightButton, SelectButton};
 	enum ButtonBits {
 		LeftBit = 1,
 		SelectBit = 2,

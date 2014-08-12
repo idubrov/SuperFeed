@@ -14,7 +14,7 @@ bool inputs::activate(tui::console& console, unsigned)
 	lcd.clear();
 	lcd << lcd::position(0, 0) << "Last event: ";
 	lcd << lcd::position(0, 3) << "\xa5 twice to exit";
-	bool enc_pressed = false;
+	bool sel_pressed = false;
 	while (true)
 	{
 		auto ev = console.read();
@@ -35,11 +35,11 @@ bool inputs::activate(tui::console& console, unsigned)
 		else if (ev.kind == console::ButtonPressed)
 		{
 			lcd << "  pressed " << ev.key << "         ";
-			if (ev.key == console::EncoderButton && enc_pressed)
+			if (ev.key == console::SelectButton && sel_pressed)
 			{
 				break;
 			}
-			enc_pressed = (ev.key == console::EncoderButton);
+			sel_pressed = (ev.key == console::SelectButton);
 		}
 		else if (ev.kind == console::ButtonUnpressed)
 		{

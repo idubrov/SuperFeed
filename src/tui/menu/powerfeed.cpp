@@ -31,7 +31,7 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 			break;
 
 		if (stepper.is_stopped() && ev.kind == console::ButtonPressed
-				&& ev.key == console::EncoderButton)
+				&& ev.key == console::SelectButton)
 		{
 			target = -target;
 			stepper.move_to(target);

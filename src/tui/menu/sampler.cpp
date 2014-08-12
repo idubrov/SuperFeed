@@ -23,7 +23,7 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 			lcd << lcd::position(0, 1) << "Sampled " << cap << " of " << buffer_size;
 			lcd << lcd::position(0, 3) << "Press \xa5 to stop";
 			if (ev.kind == console::ButtonPressed
-					&& ev.key == console::EncoderButton)
+					&& ev.key == console::SelectButton)
 			{
 				captured = 0xffff; // Stop capturing
 				lcd.clear();
@@ -52,7 +52,7 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 			lcd << lcd::position(0, 2) << "Press \xa5 to capture";
 			lcd << lcd::position(0, 3) << "Other key to exit";
 			if (ev.kind == console::ButtonPressed
-					&& ev.key == console::EncoderButton)
+					&& ev.key == console::SelectButton)
 			{
 				captured = 0; // Start capturing
 				lcd.clear();

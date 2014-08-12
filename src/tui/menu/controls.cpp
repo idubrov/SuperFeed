@@ -23,12 +23,17 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	{
 		auto ev = console.read();
 		if (ev.kind == console::ButtonPressed
-				&& ev.key == console::EncoderButton)
+				&& ev.key == console::SelectButton)
 			break;
 
+		bool updated = false;
 		if (ev.kind == console::EncoderMove)
 		{
 			value = ev.position + min;
+			updated = true;
+		}
+
+		if (updated) {
 			lcd << lcd::position(x, y) << blanks(b);
 			lcd << lcd::position(x, y) << value << (char) 3;
 		}
@@ -63,7 +68,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 		if (ev.kind != console::ButtonPressed)
 			continue;
 
-		if (ev.key == console::EncoderButton) {
+		if (ev.key == console::SelectButton) {
 			if (value < min)
 				value = min;
 			break;

@@ -15,7 +15,7 @@ class menu_base
 {
 public:
 	menu_base(char const* label, std::size_t actions_count) :
-			label(label), actions_count(actions_count), scroll(0)
+			label(label), actions_count(actions_count), scroll(0), offset(0)
 	{
 	}
 	menu_base(menu_base const&) = default;
@@ -32,6 +32,9 @@ public:
 	}
 
 protected:
+	unsigned selected_item(tui::console& console) const {
+		return (console.enc_position() + offset) % actions_count;
+	}
 	void redraw(tui::console& console);
 
 	virtual void print_actions(tui::console& console) = 0;
@@ -42,6 +45,7 @@ protected:
 	char const* label;
 	std::size_t actions_count;
 	unsigned scroll;
+	unsigned offset;
 };
 
 template<typename ... Actions>
