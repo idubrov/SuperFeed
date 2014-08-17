@@ -31,7 +31,7 @@ public:
 private:
 	inline void set_ipm(uint32_t ipmby10)
 	{
-		bool set = stepper.set_speed(ipmby10 * conv.pulse_per_inch() / 600); // 60 seconds * scale of ipm
+		bool set = stepper.set_speed(static_cast<uint64_t>(ipmby10) * conv.pulse_per_inch() / 600); // 60 seconds * scale of ipm
 		if (!set)
 		{
 			// FIXME: message?
@@ -43,7 +43,6 @@ private:
 
 	inline void print_ipm(hw::lcd::HD44780 const& lcd, unsigned ipm)
 	{
-		unsigned frac = ipm % 10;
 		lcd << hw::lcd::position(0, 0) << "Speed: " << format<>(ipm, 3, 1) << " IPM   ";
 	}
 
@@ -62,10 +61,11 @@ private:
 			return;
 		}
 
-		uint32_t mills = conv.pulse_to_mils(stepper.current_speed() * 60) >> 8;
-		uint32_t ipm = (mills + 50) / 100; // rounding
 		lcd << hw::lcd::position(0, 3) << (stepper.current_direction() ? "<<<<<<<< " : ">>>>>>>> ");
-		lcd << format<10, Right>(ipm, 8, 1);
+		lcd << stepper.current_speed() << "     ";
+		//uint32_t mills = (conv.pulse_to_mils(stepper.current_speed()) * 60)  >> 8;
+		//uint32_t ipm = (mills + 50) / 100; // rounding
+		//lcd << format<10, Right>(ipm, 8, 1);
 	}
 
 private:
