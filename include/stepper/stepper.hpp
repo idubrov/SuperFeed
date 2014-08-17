@@ -111,9 +111,6 @@ private:
 
 	inline void set_direction(bool dir)
 	{
-		if (direction == dir)
-			return; // Nothing to do!
-
 		hw::core::delay_ns(dir_setup_ns);
 		driver.set_direction(dir);
 		direction = dir;
