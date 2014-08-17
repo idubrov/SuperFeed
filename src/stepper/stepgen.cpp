@@ -78,7 +78,7 @@ uint32_t stepgen::stepgen::next()
 	if (speed == 0)
 	{
 		// First step: load first delay
-		delay = first_delay;
+		delay = first_delay < target_delay ? target_delay : first_delay;
 		speed = 1;
 		return delay;
 	}

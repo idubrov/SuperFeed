@@ -63,8 +63,9 @@ private:
 		}
 
 		uint32_t mills = conv.pulse_to_mils(stepper.current_speed() * 60) >> 8;
+		uint32_t ipm = (mills + 50) / 100; // rounding
 		lcd << hw::lcd::position(0, 3) << (stepper.current_direction() ? "<<<<<<<< " : ">>>>>>>> ");
-		lcd << format<10, Right>(mills, 8, 3);
+		lcd << format<10, Right>(ipm, 8, 1);
 	}
 
 private:
