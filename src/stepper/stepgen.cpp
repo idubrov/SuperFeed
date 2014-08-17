@@ -49,7 +49,7 @@ bool stepgen::stepgen::set_acceleration(uint32_t acceleration)
 uint32_t stepgen::stepgen::current_speed() const
 {
 	uint32_t d = slewing_delay ? slewing_delay : delay;
-	if (delay == 0)
+	if (d == 0)
 		return 0;
 	uint64_t speed = (static_cast<uint64_t>(frequency) << 16) / d;
 	return speed;
