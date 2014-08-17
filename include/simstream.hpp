@@ -25,15 +25,15 @@ enum Alignment
 	Left, Right
 };
 
-template<typename N, int R, Alignment A>
+template<typename N, int R, Alignment A, char Pad>
 struct print_format
 {
 	N value;
 	int padding;
 };
 
-template<int Radix = 10, Alignment Align = Left>
-print_format <int, Radix, Align> format(int value, int padding = 0)
+template<int Radix = 10, Alignment Align = Left, char Pad = ' '>
+print_format <int, Radix, Align, Pad> format(int value, int padding = 0)
 {
 	return
 	{	value, padding};
@@ -53,8 +53,8 @@ constexpr int buf_size(N value = std::numeric_limits<int>::max(),
 	return value == 0 ? result : buf_size<N, R>(value / R, result + 1);
 }
 
-template<typename S, typename N, int R = 10, Alignment A>
-S const& operator<<(S const& sink, print_format <N, R, A> nn)
+template<typename S, typename N, int R = 10, Alignment A, char P>
+S const& operator<<(S const& sink, print_format <N, R, A, P> nn)
 {
 	constexpr int size = util::digits<N, R>();
 	char buf[size];
@@ -80,7 +80,7 @@ S const& operator<<(S const& sink, print_format <N, R, A> nn)
 	if (A == Right)
 	{
 		for (int i = printed; i < padding; i++)
-			sink << ' ';
+			sink << P;
 	}
 	while (pos < size)
 	{
@@ -89,7 +89,7 @@ S const& operator<<(S const& sink, print_format <N, R, A> nn)
 	if (A == Left)
 	{
 		for (int i = printed; i < padding; i++)
-			sink << ' ';
+			sink << P;
 	}
 
 	return sink;

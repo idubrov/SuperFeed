@@ -65,13 +65,15 @@ public:
 		return stepgen.set_target_speed(speed);
 	}
 
-	/// Return current stepper position.
+	/// Return current stepper position in pulses.
 	inline int32_t current_position()
 	{
 		uint32_t offset = stepgen.current_step() - base_step;
 		return position + (direction ? offset : -offset);
 	}
 
+	/// Get the current stepper speed in pulses per second
+	/// \return current stepper speed in 24.8 format
 	inline uint32_t current_speed()
 	{
 		return stepgen.current_speed();

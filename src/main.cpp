@@ -146,12 +146,12 @@ public:
 								menu::spinner(eeprom, settings::Microsteps),
 								menu::numeric(eeprom, settings::Acceleration),
 							    rotatetest,
-								menu::toggle(eeprom, settings::Leadscrew),
+								menu::toggle(eeprom, settings::MetricLeadscrew),
 								menu::numeric(eeprom, settings::LeadscrewTPI),
 								menu::numeric(eeprom, settings::LeadscrewPitch),
 								menu::label("Gearing"),
-								menu::numeric(eeprom, settings::GearNominator),
-								menu::numeric(eeprom, settings::GearDenominator),
+								menu::numeric(eeprom, settings::LeadscrewGear),
+								menu::numeric(eeprom, settings::StepperGear),
 								menu::back()),
 						menu::erase_settings(eeprom), tui::menu::back()));
 		main_menu.activate(console, 0);
