@@ -77,6 +77,11 @@ public:
 		return stepgen.current_speed();
 	}
 
+	inline bool current_direction()
+	{
+		return direction;
+	}
+
 	/// Print state for debugging purposes
 	template<typename S>
 	S const& dump(S const& sink) const
@@ -127,8 +132,7 @@ private:
 	uint16_t dir_hold_ns;
 
 	// Current state
-	stepgen::stepgen stepgen;
-	bool direction;
+	stepgen::stepgen stepgen;bool direction;
 
 	uint32_t base_step;
 	int32_t position;

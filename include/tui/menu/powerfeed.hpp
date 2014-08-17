@@ -2,6 +2,7 @@
 #define __POWERFEED_HPP
 
 #include "tui/console.hpp"
+#include "hw/driver.hpp"
 #include "stepper/stepper.hpp"
 
 namespace tui
@@ -12,7 +13,8 @@ namespace menu
 class powerfeed
 {
 public:
-	powerfeed(stepper::controller& stepper) : stepper(stepper)
+	powerfeed(hw::driver& driver, stepper::controller& stepper, hw::eeprom& eeprom) :
+		driver(driver), stepper(stepper), eeprom(eeprom)
 	{
 	}
 
@@ -22,7 +24,9 @@ public:
 		console.lcd() << "Powerfeed";
 	}
 private:
+	hw::driver& driver;
 	stepper::controller& stepper;
+	hw::eeprom& eeprom;
 };
 }
 }

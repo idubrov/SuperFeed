@@ -130,7 +130,7 @@ public:
 		using namespace tui;
 		lcd.clear();
 		auto main_menu = menu::create("Main menu",
-				menu::powerfeed(stepper),
+				menu::powerfeed(driver, stepper, eeprom),
 				menu::limits(eeprom),
 				sampler,
 				menu::inputs(),

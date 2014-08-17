@@ -13,9 +13,8 @@ public:
 	constexpr static uint32_t TicksPerUpdate = 10;
 public:
 	stepgen(uint32_t frequency) :
-			step(0), speed(0), delay(0), slewing_delay(0), frequency(
-					frequency), first_delay(0), tgt_step(0), tgt_delay(
-					0)
+			step(0), speed(0), delay(0), slewing_delay(0), frequency(frequency), first_delay(
+					0), tgt_step(0), tgt_delay(0)
 	{
 	}
 
@@ -74,10 +73,9 @@ public:
 		return tgt_step.load(std::memory_order_relaxed);
 	}
 
-	inline uint32_t current_speed() const
-	{
-		return speed;
-	}
+	/// Estimated current speed
+	/// \return estimated current speed in 24.8 format
+	uint32_t current_speed() const;
 
 	inline uint32_t target_delay() const
 	{
@@ -90,22 +88,22 @@ private:
 	void speedup();
 	void slowdown();
 private:
-	// State, updated in the IRQ handler
+// State, updated in the IRQ handler
 	std::atomic_uint_fast32_t step;	// Current step
 
-	// These two are not used outside of the IRQ handler
+// These two are not used outside of the IRQ handler
 	uint32_t speed; // Amount of acceleration steps we've taken so far
 	uint32_t delay; // Previously calculated delay
 
-	// If slewing, this will be the slewing delay. Switched to this mode once
-	// we overshoot target speed.
+// If slewing, this will be the slewing delay. Switched to this mode once
+// we overshoot target speed.
 	uint32_t slewing_delay;
 
-	// Parameters
+// Parameters
 	uint32_t frequency; // Timer frequency
 	uint32_t first_delay; // First step delay
 
-	// These two could be changed from outside
+// These two could be changed from outside
 	std::atomic_uint_fast32_t tgt_step; // Target step
 	std::atomic_uint_fast32_t tgt_delay; // Target speed delay
 };
