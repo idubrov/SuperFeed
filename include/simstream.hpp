@@ -30,13 +30,15 @@ struct print_format
 {
 	N value;
 	int padding;
+	int decimal;
 };
 
 template<int Radix = 10, Alignment Align = Left, char Pad = ' '>
-print_format <int, Radix, Align, Pad> format(int value, int padding = 0)
+print_format<int, Radix, Align, Pad> format(int value, int padding = 0,
+		int decimal = 0)
 {
 	return
-	{	value, padding};
+	{	value, padding, decimal};
 }
 
 template<typename S, typename N>
@@ -54,7 +56,7 @@ constexpr int buf_size(N value = std::numeric_limits<int>::max(),
 }
 
 template<typename S, typename N, int R = 10, Alignment A, char P>
-S const& operator<<(S const& sink, print_format <N, R, A, P> nn)
+S const& operator<<(S const& sink, print_format<N, R, A, P> nn)
 {
 	constexpr int size = util::digits<N, R>();
 	char buf[size];
@@ -63,11 +65,9 @@ S const& operator<<(S const& sink, print_format <N, R, A, P> nn)
 	int padding = nn.padding;
 
 	// FIXME: won't work for min_value
+	bool negative = (n < 0);
 	if (n < 0)
-	{
-		sink << '-';
 		n = -n;
-	}
 	do
 	{
 		int m = n;
@@ -76,16 +76,37 @@ S const& operator<<(S const& sink, print_format <N, R, A, P> nn)
 		buf[--pos] = c < 10 ? c + '0' : c + 'a' - 10;
 	} while (n);
 
-	int printed = size - pos;
+	int digits = size - pos;
+	int printed = negative ? 1 : 0;
+	if (nn.decimal > 0)
+	{
+		printed++; // Decimal dot
+		printed += (digits <= nn.decimal ? (nn.decimal + 1) : digits); // plus leading zero
+	}
+	else
+		printed += digits;
 	if (A == Right)
 	{
 		for (int i = printed; i < padding; i++)
 			sink << P;
 	}
+	if (negative)
+		sink << '-';
+
+	// Leading zeroes
+	for (int i = 0; i <= nn.decimal - digits; i++)
+	{
+		if (i == 1)
+			sink << '.';
+		sink << '0';
+	}
 	while (pos < size)
 	{
+		if (pos == size - nn.decimal)
+			sink << '.';
 		sink << buf[pos++];
 	}
+
 	if (A == Left)
 	{
 		for (int i = printed; i < padding; i++)

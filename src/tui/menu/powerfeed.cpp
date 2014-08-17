@@ -12,8 +12,10 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 	driver.enable();
 	driver.release();
 
-	lcd << hw::lcd::position(0, 0) << "Speed: " << ipm << " IPM   ";
+	print_ipm(lcd, ipm);
 	print_position(lcd);
+	print_status(lcd);
+
 	set_ipm(ipm);
 	while (true)
 	{
@@ -21,8 +23,8 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 		if (ev.kind == console::EncoderMove)
 		{
 			ipm = ev.position + 1;
+			print_ipm(lcd, ipm);
 			set_ipm(ipm);
-			lcd << hw::lcd::position(7, 0) << ipm << " IPM   ";
 		}
 
 		if (ev.kind == console::ButtonPressed)
@@ -32,12 +34,10 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 				if (ev.key == console::LeftButton)
 				{
 					stepper.move_to(::std::numeric_limits<int32_t>::min());
-					lcd << hw::lcd::position(0, 3) << "<<<<<<<<<";
 				}
 				else if (ev.key == console::RightButton)
 				{
 					stepper.move_to(::std::numeric_limits<int32_t>::max());
-					lcd << hw::lcd::position(0, 3) << ">>>>>>>>>";
 				}
 			}
 			else
@@ -50,8 +50,7 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 		}
 
 		print_position(lcd);
-		if (stepper.is_stopped())
-			lcd << hw::lcd::position(0, 3) << "         ";
+		print_status(lcd);
 	}
 
 	stepper.stop();

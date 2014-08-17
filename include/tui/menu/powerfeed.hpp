@@ -41,20 +41,30 @@ private:
 		}
 	}
 
-	inline void print_position(hw::lcd::HD44780 const& lcd)
+	inline void print_ipm(hw::lcd::HD44780 const& lcd, unsigned ipm)
 	{
-		uint32_t mills = conv.pulse_to_mils(stepper.current_position());
-		lcd << hw::lcd::position(0, 1) << "Position: ";
-		lcd << (mills / 1000) << '.' << format<10, Right, '0'>(mills % 1000, 3)
-				<< "    ";
+		unsigned frac = ipm % 10;
+		lcd << hw::lcd::position(0, 0) << "Speed: " << format<>(ipm, 3, 1) << " IPM   ";
 	}
 
-	inline void print_speed(hw::lcd::HD44780 const& lcd)
+	inline void print_position(hw::lcd::HD44780 const& lcd)
 	{
-		uint32_t mills = conv.pulse_to_mils(stepper.current_speed());
-		lcd << hw::lcd::position(0, 1) << "Speed: ";
-		lcd << (mills / 1000) << '.' << format<10, Right, '0'>(mills % 1000, 3)
-				<< "    ";
+		int32_t mills = conv.pulse_to_mils(stepper.current_position());
+		lcd << hw::lcd::position(0, 1) << "Position: ";
+		lcd << format<10, Right>(mills, 8, 3);
+	}
+
+	inline void print_status(hw::lcd::HD44780 const& lcd)
+	{
+		if (stepper.is_stopped())
+		{
+			lcd << hw::lcd::position(0, 3) << "                    ";
+			return;
+		}
+
+		uint32_t mills = conv.pulse_to_mils(stepper.current_speed() * 60) >> 8;
+		lcd << hw::lcd::position(0, 3) << (stepper.current_direction() ? "<<<<<<<< " : ">>>>>>>> ");
+		lcd << format<10, Right>(mills, 8, 3);
 	}
 
 private:

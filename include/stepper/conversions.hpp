@@ -30,10 +30,10 @@ public:
 	/// Following functions try to be as precise as possible
 
 
-	inline uint32_t pulse_to_mils(uint32_t position)
+	inline int32_t pulse_to_mils(int32_t position)
 	{
 		// full leadscrew rotations multiplied by 1000 (5 = 1000 / 200 full steps)
-		uint32_t rots = (5 * position * stepper_gear) / geared_microsteps;
+		int32_t rots = (5 * position * stepper_gear) / geared_microsteps;
 		if (metric)
 			return rots * 10 * pitch / 254;
 		else
