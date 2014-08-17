@@ -100,9 +100,9 @@ build/%.o: %.c build/%.d
 	mkdir -p `dirname $@`
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 	
-build/stepgen: test/stepgen.cpp src/stepgen.cpp include/stepgen.hpp
+build/stepgen: test/stepgen.cpp src/stepper/stepgen.cpp include/stepper/stepgen.hpp
 	mkdir -p `dirname $@`
-	g++ -std=c++0x -Iinclude -o $@ test/stepgen.cpp src/stepgen.cpp
+	g++ -std=c++0x -Iinclude -o $@ test/stepgen.cpp src/stepper/stepgen.cpp
 	
 test: build/stepgen
 	mkdir -p build/testresult
