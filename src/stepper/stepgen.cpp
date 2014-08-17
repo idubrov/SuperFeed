@@ -25,6 +25,8 @@ bool stepgen::stepgen::set_target_speed(uint32_t speed)
 		// just to make sure we have enough time to calculate next delay.
 		return false;
 	}
+	// Convert to 16.16 format. We only need this precision during intermediate calculations.
+	delay <<= 8;
 	tgt_delay.store(delay, std::memory_order_relaxed);
 	return true;
 }
@@ -42,13 +44,15 @@ bool stepgen::stepgen::set_acceleration(uint32_t acceleration)
 	uint64_t c0 = (frequency * sqrt(c0long) / 1000) >> 8;
 	if (c0 >> 24)
 		return false; // Doesn't fit in in 16.8 format, our timer is only 16 bit.
-	first_delay = static_cast<uint32_t>(c0);
+	// Convert to 16.16 format. We only need this precision during intermediate calculations.
+	first_delay = static_cast<uint32_t>(c0) << 8;
 	return true;
 }
 
 uint32_t stepgen::stepgen::current_speed() const
 {
 	uint32_t d = slewing_delay ? slewing_delay : delay;
+	d >>= 8; // Convert to 16.8 format
 	if (d == 0)
 		return 0;
 	uint64_t speed = (static_cast<uint64_t>(frequency) << 16) / d;
@@ -80,7 +84,7 @@ uint32_t stepgen::stepgen::next()
 		// First step: load first delay
 		delay = first_delay < target_delay ? target_delay : first_delay;
 		speed = 1;
-		return delay;
+		return (delay >> 8); // Convert to 16.8 format
 	}
 
 	// Calculate the projected step we would stop at if we start decelerating right now
@@ -125,7 +129,7 @@ uint32_t stepgen::stepgen::next()
 
 	// If slewing, return slew delay. delay should be close enough, but could
 	// be different due to the accumulated rounding errors
-	return slewing_delay ? slewing_delay : delay;
+	return (slewing_delay ? slewing_delay : delay) >> 8; // Convert to 16.8 format
 }
 
 uint64_t stepgen::stepgen::sqrt(uint64_t x)

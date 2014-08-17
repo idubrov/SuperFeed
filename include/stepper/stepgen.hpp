@@ -79,7 +79,7 @@ public:
 
 	inline uint32_t target_delay() const
 	{
-		return tgt_delay.load(std::memory_order_relaxed);
+		return tgt_delay.load(std::memory_order_relaxed) >> 8;
 	}
 
 private:
@@ -88,24 +88,24 @@ private:
 	void speedup();
 	void slowdown();
 private:
-// State, updated in the IRQ handler
+	// State, updated in the IRQ handler
 	std::atomic_uint_fast32_t step;	// Current step
 
-// These two are not used outside of the IRQ handler
-	uint32_t speed; // Amount of acceleration steps we've taken so far
-	uint32_t delay; // Previously calculated delay
+	// These two are not used outside of the IRQ handler
+	uint32_t speed; // Amount of acceleration steps we've taken so far, in 24.8 format
+	uint32_t delay; // Previously calculated delay, in 16.16 format
 
-// If slewing, this will be the slewing delay. Switched to this mode once
-// we overshoot target speed.
+	// If slewing, this will be the slewing delay. Switched to this mode once
+	// we overshoot target speed. 16.16 format.
 	uint32_t slewing_delay;
 
-// Parameters
+	// Parameters
 	uint32_t frequency; // Timer frequency
-	uint32_t first_delay; // First step delay
+	uint32_t first_delay; // First step delay, in 16.16 format
 
-// These two could be changed from outside
+	// These two could be changed from outside
 	std::atomic_uint_fast32_t tgt_step; // Target step
-	std::atomic_uint_fast32_t tgt_delay; // Target speed delay
+	std::atomic_uint_fast32_t tgt_delay; // Target speed delay, in 16.16 format
 };
 }
 

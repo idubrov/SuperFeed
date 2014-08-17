@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <string>
-#include "stepgen.hpp"
+#include "stepper/stepgen.hpp"
 
 using namespace ::std;
 

@@ -62,10 +62,9 @@ private:
 		}
 
 		lcd << hw::lcd::position(0, 3) << (stepper.current_direction() ? "<<<<<<<< " : ">>>>>>>> ");
-		lcd << stepper.current_speed() << "     ";
-		//uint32_t mills = (conv.pulse_to_mils(stepper.current_speed()) * 60)  >> 8;
-		//uint32_t ipm = (mills + 50) / 100; // rounding
-		//lcd << format<10, Right>(ipm, 8, 1);
+		uint32_t mills = (conv.pulse_to_mils(stepper.current_speed()) * 60)  >> 8;
+		uint32_t ipm = (mills + 50) / 100; // rounding
+		lcd << format<10, Right>(ipm, 8, 1);
 	}
 
 private:
