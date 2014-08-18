@@ -46,11 +46,15 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 				&& ev.key == console::RightButton)
 		{
 			offset++;
+			if (offset == actions_count)
+				offset = 0;
 			moved = true;
 		}
 		else if (ev.kind == console::ButtonPressed
 				&& ev.key == console::LeftButton)
 		{
+			if (offset == 0)
+				offset = actions_count;
 			offset--;
 			moved = true;
 		}
