@@ -5,29 +5,28 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 	auto& lcd = console.lcd();
 	state st = { console.lcd(), eeprom };
 	conversions::converter conv(eeprom);
-	auto state = console.guard_state();
-	unsigned ipm = 1;
+	auto ipm = util::ranged<uint32_t>(1, 1, 500);
 
 
 	lcd << hw::lcd::clear();
-	console.set_encoder_limit(500);
 	stepper.reset();
 	driver.enable();
 	driver.release();
 
-	print_ipm(ipm, st);
+	print_ipm(ipm.get(), st);
 	print_position(st);
 	print_status(st);
 
-	set_ipm(ipm, st);
+	set_ipm(ipm.get(), st);
 	while (true)
 	{
 		auto ev = console.read();
 		if (ev.kind == console::EncoderMove)
 		{
-			ipm = ev.position + 1;
-			print_ipm(ipm, st);
-			set_ipm(ipm, st);
+			// FIXME: ...
+			ipm += ev.delta;
+			print_ipm(ipm.get(), st);
+			set_ipm(ipm.get(), st);
 		}
 
 		if (ev.kind == console::ButtonPressed)

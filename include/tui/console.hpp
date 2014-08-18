@@ -40,40 +40,9 @@ public:
 		Kind kind;
 		union
 		{
-			uint16_t position;
+			int16_t delta;
 			char key;
 		};
-	};
-private:
-	// Console state (like encoder position and limit)
-	struct console_state
-	{
-		console_state(console& console) :
-				_console(console), _moved(false), _encoder_state(
-						console.get_encoder_state())
-		{
-		}
-		console_state(console_state const&) = delete;
-		console_state& operator=(console_state const&) = delete;
-		console_state& operator=(console_state&&) = delete;
-
-		console_state(console_state&& other) :
-				_console(other._console), _moved(false), _encoder_state(
-						other._encoder_state)
-		{
-			other._moved = true;
-		}
-
-		~console_state()
-		{
-			if (!_moved)
-			{
-				_console.set_encoder_state(_encoder_state);
-			}
-		}
-	private:
-		console& _console;bool _moved;
-		uint32_t _encoder_state;
 	};
 private:
 	// Bit to button key mapping
@@ -114,10 +83,6 @@ public:
 	void debounce();
 
 	// All supported inputs
-	inline uint_fast16_t enc_position()
-	{
-		return (current() & EncoderMask) >> EncoderShift;
-	}
 	inline char keypad()
 	{
 		return (current() & KeypadMask) >> KeypadShift;
@@ -138,32 +103,11 @@ public:
 	{
 		return buttons() & RightBit;
 	}
-	inline void set_encoder_limit(uint16_t limit)
-	{
-		_encoder.set_limit(limit);
-	}
-	inline void set_encoder(uint_fast16_t limit, uint_fast16_t position)
-	{
-		_encoder.set_limit(limit);
-		_encoder.set_position(position);
-	}
 	inline hw::lcd::HD44780 const& lcd() const
 	{
 		return _lcd;
 	}
-	inline console_state guard_state()
-	{
-		return console_state(*this);
-	}
 private:
-	inline void set_encoder_state(uint32_t state)
-	{
-		_encoder.set_state(state);
-	}
-	inline uint32_t get_encoder_state()
-	{
-		return _encoder.get_state();
-	}
 	inline uint_fast32_t current() const
 	{
 		return _current.load(std::memory_order_relaxed);

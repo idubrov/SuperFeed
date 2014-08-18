@@ -5,7 +5,6 @@ using namespace ::hw;
 
 bool tui::menu::rotatetest::activate(tui::console& console, unsigned row)
 {
-	auto state = console.guard_state();
 	stepper.reset();
 	driver.enable();
 	driver.release();

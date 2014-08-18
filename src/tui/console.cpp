@@ -27,6 +27,10 @@ void tui::console::initialize()
 
 	// Upload custom character
 	upload_characters();
+
+	// Reset encoder
+	_encoder.set_limit(30000); // Arbitrary large number
+	_encoder.set_position(0);
 }
 
 void tui::console::upload_characters()
@@ -104,7 +108,12 @@ tui::console::Event tui::console::read()
 	if (last_enc != curr_enc)
 	{
 		event.kind = EncoderMove;
-		event.position = curr_enc;
+		int16_t delta = curr_enc - last_enc;
+		if (delta < -15000)
+			delta += 30000;
+		else if (delta > 15000)
+			delta -= 30000;
+		event.delta = delta;
 
 		_last &= ~EncoderMask;
 		_last |= curr & EncoderMask;

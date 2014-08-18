@@ -17,7 +17,7 @@ class menu_base
 public:
 	menu_base(char const* label, char const* hotkeys, std::size_t actions_count) :
 			label(label), hotkeys(hotkeys), hotkeys_count(std::strlen(hotkeys)), actions_count(
-					actions_count), scroll(0), offset(0)
+					actions_count), scroll(0), selected(0)
 	{
 	}
 	menu_base(menu_base const&) = default;
@@ -33,20 +33,6 @@ public:
 		console.lcd() << label;
 	}
 protected:
-
-	bool activate_current(tui::console& console)
-	{
-		unsigned selected = selected_item(console);
-		bool ret = activate_action(console, selected, selected - scroll);
-		redraw(console);
-		return ret;
-	}
-
-protected:
-	unsigned selected_item(tui::console& console) const
-	{
-		return (console.enc_position() + offset) % actions_count;
-	}
 	void redraw(tui::console& console);
 
 	virtual void print_actions(tui::console& console) = 0;
@@ -59,7 +45,7 @@ protected:
 	std::size_t hotkeys_count;
 	std::size_t actions_count;
 	unsigned scroll;
-	unsigned offset;
+	unsigned selected;
 };
 
 template<typename ... Actions>

@@ -10,7 +10,6 @@ void tui::menu::menu_base::redraw(tui::console& console)
 		lcd << hw::lcd::position(0, 0) << console::UpArrowCharacter;
 	}
 
-	unsigned selected = selected_item(console);
 	for (unsigned i = 0; i < lcd.lines() && i + scroll < actions_count; i++)
 	{
 		lcd << hw::lcd::position(1, i);
@@ -29,9 +28,7 @@ void tui::menu::menu_base::redraw(tui::console& console)
 
 bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 {
-	auto state = console.guard_state();
-	console.set_encoder_limit(actions_count);
-	offset = 0;
+	selected = 0;
 
 	redraw(console);
 	while (true)
@@ -40,28 +37,30 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 		bool moved = false;
 		if (ev.kind == console::EncoderMove)
 		{
+			auto ranged = util::ranged<unsigned>(selected, 0, actions_count - 1);
+			ranged += ev.delta;
+			selected = ranged.get();
 			moved = true;
 		}
 		else if (ev.kind == console::ButtonPressed
 				&& ev.key == console::RightButton)
 		{
-			offset++;
-			if (offset == actions_count)
-				offset = 0;
+			selected++;
+			if (selected == actions_count)
+				selected = 0;
 			moved = true;
 		}
 		else if (ev.kind == console::ButtonPressed
 				&& ev.key == console::LeftButton)
 		{
-			if (offset == 0)
-				offset = actions_count;
-			offset--;
+			if (selected == 0)
+				selected = actions_count;
+			selected--;
 			moved = true;
 		}
 		else if (ev.kind == console::ButtonPressed
 				&& ev.key == console::SelectButton)
 		{
-			unsigned selected = selected_item(console);
 			if (!activate_action(console, selected, selected - scroll))
 				break;
 			redraw(console);
@@ -84,7 +83,6 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 		}
 		if (moved)
 		{
-			unsigned selected = selected_item(console);
 			if (selected < scroll)
 			{
 				scroll = selected;

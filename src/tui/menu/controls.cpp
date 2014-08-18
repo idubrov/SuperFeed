@@ -11,11 +11,9 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	unsigned b = util::digits(max) + 1;
 
 	auto& lcd = console.lcd();
-	auto state(console.guard_state());
-
 	uint16_t value = def_value;
 	eeprom.read(tag, value);
-	console.set_encoder(max - min + 1, value - min);
+	auto selected = util::ranged(value, min, max);
 
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value << (char) 3;
@@ -29,11 +27,13 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 		bool updated = false;
 		if (ev.kind == console::EncoderMove)
 		{
-			value = ev.position + min;
+			selected += ev.delta;
+			value = selected.get();
 			updated = true;
 		}
 
-		if (updated) {
+		if (updated)
+		{
 			lcd << lcd::position(x, y) << blanks(b);
 			lcd << lcd::position(x, y) << value << (char) 3;
 		}
@@ -68,7 +68,8 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 		if (ev.kind != console::ButtonPressed)
 			continue;
 
-		if (ev.key == console::SelectButton) {
+		if (ev.key == console::SelectButton)
+		{
 			if (value < min)
 				value = min;
 			break;

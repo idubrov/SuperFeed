@@ -6,10 +6,8 @@ using namespace ::tui::menu;
 
 bool inputs::activate(tui::console& console, unsigned)
 {
-	auto state = console.guard_state();
-
-	console.set_encoder_limit(100);
 	auto& lcd = console.lcd();
+	auto encoder = util::ranged(1, 1, 100, false);
 
 	lcd.clear();
 	lcd << lcd::position(0, 0) << "Last event: ";
@@ -19,8 +17,7 @@ bool inputs::activate(tui::console& console, unsigned)
 	{
 		auto ev = console.read();
 
-		lcd << lcd::position(0, 2) << "Encoder: " << console.enc_position()
-				<< " of 100  ";
+		lcd << lcd::position(0, 2) << "Encoder: " << encoder.get() << " of 100    ";
 		if (ev.kind == console::Nothing)
 		{
 			core::delay_ms(100);
@@ -31,6 +28,7 @@ bool inputs::activate(tui::console& console, unsigned)
 		if (ev.kind == console::EncoderMove)
 		{
 			lcd << "  encoder moved     ";
+			encoder += ev.delta;
 		}
 		else if (ev.kind == console::ButtonPressed)
 		{

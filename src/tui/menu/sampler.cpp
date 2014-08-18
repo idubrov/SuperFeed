@@ -5,9 +5,7 @@ using namespace ::hw;
 
 bool tui::menu::sampler::activate(tui::console& console, unsigned)
 {
-	auto state = console.guard_state();
-
-	console.set_encoder(BufferCapacity, buffer_size - 1);
+	auto value = util::ranged<unsigned>(buffer_size, 1, BufferCapacity);
 	auto& lcd = console.lcd();
 	lcd.clear();
 	while (true)
@@ -59,7 +57,8 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 			}
 			else if (ev.kind == console::EncoderMove)
 			{
-				buffer_size = ev.position + 1;
+				value += ev.delta;
+				buffer_size = value.get();
 			}
 			else if (ev.kind == console::ButtonPressed)
 			{

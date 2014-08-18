@@ -27,13 +27,18 @@ template<typename T>
 class ranged_value
 {
 public:
-	ranged_value(T value, T min, T max, bool wrap = true) :
+	ranged_value(T value, T min, T max, bool wrap) :
 			value(value), min(min), max(max), wrap(wrap)
 	{
 
 	}
 
 	explicit operator T() const
+	{
+		return value;
+	}
+
+	T get() const
 	{
 		return value;
 	}
@@ -81,10 +86,10 @@ private:
 };
 
 template<typename T>
-ranged_value<T> ranged(T value, T min, T max)
+ranged_value<T> ranged(T value, T min, T max, bool wrap = true)
 {
 	return
-	{	value, min, max};
+	{	value, min, max, wrap};
 }
 }
 
