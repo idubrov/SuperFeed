@@ -66,6 +66,11 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 				break; // false returned -- exit from the menu
 			redraw(console);
 		}
+		else if (ev.kind == console::ButtonPressed
+				&& ev.key == '#')
+		{
+			break;
+		}
 		if (moved)
 		{
 			unsigned selected = selected_item(console);
