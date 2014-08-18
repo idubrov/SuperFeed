@@ -27,7 +27,7 @@ public:
 public:
 	controller(hw::eeprom& eeprom, hw::driver const& driver) :
 			eeprom(eeprom), driver(driver), step_len_ticks(0), step_space_ticks(
-					0), dir_setup_ns(0), dir_hold_ns(0), stepgen(
+					0), dir_setup_ns(0), dir_hold_ns(0), reverse(false), stepgen(
 					hw::driver::Frequency), direction(
 			true), base_step(0), position(0), stop_requested(
 			false)
@@ -134,8 +134,7 @@ private:
 	bool reverse;
 
 	// Current state
-	stepgen::stepgen stepgen;
-	bool direction;
+	stepgen::stepgen stepgen;bool direction;
 
 	uint32_t base_step;
 	int32_t position;

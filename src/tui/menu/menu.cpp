@@ -63,13 +63,24 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 		{
 			unsigned selected = selected_item(console);
 			if (!activate_action(console, selected, selected - scroll))
-				break; // false returned -- exit from the menu
+				break;
 			redraw(console);
 		}
-		else if (ev.kind == console::ButtonPressed
-				&& ev.key == '#')
+		else if (ev.kind == console::ButtonPressed && ev.key == '#')
 		{
 			break;
+		}
+		else if (ev.kind == console::ButtonPressed)
+		{
+			auto ptr = std::strchr(hotkeys, ev.key);
+			if (ptr != nullptr)
+			{
+				// Make item current
+				unsigned selected = ptr - hotkeys;
+				if (!activate_action(console, selected, 0)) // FIXME: we are giving wrong row here!
+					break;
+				redraw(console);
+			}
 		}
 		if (moved)
 		{

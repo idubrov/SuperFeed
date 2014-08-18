@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <tuple>
+#include <cstring>
 
 #include "tuple_util.hpp"
 #include "tui/console.hpp"
@@ -14,8 +15,9 @@ namespace menu
 class menu_base
 {
 public:
-	menu_base(char const* label, std::size_t actions_count) :
-			label(label), actions_count(actions_count), scroll(0), offset(0)
+	menu_base(char const* label, char const* hotkeys, std::size_t actions_count) :
+			label(label), hotkeys(hotkeys), hotkeys_count(std::strlen(hotkeys)), actions_count(
+					actions_count), scroll(0), offset(0)
 	{
 	}
 	menu_base(menu_base const&) = default;
@@ -30,9 +32,19 @@ public:
 	{
 		console.lcd() << label;
 	}
+protected:
+
+	bool activate_current(tui::console& console)
+	{
+		unsigned selected = selected_item(console);
+		bool ret = activate_action(console, selected, selected - scroll);
+		redraw(console);
+		return ret;
+	}
 
 protected:
-	unsigned selected_item(tui::console& console) const {
+	unsigned selected_item(tui::console& console) const
+	{
 		return (console.enc_position() + offset) % actions_count;
 	}
 	void redraw(tui::console& console);
@@ -43,6 +55,8 @@ protected:
 
 protected:
 	char const* label;
+	char const* hotkeys;
+	std::size_t hotkeys_count;
 	std::size_t actions_count;
 	unsigned scroll;
 	unsigned offset;
@@ -75,19 +89,22 @@ class menu: public menu_base
 			std::tuple_size<actions_tuple>::value;
 	constexpr static unsigned lines_count = 4;
 public:
-	menu(char const* label, Actions&&... actions) :
-			menu_base(label, std::tuple_size<actions_tuple>::value), actions(
+	menu(char const* label, char const* hotkeys, Actions&&... actions) :
+			menu_base(label, hotkeys, std::tuple_size<actions_tuple>::value), actions(
 					std::forward<Actions>(actions)...)
 	{
 	}
 private:
 	void print_actions(tui::console& console)
 	{
-		for (unsigned i = 0; i < lines_count && i + scroll < actions_count; i++)
+		for (unsigned i = scroll; i < scroll + lines_count && i < actions_count; i++)
 		{
-			console.lcd() << hw::lcd::position(2, i);
-			util::make_tuple_applicator(actions, console).template apply_to<
-			bool, Print>(i + scroll);
+			console.lcd() << hw::lcd::position(2, i - scroll);
+			util::make_tuple_applicator(actions, console).template apply_to<bool, Print>(i);
+			if (i < hotkeys_count)
+			{
+				console.lcd() << hw::lcd::position(19, i - scroll) << hotkeys[i];
+			}
 		}
 	}
 
@@ -103,7 +120,14 @@ private:
 template<typename ... Actions>
 menu<Actions...> create(char const* label, Actions&&... actions)
 {
-	return menu<Actions...>(label, std::forward<Actions>(actions)...);
+	return menu<Actions...>(label, nullptr, std::forward<Actions>(actions)...);
+}
+
+template<typename ... Actions>
+menu<Actions...> create(char const* label, char const* hotkeys,
+		Actions&&... actions)
+{
+	return menu<Actions...>(label, hotkeys, std::forward<Actions>(actions)...);
 }
 
 // Simple actions

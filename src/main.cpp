@@ -129,12 +129,12 @@ public:
 	{
 		using namespace tui;
 		lcd.clear();
-		auto main_menu = menu::create("Main menu",
+		auto main_menu = menu::create("Main menu", "ABCD",
 				menu::powerfeed(driver, stepper, eeprom),
-				menu::limits(eeprom),
+				//menu::limits(eeprom),
 				sampler,
 				menu::inputs(),
-				menu::create("Settings",
+				menu::create("Settings", "AB",
 						menu::create("Driver timings",
 								menu::label("Timings (in nsec)"),
 								menu::numeric(eeprom, settings::StepLen),
