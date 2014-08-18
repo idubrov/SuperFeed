@@ -104,6 +104,9 @@ public:
 	void reset()
 	{
 		_last = (static_cast<uint8_t>(hw::keypad::None) << KeypadShift) & KeypadMask;
+		// Reset keypad state
+		_current &= ~KeypadMask;
+		_current |= (static_cast<uint8_t>(hw::keypad::None) << KeypadShift) & KeypadMask;
 	}
 
 	Event read();
