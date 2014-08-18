@@ -22,6 +22,70 @@ constexpr T ns2us(T ns)
 {
 	return (ns + 999) / 1000;
 }
+
+template<typename T>
+class ranged_value
+{
+public:
+	ranged_value(T value, T min, T max, bool wrap = true) :
+			value(value), min(min), max(max), wrap(wrap)
+	{
+
+	}
+
+	explicit operator T() const
+	{
+		return value;
+	}
+
+	template<typename D>
+	ranged_value& operator+=(D d)
+	{
+		if (d == 0)
+			return *this;
+
+		d %= static_cast<D>(max - min + 1);
+		if (d > 0)
+		{
+			if (d <= (max - value))
+				value += d;
+			else
+			{
+				if (wrap)
+					value = min + (d - (max - value) - 1);
+				else
+					value = max;
+			}
+		}
+		else
+		{
+			d = -d;
+			if (d <= value - min)
+				value -= d;
+			else
+			{
+				if (wrap)
+					value = max - (d - (value - min) - 1);
+				else
+					value = min;
+			}
+		}
+		return *this;
+	}
+
+private:
+	T value;
+	T min;
+	T max;
+	bool wrap;
+};
+
+template<typename T>
+ranged_value<T> ranged(T value, T min, T max)
+{
+	return
+	{	value, min, max};
+}
 }
 
 #endif /* __UTIL_HPP */
