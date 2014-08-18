@@ -10,6 +10,7 @@ void stepper::controller::reset()
 	step_space_ticks = hw::driver::ns2ticks(settings::StepSpace.get(eeprom));
 	dir_setup_ns = settings::DirectionSetup.get(eeprom);
 	dir_hold_ns = settings::DirectionHold.get(eeprom);
+	reverse = settings::Reverse.get(eeprom);
 
 	// FIXME: check return value
 	uint16_t accel = settings::Acceleration.get(eeprom);

@@ -112,7 +112,7 @@ private:
 	inline void set_direction(bool dir)
 	{
 		hw::core::delay_ns(dir_setup_ns);
-		driver.set_direction(dir);
+		driver.set_direction(reverse ? dir : !dir);
 		direction = dir;
 		hw::core::delay_ns(dir_hold_ns);
 	}
@@ -130,8 +130,12 @@ private:
 	uint16_t dir_setup_ns;
 	uint16_t dir_hold_ns;
 
+	// If should reverse direction signal
+	bool reverse;
+
 	// Current state
-	stepgen::stepgen stepgen;bool direction;
+	stepgen::stepgen stepgen;
+	bool direction;
 
 	uint32_t base_step;
 	int32_t position;

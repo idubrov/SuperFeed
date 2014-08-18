@@ -60,6 +60,7 @@ constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
 constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);
 constexpr numeric LeadscrewGear("  A", 0x06, 1, 1, 1000); // Leadscrew gear
 constexpr numeric StepperGear("  B", 0x07, 1, 1, 1000); // Stepper motor gear
+constexpr boolean Reverse("Reverse", 0x08, false, "false", "true");
 
 // Stepper driver timings
 constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns

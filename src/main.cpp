@@ -143,6 +143,7 @@ public:
 								menu::numeric(eeprom, settings::DirectionHold),
 								menu::back()),
 						menu::create("Stepper config",
+								menu::toggle(eeprom, settings::Reverse),
 								menu::spinner(eeprom, settings::Microsteps),
 								menu::numeric(eeprom, settings::Acceleration),
 							    rotatetest,
