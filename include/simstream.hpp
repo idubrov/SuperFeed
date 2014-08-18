@@ -48,6 +48,14 @@ S const& operator<<(S const& sink, N n)
 	return sink;
 }
 
+template<typename S, typename T>
+S const& operator<<(S const& sink, util::ranged_value<T> n)
+{
+	sink << format<>(n.get());
+	return sink;
+}
+
+
 template<typename N, int R>
 constexpr int buf_size(N value = std::numeric_limits<int>::max(),
 		int result = 0)

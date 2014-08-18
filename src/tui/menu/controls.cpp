@@ -11,9 +11,9 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 	unsigned b = util::digits(max) + 1;
 
 	auto& lcd = console.lcd();
-	uint16_t value = def_value;
-	eeprom.read(tag, value);
-	auto selected = util::ranged(value, min, max);
+	auto value = util::ranged(def_value, min, max);
+	eeprom.read(tag, value.get());
+
 
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value << (char) 3;
@@ -27,8 +27,7 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 		bool updated = false;
 		if (ev.kind == console::EncoderMove)
 		{
-			selected += ev.delta;
-			value = selected.get();
+			value += ev.delta;
 			updated = true;
 		}
 
@@ -41,9 +40,9 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 
 	uint16_t current = def_value;
 	eeprom.read(tag, current);
-	if (current != value)
+	if (current != value.get())
 	{
-		eeprom.write(tag, value);
+		eeprom.write(tag, value.get());
 	}
 	return true;
 }

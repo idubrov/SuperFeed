@@ -38,7 +38,17 @@ public:
 		return value;
 	}
 
+	explicit operator T&()
+	{
+		return value;
+	}
+
 	T get() const
+	{
+		return value;
+	}
+
+	T& get()
 	{
 		return value;
 	}
