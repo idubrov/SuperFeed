@@ -48,7 +48,7 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 			lcd << lcd::position(0, 1) << "Capture size: "
 					<< format<10>(buffer_size, 3);
 			lcd << lcd::position(0, 2) << "Press \xa5 to capture";
-			lcd << lcd::position(0, 3) << "Other key to exit";
+			lcd << lcd::position(0, 3) << "Back" << tui::console::BackCharacter << "              #";
 			if (ev.kind == console::ButtonPressed
 					&& ev.key == console::SelectButton)
 			{
@@ -60,11 +60,8 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 				value += ev.delta;
 				buffer_size = value.get();
 			}
-			else if (ev.kind == console::ButtonPressed)
-			{
-				// Any other button -- exit
+			else if (ev.kind == console::ButtonPressed && ev.key == '#')
 				break;
-			}
 		}
 	}
 	return true;
