@@ -27,6 +27,18 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 			value += ev.delta;
 			updated = true;
 		}
+		else if (ev.kind == console::ButtonPressed
+				&& ev.key == console::RightButton)
+		{
+			value += 1;
+			updated = true;
+		}
+		else if (ev.kind == console::ButtonPressed
+				&& ev.key == console::LeftButton)
+		{
+			value += -1;
+			updated = true;
+		}
 
 		if (updated)
 		{
