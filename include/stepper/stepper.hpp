@@ -49,6 +49,10 @@ public:
 		return driver.check_stopped();
 	}
 
+	/// Zero current position. This method could only be called while stepper motor is stopped.
+	/// \return false if motor is still running
+	bool zero_position();
+
 	/// Move to given position. Note that no new move commands will be accepted
 	/// while stepper is running. However, other target parameter, target speed,
 	/// could be changed any time.

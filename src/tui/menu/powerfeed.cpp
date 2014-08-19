@@ -16,7 +16,10 @@ void tui::menu::powerfeed::update_display(state& s)
 	// Current position
 	int32_t mills = s.conv.pulse_to_mils(stepper.current_position());
 	s.lcd << hw::lcd::position(0, 1) << "Position: ";
-	s.lcd << format<10, Right>(mills, 8, 3);
+	s.lcd << format<10, Right>(mills, 6, 3);
+
+	// Only allow zeroing position while stopped
+	s.lcd << (stepper.is_stopped() ? "   A" : "    ");
 
 	// Current state and speed
 	if (stepper.is_stopped())
@@ -66,6 +69,8 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 		{
 			if (ev.key == '#')
 				break;
+			if (ev.key == 'A' && stepper.is_stopped())
+				stepper.zero_position();
 
 			bool stop = true;
 			if (ev.key == console::LeftButton || ev.key == console::RightButton)

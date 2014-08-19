@@ -20,6 +20,16 @@ void stepper::controller::reset()
 	// FIXME: reset position
 }
 
+bool stepper::controller::zero_position()
+{
+	if (!driver.check_stopped())
+		return false;
+
+	base_step = stepgen.current_step();
+	position = 0;
+	return true;
+}
+
 bool stepper::controller::move_to(int32_t target)
 {
 	if (!driver.check_stopped())
