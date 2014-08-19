@@ -65,7 +65,8 @@ public:
 			// Use page 126 and 127 for persistent storage
 			eeprom((uint32_t) &__eeprom_start, (uint32_t) &__eeprom_pages), stepper(
 					eeprom, driver), console(lcd,
-			TIM7, encoder, keypad, buttons), sampler(spindle), rotatetest(driver, stepper, eeprom)
+			TIM7, encoder, keypad, buttons), sampler(spindle), rotatetest(
+					driver, stepper, eeprom)
 	{
 	}
 
@@ -132,9 +133,8 @@ public:
 		auto main_menu = menu::create("Main menu", "ABCD",
 				menu::powerfeed(driver, stepper, eeprom),
 				//menu::limits(eeprom),
-				sampler,
-				menu::inputs(),
-				menu::create("Settings", "AB",
+				sampler, menu::inputs(),
+				menu::create("Settings", "ABC",
 						menu::create("Driver timings",
 								menu::label("Timings (in nsec)"),
 								menu::numeric(eeprom, settings::StepLen),
@@ -146,7 +146,7 @@ public:
 								menu::toggle(eeprom, settings::Reverse),
 								menu::spinner(eeprom, settings::Microsteps),
 								menu::numeric(eeprom, settings::Acceleration),
-							    rotatetest,
+								rotatetest,
 								menu::toggle(eeprom, settings::MetricLeadscrew),
 								menu::numeric(eeprom, settings::LeadscrewTPI),
 								menu::numeric(eeprom, settings::LeadscrewPitch),
@@ -154,7 +154,11 @@ public:
 								menu::numeric(eeprom, settings::LeadscrewGear),
 								menu::numeric(eeprom, settings::StepperGear),
 								menu::back()),
-						menu::erase_settings(eeprom), tui::menu::back()));
+						menu::create("Advanced config",
+								menu::numeric(eeprom, settings::RapidFeed),
+								menu::numeric(eeprom, settings::LastFeed),
+								menu::back()), menu::erase_settings(eeprom),
+						tui::menu::back()));
 		main_menu.activate(console, 0);
 
 ////		// STEPPER.....

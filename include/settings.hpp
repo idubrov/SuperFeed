@@ -21,6 +21,13 @@ struct setting
 		eeprom.read(tag, result);
 		return result;
 	}
+	void set(hw::eeprom& eeprom, uint16_t value) const
+	{
+		uint16_t current = def_value;
+		eeprom.read(tag, current);
+		if (current != value)
+			eeprom.write(tag, value);
+	}
 
 	char const* const label;
 	uint16_t const tag;
@@ -61,6 +68,8 @@ constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);
 constexpr numeric LeadscrewGear("  A", 0x06, 1, 1, 1000); // Leadscrew gear
 constexpr numeric StepperGear("  B", 0x07, 1, 1, 1000); // Stepper motor gear
 constexpr boolean Reverse("Reverse", 0x08, false, "false", "true");
+constexpr numeric RapidFeed("Rapid (IPMx10)", 0x09, 200, 1, 500);
+constexpr numeric LastFeed("Feed (IPM*10)", 0x10, 50, 1, 500);
 
 // Stepper driver timings
 constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns
