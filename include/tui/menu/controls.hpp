@@ -13,24 +13,17 @@ class numeric_base
 {
 public:
 	numeric_base(hw::eeprom& eeprom, settings::numeric const& setting) :
-			eeprom(eeprom), label(setting.label), tag(setting.tag), min(
-					setting.min), max(setting.max), def_value(setting.def_value)
+			eeprom(eeprom), setting(setting)
 	{
 	}
 
 	void print_label(tui::console& console)
 	{
-		uint16_t value = def_value;
-		eeprom.read(tag, value);
-		console.lcd() << label << ": " << value;
+		console.lcd() << setting.label << ": " << setting.get(eeprom);
 	}
 protected:
 	hw::eeprom& eeprom;
-	char const* const label;
-	uint16_t const tag;
-	uint16_t const min;
-	uint16_t const max;
-	uint16_t const def_value;
+	settings::numeric const& setting;
 };
 
 class spinner: public numeric_base

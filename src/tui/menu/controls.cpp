@@ -7,14 +7,11 @@ using namespace hw;
 
 bool tui::menu::spinner::activate(console& console, unsigned y)
 {
-	unsigned x = 4 + std::strlen(label);
-	unsigned b = util::digits(max) + 1;
+	unsigned x = 4 + std::strlen(setting.label);
+	unsigned b = util::digits(setting.max) + 1;
 
 	auto& lcd = console.lcd();
-	auto value = util::ranged(def_value, min, max);
-	eeprom.read(tag, value.get());
-
-
+	auto value = setting.ranged(eeprom);
 	lcd << lcd::position(x, y) << blanks(b);
 	lcd << lcd::position(x, y) << value << (char) 3;
 	while (true)
@@ -38,25 +35,19 @@ bool tui::menu::spinner::activate(console& console, unsigned y)
 		}
 	}
 
-	uint16_t current = def_value;
-	eeprom.read(tag, current);
-	if (current != value.get())
-	{
-		eeprom.write(tag, value.get());
-	}
+	setting.set(eeprom, value.get());
 	return true;
 }
 
 bool tui::menu::numeric::activate(console& console, unsigned y)
 {
-	unsigned b = util::digits(max) + 1;
-	unsigned x = 4 + std::strlen(label);
+	unsigned b = util::digits(setting.max) + 1;
+	unsigned x = 4 + std::strlen(setting.label);
 
 	auto& lcd = console.lcd();
 
 	bool empty = false;
-	uint16_t value = def_value;
-	eeprom.read(tag, value);
+	uint16_t value = setting.get(eeprom);
 
 	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOn, hw::lcd::BlinkOn);
 	lcd << lcd::position(x, y) << blanks(b);
@@ -69,8 +60,8 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 
 		if (ev.key == console::SelectButton)
 		{
-			if (value < min)
-				value = min;
+			if (value < setting.min)
+				value = setting.min;
 			break;
 		}
 		else if (ev.key == '#')
@@ -82,7 +73,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 		else if (ev.key >= '0' && ev.key <= '9')
 		{
 			uint32_t newValue = value * 10 + (ev.key - '0');
-			if (newValue <= max)
+			if (newValue <= setting.max)
 			{
 				empty = false;
 				value = newValue;
@@ -94,12 +85,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 			lcd << value;
 	}
 
-	uint16_t current = def_value;
-	eeprom.read(tag, current);
-	if (current != value)
-	{
-		eeprom.write(tag, value);
-	}
+	setting.set(eeprom, value);
 
 	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOff, hw::lcd::BlinkOff);
 	return true;

@@ -3,6 +3,7 @@
 
 #include <limits>
 
+#include "util.hpp"
 #include "hw/eeprom.hpp"
 
 namespace settings
@@ -21,6 +22,7 @@ struct setting
 		eeprom.read(tag, result);
 		return result;
 	}
+
 	void set(hw::eeprom& eeprom, uint16_t value) const
 	{
 		uint16_t current = def_value;
@@ -41,6 +43,11 @@ struct numeric: setting<uint16_t>
 			uint16_t min, uint16_t max = std::numeric_limits<uint16_t>::max()) :
 			setting<uint16_t>(label, tag, def_value), min(min), max(max)
 	{
+	}
+
+	util::ranged_value<uint16_t> ranged(hw::eeprom const& eeprom) const
+	{
+		return util::ranged(get(eeprom), min, max);
 	}
 
 	uint16_t const min;
@@ -68,8 +75,8 @@ constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);
 constexpr numeric LeadscrewGear("  A", 0x06, 1, 1, 1000); // Leadscrew gear
 constexpr numeric StepperGear("  B", 0x07, 1, 1, 1000); // Stepper motor gear
 constexpr boolean Reverse("Reverse", 0x08, false, "false", "true");
-constexpr numeric RapidFeed("Rapid (IPMx10)", 0x09, 200, 1, 500);
-constexpr numeric LastFeed("Feed (IPM*10)", 0x10, 50, 1, 500);
+constexpr numeric RapidFeed("Rapid IPM*10", 0x09, 200, 1, 500);
+constexpr numeric LastFeed("Feed IPM*10", 0x10, 50, 1, 500);
 
 // Stepper driver timings
 constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns

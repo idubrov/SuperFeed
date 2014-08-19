@@ -154,7 +154,7 @@ public:
 								menu::numeric(eeprom, settings::LeadscrewGear),
 								menu::numeric(eeprom, settings::StepperGear),
 								menu::back()),
-						menu::create("Advanced config",
+						menu::create("Feeds",
 								menu::numeric(eeprom, settings::RapidFeed),
 								menu::numeric(eeprom, settings::LastFeed),
 								menu::back()), menu::erase_settings(eeprom),
