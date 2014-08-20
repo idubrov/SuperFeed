@@ -29,7 +29,9 @@ public:
 		// Note that these should not intersect with keypad buttons
 		LeftButton = '<',
 		RightButton = '>',
-		SelectButton = '.'
+		SelectButton = '.',
+		BackButton = 'D',
+		DeleteButton = '#'
 	};
 	enum Kind
 	{

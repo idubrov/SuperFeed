@@ -13,9 +13,9 @@ public:
 					settings::Microsteps.get(eeprom)
 							* settings::LeadscrewGear.get(eeprom)), stepper_gear(
 					settings::StepperGear.get(eeprom)), metric(
-					settings::MetricLeadscrew.get(eeprom)),
-					tpi(settings::LeadscrewTPI.get(eeprom)),
-					pitch(settings::LeadscrewPitch.get(eeprom))
+					settings::MetricLeadscrew.get(eeprom)), tpi(
+					settings::LeadscrewTPI.get(eeprom)), pitch(
+					settings::LeadscrewPitch.get(eeprom)), ppr(0), ppi(0)
 	{
 		ppr = ((200 * geared_microsteps) << 8) / stepper_gear;
 		ppi = metric ? ((ppr * 254) / (10 * pitch)) : ppr * tpi;
@@ -29,7 +29,6 @@ public:
 
 	/// Following functions try to be as precise as possible
 
-
 	inline int32_t pulse_to_mils(int32_t position)
 	{
 		// full leadscrew rotations multiplied by 1000 (5 = 1000 / 200 full steps)
@@ -38,6 +37,12 @@ public:
 			return rots * 10 * pitch / 254;
 		else
 			return rots / tpi;
+	}
+
+	inline int32_t mils_to_pulse(int32_t position)
+	{
+		int32_t rots = metric ? (position * 254 / 10 / pitch) : (position * tpi);
+		return (rots * geared_microsteps) / (5 * stepper_gear);
 	}
 
 private:

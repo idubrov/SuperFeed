@@ -76,7 +76,7 @@ bool tui::menu::numeric::activate(console& console, unsigned y)
 				value = setting.min;
 			break;
 		}
-		else if (ev.key == '#')
+		else if (ev.key == console::DeleteButton)
 		{
 			if (value <= 9)
 				empty = true;

@@ -51,6 +51,9 @@ private:
 	}
 
 	void update_display(state& s);
+
+	void print_offset(hw::lcd::HD44780 const& lcd, int offset);
+	int32_t read_offset(tui::console& console, tui::console::Event& ev);
 private:
 	hw::driver& driver;
 	stepper::controller& stepper;

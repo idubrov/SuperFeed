@@ -11,7 +11,7 @@ bool inputs::activate(tui::console& console, unsigned)
 
 	lcd.clear();
 	lcd << lcd::position(0, 0) << "Last event: ";
-	lcd << lcd::position(0, 3) << "Back" << tui::console::BackCharacter << "              #";
+	lcd << lcd::position(0, 3) << "  Back" << blanks(13) << tui::console::BackCharacter;
 	while (true)
 	{
 		auto ev = console.read();
@@ -31,13 +31,13 @@ bool inputs::activate(tui::console& console, unsigned)
 		}
 		else if (ev.kind == console::ButtonPressed)
 		{
-			lcd << "  pressed " << ev.key << "         ";
-			if (ev.key == '#')
+			lcd << "  pressed " << ev.key << blanks(9);
+			if (ev.key == console::BackButton)
 				break;
 		}
 		else if (ev.kind == console::ButtonUnpressed)
 		{
-			lcd << "  unpressed " << ev.key << "       ";
+			lcd << "  unpressed " << ev.key << blanks(7);
 		}
 	}
 	return true;

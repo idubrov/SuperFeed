@@ -65,7 +65,7 @@ bool tui::menu::menu_base::activate(tui::console& console, unsigned)
 				break;
 			redraw(console);
 		}
-		else if (ev.kind == console::ButtonPressed && ev.key == '#')
+		else if (ev.kind == console::ButtonPressed && ev.key == console::BackButton)
 		{
 			break;
 		}
