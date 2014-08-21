@@ -37,7 +37,7 @@ private:
 		conversions::converter conv;
 	};
 private:
-	void update_ipm(state& state);
+	bool update_ipm(state& state);
 	void update_display(state& s);
 
 	void print_offset(hw::lcd::HD44780 const& lcd, int offset);

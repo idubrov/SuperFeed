@@ -257,12 +257,15 @@ TIM7_IRQHandler()
 extern "C" void __attribute__ ((section(".after_vectors")))
 TIM1_BRK_TIM15_IRQHandler()
 {
-	if (TIM_GetITStatus(TIM15, TIM_IT_Update))
+	// Check flags before we act
+	ITStatus update = TIM_GetITStatus(TIM15, TIM_IT_Update);
+	ITStatus capture = TIM_GetITStatus(TIM15, TIM_IT_CC1);
+	if (update)
 	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_Update);
 		application::instance().spindle.overflow_handler();
 	}
-	if (TIM_GetITStatus(TIM15, TIM_IT_CC1))
+	if (capture)
 	{
 		TIM_ClearITPendingBit(TIM15, TIM_IT_CC1);
 		application::instance().spindle.index_pulse_hanlder();

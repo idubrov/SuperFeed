@@ -64,14 +64,20 @@ void hw::spindle::overflow_handler()
 void hw::spindle::index_pulse_hanlder()
 {
 	uint_fast16_t delay = TIM_GetCapture1(_index_timer);
-	if (_overflowed)
+	// Ignore results too small (>6000 RPM)
+	if (delay < 100)
+	{
+		_overflowed = true;
+		_delay.store(0, std::memory_order_relaxed);
+	}
+	else if (_overflowed)
 	{
 		// Delay timer overflowed last time, ignore the delay reading
 		_overflowed = false;
 	}
 	else
 	{
-		// Allow spindle to slow down by 25% (delay is 1.25 the current one)
+		// Allow spindle to slow down by ~25% (delay is 1.25 the current one)
 		uint_fast32_t top = delay + (delay / 4);
 		_index_timer->ARR = top < 0xffff ? top : 0xffff;
 		_delay.store(delay, std::memory_order_relaxed);

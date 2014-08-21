@@ -6,7 +6,7 @@ constexpr int32_t LEFTMOST = ::std::numeric_limits<int32_t>::min();
 constexpr int32_t RIGHTMOST = ::std::numeric_limits<int32_t>::max();
 }
 
-void tui::menu::powerfeed::update_ipm(state& state)
+bool tui::menu::powerfeed::update_ipm(state& state)
 {
 	uint32_t speed = 0;
 	unsigned ipm;
@@ -22,13 +22,7 @@ void tui::menu::powerfeed::update_ipm(state& state)
 	}
 	// 600 = 60 seconds * scale of ipm (10)
 	speed = (static_cast<uint64_t>(ipm) * state.conv.pulse_per_inch() / 600) >> 8;
-	if (!stepper.set_speed(speed))
-	{
-		// FIXME: message?
-		stepper.stop();
-		while (1)
-			;
-	}
+	return stepper.set_speed(speed);
 }
 
 void tui::menu::powerfeed::update_display(state& s)
@@ -132,8 +126,9 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 			{
 				// Either already moving in given direction or stopped
 				rapid = !stopped;
-				update_ipm(st);
-				if (stopped)
+
+				// Only move if speed is in range
+				if (update_ipm(st) && stopped)
 					stepper.move_to(dir ? RIGHTMOST : LEFTMOST);
 				should_stop = false;
 			}
