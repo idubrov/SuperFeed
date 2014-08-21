@@ -19,14 +19,22 @@ public:
 	spindle(spindle const&) = delete;
 	void initialize();
 
-	bool raw_index() const
-	{
-		return !(_index_port->IDR & _index_pin);
-	}
-
-	uint_fast16_t raw_delay() const
+	/// Get last spindle delay (time between two index pulses)
+	inline uint_fast16_t delay() const
 	{
 		return _delay.load(std::memory_order_relaxed);
+	}
+
+	/// Return spindle rpm in 24.8 format
+	inline uint32_t rpm() const
+	{
+		uint_fast16_t d = delay();
+		if (d == 0)
+			return 0;
+		// ((60*10000 + delay/2) / delay) in 24.8 format
+		uint32_t rpm = ((1200000 + d) << 7) / d;
+		// Assume 10k RPM is the maximum possible spindle speed
+		return rpm < 10000 ? rpm : 0;
 	}
 
 	void overflow_handler();
@@ -44,7 +52,7 @@ private:
 template<typename S>
 inline S const& operator<<(S const& l, hw::spindle const& spindle)
 {
-	l << "I: " << spindle.raw_index();
+	l << "I: " << spindle.delay();
 	return l;
 }
 

@@ -12,7 +12,7 @@ bool tui::menu::sampler::activate(tui::console& console, unsigned)
 	{
 		auto ev = console.read();
 		lcd << lcd::position(0, 0) << "Spindle delay: "
-				<< format<10>(spindle.raw_delay(), 5);
+				<< format<10>(spindle.delay(), 5);
 
 		// Get local copy
 		unsigned cap = captured;
@@ -94,7 +94,7 @@ void tui::menu::sampler::index_pulse_handler()
 	unsigned pos = captured;
 	if (pos < buffer_size)
 	{
-		buffer[pos] = spindle.raw_delay();
+		buffer[pos] = spindle.delay();
 
 		// Make sure we update captured after writing to buffer
 		captured.store(pos + 1);

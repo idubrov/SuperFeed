@@ -6,11 +6,44 @@ constexpr int32_t LEFTMOST = ::std::numeric_limits<int32_t>::min();
 constexpr int32_t RIGHTMOST = ::std::numeric_limits<int32_t>::max();
 }
 
+void tui::menu::powerfeed::update_ipm(state& state)
+{
+	uint32_t speed = 0;
+	unsigned ipm;
+	if (ipr && !rapid)
+	{
+		uint32_t rpm = spindle.rpm();
+		ipm = (ipr_feed * rpm) / 100; // 10th of inch in 24.8 (spindle rpm is in 24.8)
+	}
+	else
+	{
+		// ipm in 24.8 format
+		ipm = (rapid ? ipm_rapid : ipm_feed) << 8;
+	}
+	// 600 = 60 seconds * scale of ipm (10)
+	speed = (static_cast<uint64_t>(ipm) * state.conv.pulse_per_inch() / 600) >> 8;
+	if (!stepper.set_speed(speed))
+	{
+		// FIXME: message?
+		stepper.stop();
+		while (1)
+			;
+	}
+}
+
 void tui::menu::powerfeed::update_display(state& s)
 {
-	uint32_t speed = (s.conv.pulse_to_mils(stepper.current_speed()) * 60) >> 8;
+	// Current position
+	int32_t mills = s.conv.pulse_to_mils(stepper.current_position());
+	s.lcd << hw::lcd::position(0, 0) << "Pos "
+			<< format<10, Right>(mills, 6, 3);
+	uint32_t rpm = spindle.rpm() >> 8;
+	if (rpm)
+		s.lcd << "  RPM " << format<10, Right>(rpm, 4);
+	else
+		s.lcd << blanks(10);
 
-	// Selected IPM
+	// Selected IPM/IPR
 	s.lcd << hw::lcd::position(0, 1) << "Feed ";
 	if (ipr)
 		s.lcd << format<10, Right>(ipr_feed, 4) << " IPR (*)";
@@ -20,16 +53,12 @@ void tui::menu::powerfeed::update_display(state& s)
 	s.lcd << hw::lcd::position(0, 2) << "Rapid "
 			<< format<10, Right>(ipm_rapid, 4, 1) << " IPM";
 
-	// Current position
-	int32_t mills = s.conv.pulse_to_mils(stepper.current_position());
-	s.lcd << hw::lcd::position(0, 0) << "Pos " << format<10, Right>(mills, 6, 3)
-			<< blanks(10);
 	if (stepper.is_stopped())
-	{
 		s.lcd << hw::lcd::position(0, 3) << "Press A to 0 pos" << blanks(4);
-	}
 	else
 	{
+		uint32_t speed = (s.conv.pulse_to_mils(stepper.current_speed()) * 60)
+				>> 8;
 		char const* status =
 				stepper.current_direction() ?
 						(rapid ? ">>>>>>>>" : "> > > > ") :
@@ -67,9 +96,18 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 
 		if (ev.kind == console::EncoderMove)
 		{
-			auto range = util::ranged<uint32_t>(ipm_feed, 1, ipm_rapid);
-			range += ev.delta;
-			ipm_feed = range.get();
+			if (ipr)
+			{
+				auto range = util::ranged<uint32_t>(ipr_feed, 1, 100);
+				range += ev.delta;
+				ipr_feed = range.get();
+			}
+			else
+			{
+				auto range = util::ranged<uint32_t>(ipm_feed, 1, ipm_rapid);
+				range += ev.delta;
+				ipm_feed = range.get();
+			}
 			update_ipm(st);
 			update_display(st);
 			continue;

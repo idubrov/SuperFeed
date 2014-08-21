@@ -3,6 +3,7 @@
 
 #include "tui/console.hpp"
 #include "hw/driver.hpp"
+#include "hw/spindle.hpp"
 #include "stepper/stepper.hpp"
 #include "stepper/conversions.hpp"
 
@@ -15,8 +16,9 @@ class powerfeed
 {
 public:
 	powerfeed(hw::driver& driver, stepper::controller& stepper,
+			hw::spindle& spindle,
 			hw::eeprom& eeprom) :
-			driver(driver), stepper(stepper), eeprom(eeprom),
+			driver(driver), stepper(stepper), spindle(spindle), eeprom(eeprom),
 			ipm_feed(1), ipr_feed(1), ipm_rapid(1), ipr(false), rapid(false)
 	{
 	}
@@ -35,21 +37,7 @@ private:
 		conversions::converter conv;
 	};
 private:
-	inline void update_ipm(state& state)
-	{
-		unsigned ipm = rapid ? ipm_rapid : ipm_feed;
-		bool set = stepper.set_speed(
-				static_cast<uint64_t>(ipm) * state.conv.pulse_per_inch()
-						/ 600); // 60 seconds * scale of ipm
-		if (!set)
-		{
-			// FIXME: message?
-			stepper.stop();
-			while (1)
-				;
-		}
-	}
-
+	void update_ipm(state& state);
 	void update_display(state& s);
 
 	void print_offset(hw::lcd::HD44780 const& lcd, int offset);
@@ -57,6 +45,7 @@ private:
 private:
 	hw::driver& driver;
 	stepper::controller& stepper;
+	hw::spindle& spindle;
 	hw::eeprom& eeprom;
 
 	unsigned ipm_feed;
