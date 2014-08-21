@@ -76,7 +76,9 @@ constexpr numeric LeadscrewGear("  A", 0x06, 1, 1, 1000); // Leadscrew gear
 constexpr numeric StepperGear("  B", 0x07, 1, 1, 1000); // Stepper motor gear
 constexpr boolean Reverse("Reverse", 0x08, false, "false", "true");
 constexpr numeric RapidFeed("Rapid IPM*10", 0x09, 200, 1, 500);
-constexpr numeric LastFeed("Feed IPM*10", 0x10, 50, 1, 500);
+constexpr numeric LastFeedIPM("Feed IPM (1/10)", 0x10, 50, 1, 500);
+constexpr numeric LastFeedIPR("Feed IPR (mils)", 0x11, 1, 1, 100);
+constexpr boolean LastFeedMode("Feed mode", 0x12, false, "IPM", "IPR");
 
 // Stepper driver timings
 constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns

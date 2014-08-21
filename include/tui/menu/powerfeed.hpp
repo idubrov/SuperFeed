@@ -17,7 +17,7 @@ public:
 	powerfeed(hw::driver& driver, stepper::controller& stepper,
 			hw::eeprom& eeprom) :
 			driver(driver), stepper(stepper), eeprom(eeprom),
-			ipm_feed(1), ipm_rapid(1), rapid(false)
+			ipm_feed(1), ipr_feed(1), ipm_rapid(1), ipr(false), rapid(false)
 	{
 	}
 
@@ -60,7 +60,9 @@ private:
 	hw::eeprom& eeprom;
 
 	unsigned ipm_feed;
+	unsigned ipr_feed;
 	unsigned ipm_rapid;
+	bool ipr;
 	bool rapid;
 };
 }

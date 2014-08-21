@@ -11,30 +11,32 @@ void tui::menu::powerfeed::update_display(state& s)
 	uint32_t speed = (s.conv.pulse_to_mils(stepper.current_speed()) * 60) >> 8;
 
 	// Selected IPM
-	s.lcd << hw::lcd::position(0, 0) << "Feed "
-			<< format<10, Right>(ipm_feed, 4, 1) << " Rapid "
-			<< format<10, Right>(ipm_rapid, 4, 1);
+	s.lcd << hw::lcd::position(0, 1) << "Feed ";
+	if (ipr)
+		s.lcd << format<10, Right>(ipr_feed, 4) << " IPR (*)";
+	else
+		s.lcd << format<10, Right>(ipm_feed, 4, 1) << " IPM (*)";
+
+	s.lcd << hw::lcd::position(0, 2) << "Rapid "
+			<< format<10, Right>(ipm_rapid, 4, 1) << " IPM";
 
 	// Current position
 	int32_t mills = s.conv.pulse_to_mils(stepper.current_position());
-	s.lcd << hw::lcd::position(0, 1) << "Pos ";
-	s.lcd << format<10, Right>(mills, 6, 3) << blanks(9);
-	s.lcd << (stepper.is_stopped() ? 'A' : ' ');
-
-	// Current state and speed
+	s.lcd << hw::lcd::position(0, 0) << "Pos " << format<10, Right>(mills, 6, 3)
+			<< blanks(10);
 	if (stepper.is_stopped())
 	{
-		s.lcd << hw::lcd::position(0, 3) << blanks(20);
+		s.lcd << hw::lcd::position(0, 3) << "Press A to 0 pos" << blanks(4);
 	}
 	else
 	{
-
 		char const* status =
 				stepper.current_direction() ?
-						(rapid ? ">>>>>>>> " : "> > > >  ") :
-						(rapid ? "<<<<<<<< " : "< < < <  ");
+						(rapid ? ">>>>>>>>" : "> > > > ") :
+						(rapid ? "<<<<<<<<" : "< < < < ");
 		s.lcd << hw::lcd::position(0, 3) << status;
-		s.lcd << format<10, Right>((speed + 50) / 100 /* rounding */, 8, 1);
+		s.lcd << " Speed "
+				<< format<10, Right>((speed + 50) / 100 /* rounding */, 4, 1);
 	}
 }
 
@@ -42,7 +44,9 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 {
 	// Reload rapid from the settings
 	ipm_rapid = settings::RapidFeed.get(eeprom);
-	ipm_feed = settings::LastFeed.get(eeprom);
+	ipm_feed = settings::LastFeedIPM.get(eeprom);
+	ipr_feed = settings::LastFeedIPR.get(eeprom);
+	ipr = settings::LastFeedMode.get(eeprom);
 
 	auto& lcd = console.lcd();
 	state st =
@@ -124,6 +128,10 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 				should_stop = false;
 			}
 		}
+		else if (ev.kind == console::ButtonPressed && stopped && ev.key == '*')
+		{
+			ipr = !ipr;
+		}
 
 		if (ev.kind == console::ButtonPressed && should_stop)
 			stepper.stop();
@@ -139,14 +147,16 @@ bool tui::menu::powerfeed::activate(tui::console& console, unsigned)
 	driver.disable();
 
 	// Update last feed
-	settings::LastFeed.set(eeprom, ipm_feed);
+	settings::LastFeedIPM.set(eeprom, ipm_feed);
+	settings::LastFeedIPR.set(eeprom, ipr_feed);
+	settings::LastFeedMode.set(eeprom, ipr);
 	return true;
 }
 
 void tui::menu::powerfeed::print_offset(hw::lcd::HD44780 const& lcd, int offset)
 {
-	lcd << hw::lcd::position(0, 2) << blanks(6);
-	lcd << hw::lcd::position(0, 2) << offset;
+	lcd << hw::lcd::position(5, 3) << blanks(5);
+	lcd << hw::lcd::position(5, 3) << offset;
 	lcd.display(hw::lcd::DisplayOn, hw::lcd::CursorOn, hw::lcd::BlinkOn);
 }
 
@@ -154,7 +164,7 @@ int32_t tui::menu::powerfeed::read_offset(tui::console& console,
 		tui::console::Event& ev)
 {
 	auto& lcd = console.lcd();
-	lcd << hw::lcd::position(0, 2) << blanks(6);
+	lcd << hw::lcd::position(0, 3) << "Goto " << blanks(15);
 	int32_t value = 0;
 	while (1)
 	{
@@ -175,6 +185,11 @@ int32_t tui::menu::powerfeed::read_offset(tui::console& console,
 					value = newValue;
 					print_offset(lcd, value);
 				}
+			}
+			else if (ev.key == '*')
+			{
+				value = -value;
+				print_offset(lcd, value);
 			}
 			else
 			{

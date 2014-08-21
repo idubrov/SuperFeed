@@ -156,7 +156,9 @@ public:
 								menu::back()),
 						menu::create("Feeds",
 								menu::numeric(eeprom, settings::RapidFeed),
-								menu::numeric(eeprom, settings::LastFeed),
+								menu::numeric(eeprom, settings::LastFeedIPM),
+								menu::numeric(eeprom, settings::LastFeedIPR),
+								menu::toggle(eeprom, settings::LastFeedMode),
 								menu::back()), menu::erase_settings(eeprom),
 						tui::menu::back()));
 		main_menu.activate(console, 0);

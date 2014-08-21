@@ -49,10 +49,10 @@ private:
 	uint16_t const geared_microsteps; // microsteps * nom
 	uint16_t const stepper_gear;
 	bool const metric;
-	uint32_t ppr;
-	uint32_t ppi;
 	uint16_t tpi;
 	uint16_t pitch;
+	uint32_t ppr;
+	uint32_t ppi;
 };
 
 }
