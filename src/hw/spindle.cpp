@@ -6,7 +6,7 @@ void hw::spindle::initialize()
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_StructInit(&GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = _index_pin;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(_index_port, &GPIO_InitStructure);
 
 	// Get system frequency
@@ -34,7 +34,7 @@ void hw::spindle::initialize()
 	TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Falling;
 	TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
 	TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-	TIM_ICInitStructure.TIM_ICFilter = 0;
+	TIM_ICInitStructure.TIM_ICFilter = 2;
 	TIM_ICInit(_index_timer, &TIM_ICInitStructure);
 
 	// Configure slave mode, reset on capture
