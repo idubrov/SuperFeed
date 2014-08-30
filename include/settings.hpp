@@ -67,24 +67,26 @@ struct boolean: setting<bool>
 };
 
 // Hardware configuration
-constexpr numeric Microsteps("Microsteps", 0x01, 1, 1, 32);
-constexpr numeric Acceleration("Accel.", 0x02, 10000, 1, 50000);
+constexpr numeric Microsteps("Microsteps", 0x01, 10, 1, 32);
+constexpr numeric Acceleration("Accel.", 0x02, 1200, 1, 50000);
 constexpr boolean MetricLeadscrew("Leadscrew", 0x03, false, "(inch)", "(mm)");
-constexpr numeric LeadscrewTPI("  TPI", 0x04, 1, 1, 40);
+constexpr numeric LeadscrewTPI("  TPI", 0x04, 12, 1, 40);
 constexpr numeric LeadscrewPitch("  Pitch", 0x05, 1, 1, 40);
 constexpr numeric LeadscrewGear("  A", 0x06, 1, 1, 1000); // Leadscrew gear
 constexpr numeric StepperGear("  B", 0x07, 1, 1, 1000); // Stepper motor gear
 constexpr boolean Reverse("Reverse", 0x08, false, "false", "true");
-constexpr numeric RapidFeed("Rapid IPM*10", 0x09, 200, 1, 500);
-constexpr numeric LastFeedIPM("Feed IPM (1/10)", 0x10, 50, 1, 500);
-constexpr numeric LastFeedIPR("Feed IPR (mils)", 0x11, 1, 1, 100);
-constexpr boolean LastFeedMode("Feed mode", 0x12, false, "IPM", "IPR");
+constexpr numeric RapidFeed("Rapid IPM*10", 0x09, 150, 1, 500);
+
+// Feeds
+constexpr numeric LastFeedIPM("Feed IPM (.1)", 0x20, 50, 1, 500);
+constexpr numeric LastFeedIPR("Feed IPR (mils)", 0x21, 1, 1, 100);
+constexpr boolean LastFeedMode("Feed mode", 0x22, false, "IPM", "IPR");
 
 // Stepper driver timings
-constexpr numeric StepLen("Step len.", 0x10, 1, 1, 50000); // in ns
-constexpr numeric StepSpace("Step space", 0x11, 1, 1, 50000); // in ns
-constexpr numeric DirectionSetup("Dir setup", 0x12, 1, 1, 50000); // in ns
-constexpr numeric DirectionHold("Dir hold", 0x13, 1, 1, 50000); // in ns
+constexpr numeric StepLen("Step len.", 0x80, 1, 1, 50000); // in ns
+constexpr numeric StepSpace("Step space", 0x81, 1, 1, 50000); // in ns
+constexpr numeric DirectionSetup("Dir setup", 0x82, 1, 1, 50000); // in ns
+constexpr numeric DirectionHold("Dir hold", 0x83, 1, 1, 50000); // in ns
 }
 
 #endif /* __SETTINGS_HPP */
